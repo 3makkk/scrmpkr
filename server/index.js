@@ -20,10 +20,15 @@ const rooms = new RoomManager();
 const namespace = io.of('/poker');
 namespace.use(async (socket, next) => {
   try {
-    const token = socket.handshake.auth?.token;
-    if (!token) throw new Error('No token');
-    const payload = await verifyToken(token);
-    socket.user = { id: payload.sub, name: payload.name };
+    const { token, name, userId } = socket.handshake.auth || {};
+    if (token) {
+      const payload = await verifyToken(token);
+      socket.user = { id: payload.sub, name: payload.name };
+    } else if (name && userId) {
+      socket.user = { id: userId, name };
+    } else {
+      throw new Error('No auth');
+    }
     next();
   } catch (err) {
     next(err);

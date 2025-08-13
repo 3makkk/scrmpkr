@@ -7,16 +7,16 @@ const DECK = [0,1,2,3,5,8,13,21,34,55,'?'];
 
 export default function Room(){
   const { roomId } = useParams();
-  const { getToken, account } = useAuth();
+  const { account } = useAuth();
   const [socket, setSocket] = useState(null);
   const [state, setState] = useState(null);
   const [progress, setProgress] = useState({});
   const [countdown, setCountdown] = useState(null);
   const [revealed, setRevealed] = useState(null);
 
-  useEffect(() => { (async () => {
-    const token = await getToken();
-    const s = getSocket(token);
+  useEffect(() => {
+    if (!account) return;
+    const s = getSocket({ name: account.name, userId: account.id });
     setSocket(s);
     s.emit('room:join',{ roomId }, ({ state }) => setState(state));
     s.on('room:state', setState);
@@ -29,14 +29,14 @@ export default function Room(){
       }
     });
     s.on('votes:cleared', ()=>{ setRevealed(null); setCountdown(null); });
-  })();}, [roomId]);
+  }, [roomId, account]);
 
   const cast = value => socket.emit('vote:cast',{ roomId, value });
   const reveal = () => socket.emit('reveal:start',{ roomId });
   const clear = () => socket.emit('vote:clear',{ roomId });
 
   if(!state) return <div>Loading...</div>;
-  const isOwner = account && account.localAccountId === state.ownerId;
+  const isOwner = account && account.id === state.ownerId;
 
   return (
     <div className="p-4 space-y-4">

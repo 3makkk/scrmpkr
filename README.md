@@ -1,6 +1,6 @@
 # scrmpkr
 
-Lightweight internal Scrum Poker web app with Azure AD authentication, Socket.io realtime backend, and React frontend.
+Lightweight internal Scrum Poker web app with a simple name-based login (stored only in your browser) and a placeholder Azure AD authentication, Socket.io realtime backend, and React frontend.
 
 ## Setup
 
