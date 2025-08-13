@@ -1,0 +1,9 @@
+{
+  "name": "scrmpkr",
+  "private": true,
+  "scripts": {
+    "dev:server": "pnpm --filter server dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "test": "pnpm -r test"
+  }
+}

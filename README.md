@@ -4,6 +4,12 @@ Lightweight internal Scrum Poker web app with Azure AD authentication, Socket.io
 
 ## Setup
 
+Install dependencies with [pnpm](https://pnpm.io):
+
+```
+pnpm install
+```
+
 ### Backend
 
 Create `server/.env` using `server/.env.example`.
@@ -16,12 +22,10 @@ PORT=4000
 CORS_ORIGIN=http://localhost:5173
 ```
 
-Run:
+Run the backend:
 
 ```
-cd server
-npm install
-npm run dev
+pnpm dev:server
 ```
 
 ### Frontend
@@ -35,17 +39,14 @@ VITE_REDIRECT_URI=http://localhost:5173
 VITE_API_URL=http://localhost:4000
 ```
 
-Run:
+Run the frontend:
 
 ```
-cd frontend
-npm install
-npm run dev
+pnpm dev:frontend
 ```
 
-Backend unit tests:
+### Tests
 
 ```
-cd server
-npm test
+pnpm test
 ```
