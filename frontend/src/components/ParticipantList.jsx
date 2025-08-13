@@ -1,4 +1,3 @@
-import React from "react";
 import { useRoom } from "../hooks/useRoom";
 import Card from "./Card";
 

@@ -28,7 +28,7 @@ class RoomManager {
     });
 
     console.log(
-      `🎯 Room created: ${id} by user ${ownerId} (${name || "Owner"})`
+      `🎯 Room created: ${id} by user ${ownerId} (${name || "Owner"})`,
     );
     console.log(`📊 Total rooms: ${this.rooms.size}`);
 
@@ -39,7 +39,7 @@ class RoomManager {
     const room = this.rooms.get(id);
     if (!room) {
       console.log(
-        `❌ Failed to join room ${id}: Room not found (user: ${user.id}/${user.name})`
+        `❌ Failed to join room ${id}: Room not found (user: ${user.id}/${user.name})`,
       );
       throw new Error("Room not found");
     }
@@ -49,7 +49,7 @@ class RoomManager {
       clearTimeout(this.roomTimeouts.get(id));
       this.roomTimeouts.delete(id);
       console.log(
-        `⏰ Cancelled deletion timeout for room ${id} - user rejoined`
+        `⏰ Cancelled deletion timeout for room ${id} - user rejoined`,
       );
     }
 
@@ -63,7 +63,7 @@ class RoomManager {
     console.log(
       `👋 User ${user.id} (${user.name}) ${
         wasAlreadyInRoom ? "rejoined" : "joined"
-      } room ${id}`
+      } room ${id}`,
     );
     console.log(`👥 Room ${id} now has ${room.participants.size} participants`);
 
@@ -74,13 +74,13 @@ class RoomManager {
     const room = this.rooms.get(id);
     if (!room) {
       console.log(
-        `❌ Vote failed: Room ${id} not found (user: ${userId}, value: ${value})`
+        `❌ Vote failed: Room ${id} not found (user: ${userId}, value: ${value})`,
       );
       return;
     }
     if (!FIB_DECK.includes(value)) {
       console.log(
-        `❌ Vote failed: Invalid value ${value} (user: ${userId}, room: ${id})`
+        `❌ Vote failed: Invalid value ${value} (user: ${userId}, room: ${id})`,
       );
       return;
     }
@@ -94,14 +94,14 @@ class RoomManager {
       console.log(
         `🗳️  User ${userId} (${p.name}) voted ${value} in room ${id}${
           previousVote ? ` (changed from ${previousVote})` : ""
-        }`
+        }`,
       );
 
       const votedCount = Array.from(room.participants.values()).filter(
-        (p) => p.hasVoted
+        (p) => p.hasVoted,
       ).length;
       console.log(
-        `📈 Room ${id}: ${votedCount}/${room.participants.size} participants have voted`
+        `📈 Room ${id}: ${votedCount}/${room.participants.size} participants have voted`,
       );
     } else {
       console.log(`❌ Vote failed: User ${userId} not found in room ${id}`);
@@ -116,7 +116,7 @@ class RoomManager {
     }
 
     const votedCount = Array.from(room.participants.values()).filter(
-      (p) => p.hasVoted
+      (p) => p.hasVoted,
     ).length;
     room.status = "voting";
     for (const p of room.participants.values()) {
@@ -132,7 +132,7 @@ class RoomManager {
     const isOwner = room && room.ownerId === userId;
     if (room && !isOwner) {
       console.log(
-        `🚫 Access denied: User ${userId} is not owner of room ${id} (owner: ${room.ownerId})`
+        `🚫 Access denied: User ${userId} is not owner of room ${id} (owner: ${room.ownerId})`,
       );
     }
     return isOwner;
@@ -142,10 +142,10 @@ class RoomManager {
     const room = this.rooms.get(id);
     if (!room) return false;
     const hasVotes = Array.from(room.participants.values()).some(
-      (p) => p.hasVoted
+      (p) => p.hasVoted,
     );
     console.log(
-      `🔍 Room ${id} vote check: ${hasVotes ? "has votes" : "no votes yet"}`
+      `🔍 Room ${id} vote check: ${hasVotes ? "has votes" : "no votes yet"}`,
     );
     return hasVotes;
   }
@@ -207,7 +207,7 @@ class RoomManager {
 
     // Check if anyone has voted before allowing reveal
     const hasAnyVotes = Array.from(room.participants.values()).some(
-      (p) => p.hasVoted
+      (p) => p.hasVoted,
     );
     if (!hasAnyVotes) {
       console.log(`❌ Reveal blocked: No votes in room ${id}`);
@@ -215,10 +215,10 @@ class RoomManager {
     }
 
     const votedCount = Array.from(room.participants.values()).filter(
-      (p) => p.hasVoted
+      (p) => p.hasVoted,
     ).length;
     console.log(
-      `🎭 Starting reveal for room ${id} (${votedCount}/${room.participants.size} voted)`
+      `🎭 Starting reveal for room ${id} (${votedCount}/${room.participants.size} voted)`,
     );
 
     room.status = "revealing";
@@ -260,7 +260,7 @@ class RoomManager {
     const room = this.rooms.get(roomId);
     if (!room) {
       console.log(
-        `❌ Leave room failed: Room ${roomId} not found (user: ${userId})`
+        `❌ Leave room failed: Room ${roomId} not found (user: ${userId})`,
       );
       return false;
     }
@@ -273,7 +273,7 @@ class RoomManager {
       console.log(
         `🚪 User ${userId} (${
           participant?.name || "unknown"
-        }) left room ${roomId}`
+        }) left room ${roomId}`,
       );
     }
 
@@ -284,7 +284,7 @@ class RoomManager {
     }
 
     console.log(
-      `👥 Room ${roomId} now has ${room.participants.size} participants`
+      `👥 Room ${roomId} now has ${room.participants.size} participants`,
     );
     return { roomDeleted: false, wasInRoom, scheduled: false };
   }
@@ -303,7 +303,7 @@ class RoomManager {
         console.log(
           `🚪 User ${userId} (${
             participant?.name || "unknown"
-          }) left room ${roomId}`
+          }) left room ${roomId}`,
         );
 
         // If room is empty, schedule it for deletion instead of immediate deletion
@@ -312,14 +312,14 @@ class RoomManager {
         } else {
           roomsToUpdate.push(roomId);
           console.log(
-            `👥 Room ${roomId} now has ${room.participants.size} participants`
+            `👥 Room ${roomId} now has ${room.participants.size} participants`,
           );
         }
       }
     }
 
     console.log(
-      `📊 User ${userId} left ${roomsLeft} rooms. Total rooms: ${this.rooms.size}`
+      `📊 User ${userId} left ${roomsLeft} rooms. Total rooms: ${this.rooms.size}`,
     );
     return roomsToUpdate; // Return room IDs that need state updates
   }

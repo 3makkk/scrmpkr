@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 export default function LoginForm({
   title,
@@ -6,7 +6,6 @@ export default function LoginForm({
   onLogin,
   primaryButtonText = "Enter",
   secondaryButton = null,
-  autoFocus = false,
 }) {
   const [name, setName] = useState("");
 
@@ -32,21 +31,25 @@ export default function LoginForm({
 
         <div className="space-y-8">
           <div>
-            <label className="block text-white/70 text-sm font-medium mb-3 text-left">
+            <label
+              htmlFor="name"
+              className="block text-white/70 text-sm font-medium mb-3 text-left"
+            >
               Your name
             </label>
             <input
+              id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your name"
               className="input w-full"
               onKeyPress={handleKeyPress}
-              autoFocus={autoFocus}
             />
           </div>
 
           <div className="space-y-4">
             <button
+              type="button"
               onClick={handleLogin}
               disabled={!name.trim()}
               className="btn w-full"

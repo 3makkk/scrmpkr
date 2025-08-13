@@ -124,10 +124,10 @@ export function RoomProvider({ children }) {
       clearTimeout(joinTimeout);
       console.log(`📨 Room join response for ${roomId}:`, response);
 
-      if (response && response.error) {
+      if (response?.error) {
         console.error("Failed to join room:", response.error);
         dispatch({ type: "SET_ERROR", payload: response.error });
-      } else if (response && response.state) {
+      } else if (response?.state) {
         console.log(`✅ Successfully joined room ${roomId}`);
         dispatch({ type: "SET_ROOM_STATE", payload: response.state });
       } else {
@@ -185,24 +185,30 @@ export function RoomProvider({ children }) {
       // Leave room but don't disconnect socket
       s.emit("room:leave", { roomId });
     };
-  }, [dispatch]);
+  }, []);
 
-  const leaveRoom = useCallback((callback) => {
-    if (socket && currentRoomId) {
-      socket.emit("room:leave", { roomId: currentRoomId }, () => {
-        if (callback) callback();
-      });
-    } else if (callback) {
-      callback();
-    }
-  }, [socket, currentRoomId]);
+  const leaveRoom = useCallback(
+    (callback) => {
+      if (socket && currentRoomId) {
+        socket.emit("room:leave", { roomId: currentRoomId }, () => {
+          if (callback) callback();
+        });
+      } else if (callback) {
+        callback();
+      }
+    },
+    [socket, currentRoomId],
+  );
 
-  const castVote = useCallback((value) => {
-    if (socket && currentRoomId) {
-      dispatch({ type: "SET_SELECTED_CARD", payload: value });
-      socket.emit("vote:cast", { roomId: currentRoomId, value });
-    }
-  }, [socket, currentRoomId, dispatch]);
+  const castVote = useCallback(
+    (value) => {
+      if (socket && currentRoomId) {
+        dispatch({ type: "SET_SELECTED_CARD", payload: value });
+        socket.emit("vote:cast", { roomId: currentRoomId, value });
+      }
+    },
+    [socket, currentRoomId],
+  );
 
   const revealVotes = useCallback(() => {
     if (socket && currentRoomId) {
@@ -216,25 +222,28 @@ export function RoomProvider({ children }) {
     }
   }, [socket, currentRoomId]);
 
-  const retryJoin = useCallback((roomId, account) => {
-    dispatch({ type: "RESET_ROOM" });
+  const retryJoin = useCallback(
+    (roomId) => {
+      dispatch({ type: "RESET_ROOM" });
 
-    if (socket) {
-      const retryTimeout = setTimeout(() => {
-        dispatch({ type: "TIMEOUT_ERROR" });
-      }, 10000);
+      if (socket) {
+        const retryTimeout = setTimeout(() => {
+          dispatch({ type: "TIMEOUT_ERROR" });
+        }, 10000);
 
-      socket.emit("room:join", { roomId }, (response) => {
-        clearTimeout(retryTimeout);
+        socket.emit("room:join", { roomId }, (response) => {
+          clearTimeout(retryTimeout);
 
-        if (response.error) {
-          dispatch({ type: "SET_ERROR", payload: response.error });
-        } else {
-          dispatch({ type: "SET_ROOM_STATE", payload: response.state });
-        }
-      });
-    }
-  }, [socket, dispatch]);
+          if (response.error) {
+            dispatch({ type: "SET_ERROR", payload: response.error });
+          } else {
+            dispatch({ type: "SET_ROOM_STATE", payload: response.state });
+          }
+        });
+      }
+    },
+    [socket],
+  );
 
   // Cleanup effect for component unmount
   useEffect(() => {
@@ -245,7 +254,7 @@ export function RoomProvider({ children }) {
         socket.disconnect();
       }
     };
-  }, []);
+  }, [socket, currentRoomId]);
 
   const contextValue = {
     // State

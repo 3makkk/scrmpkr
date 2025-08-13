@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function PokerCard({
   value,
   isSelected,
@@ -8,6 +6,7 @@ export default function PokerCard({
 }) {
   return (
     <button
+      type="button"
       onClick={() => !disabled && onClick(value)}
       disabled={disabled}
       className={`poker-card ${isSelected ? "selected" : ""} ${
