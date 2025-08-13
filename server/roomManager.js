@@ -1,10 +1,12 @@
-const { v4: uuid } = require('uuid');
+const { v4: uuid } = require("uuid");
 
-const FIB_DECK = [0,1,2,3,5,8,13,21,34,55,'?'];
+const FIB_DECK = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, "?"];
 
 class RoomManager {
   constructor() {
     this.rooms = new Map();
+    this.roomTimeouts = new Map(); // Track deletion timeouts for empty rooms
+    console.log("🏠 RoomManager initialized");
   }
 
   createRoom(ownerId, name) {
@@ -14,41 +16,163 @@ class RoomManager {
       ownerId,
       name,
       participants: new Map(),
-      status: 'voting',
+      status: "voting",
       reveals: 0,
-      lastRevealAt: Date.now()
+      lastRevealAt: Date.now(),
     };
     this.rooms.set(id, room);
-    room.participants.set(ownerId, { id: ownerId, name: name || 'Owner', hasVoted: false });
+    room.participants.set(ownerId, {
+      id: ownerId,
+      name: name || "Owner",
+      hasVoted: false,
+    });
+
+    console.log(
+      `🎯 Room created: ${id} by user ${ownerId} (${name || "Owner"})`
+    );
+    console.log(`📊 Total rooms: ${this.rooms.size}`);
+
     return room;
   }
 
   joinRoom(id, user) {
     const room = this.rooms.get(id);
-    if (!room) throw new Error('Room not found');
-    room.participants.set(user.id, { id: user.id, name: user.name, hasVoted: false });
+    if (!room) {
+      console.log(
+        `❌ Failed to join room ${id}: Room not found (user: ${user.id}/${user.name})`
+      );
+      throw new Error("Room not found");
+    }
+
+    // Cancel any pending deletion timeout for this room
+    if (this.roomTimeouts.has(id)) {
+      clearTimeout(this.roomTimeouts.get(id));
+      this.roomTimeouts.delete(id);
+      console.log(
+        `⏰ Cancelled deletion timeout for room ${id} - user rejoined`
+      );
+    }
+
+    const wasAlreadyInRoom = room.participants.has(user.id);
+    room.participants.set(user.id, {
+      id: user.id,
+      name: user.name,
+      hasVoted: false,
+    });
+
+    console.log(
+      `👋 User ${user.id} (${user.name}) ${
+        wasAlreadyInRoom ? "rejoined" : "joined"
+      } room ${id}`
+    );
+    console.log(`👥 Room ${id} now has ${room.participants.size} participants`);
+
     return room;
   }
 
   castVote(id, userId, value) {
     const room = this.rooms.get(id);
-    if (!room || !FIB_DECK.includes(value)) return;
+    if (!room) {
+      console.log(
+        `❌ Vote failed: Room ${id} not found (user: ${userId}, value: ${value})`
+      );
+      return;
+    }
+    if (!FIB_DECK.includes(value)) {
+      console.log(
+        `❌ Vote failed: Invalid value ${value} (user: ${userId}, room: ${id})`
+      );
+      return;
+    }
+
     const p = room.participants.get(userId);
-    if (p) { p.hasVoted = true; p.value = value; }
+    if (p) {
+      const previousVote = p.value;
+      p.hasVoted = true;
+      p.value = value;
+
+      console.log(
+        `🗳️  User ${userId} (${p.name}) voted ${value} in room ${id}${
+          previousVote ? ` (changed from ${previousVote})` : ""
+        }`
+      );
+
+      const votedCount = Array.from(room.participants.values()).filter(
+        (p) => p.hasVoted
+      ).length;
+      console.log(
+        `📈 Room ${id}: ${votedCount}/${room.participants.size} participants have voted`
+      );
+    } else {
+      console.log(`❌ Vote failed: User ${userId} not found in room ${id}`);
+    }
   }
 
   clearVotes(id) {
     const room = this.rooms.get(id);
-    if (!room) return;
-    room.status = 'voting';
+    if (!room) {
+      console.log(`❌ Clear votes failed: Room ${id} not found`);
+      return;
+    }
+
+    const votedCount = Array.from(room.participants.values()).filter(
+      (p) => p.hasVoted
+    ).length;
+    room.status = "voting";
     for (const p of room.participants.values()) {
       p.hasVoted = false;
       delete p.value;
     }
+
+    console.log(`🧹 Votes cleared in room ${id} (${votedCount} votes removed)`);
   }
 
   isOwner(id, userId) {
-    const room = this.rooms.get(id); return room && room.ownerId === userId;
+    const room = this.rooms.get(id);
+    const isOwner = room && room.ownerId === userId;
+    if (room && !isOwner) {
+      console.log(
+        `🚫 Access denied: User ${userId} is not owner of room ${id} (owner: ${room.ownerId})`
+      );
+    }
+    return isOwner;
+  }
+
+  hasAnyVotes(id) {
+    const room = this.rooms.get(id);
+    if (!room) return false;
+    const hasVotes = Array.from(room.participants.values()).some(
+      (p) => p.hasVoted
+    );
+    console.log(
+      `🔍 Room ${id} vote check: ${hasVotes ? "has votes" : "no votes yet"}`
+    );
+    return hasVotes;
+  }
+
+  scheduleRoomDeletion(roomId) {
+    // Schedule room deletion after 30 seconds of being empty
+    const timeout = setTimeout(() => {
+      const room = this.rooms.get(roomId);
+      if (room && room.participants.size === 0) {
+        this.rooms.delete(roomId);
+        this.roomTimeouts.delete(roomId);
+        console.log(`🗑️  Room ${roomId} deleted after timeout (empty)`);
+        console.log(`📊 Total rooms: ${this.rooms.size}`);
+      }
+    }, 30000); // 30 seconds
+
+    this.roomTimeouts.set(roomId, timeout);
+    console.log(`⏰ Room ${roomId} scheduled for deletion in 30 seconds`);
+  }
+
+  cleanup() {
+    // Clear all pending timeouts
+    for (const timeout of this.roomTimeouts.values()) {
+      clearTimeout(timeout);
+    }
+    this.roomTimeouts.clear();
+    console.log("🧹 All room deletion timeouts cleared");
   }
 
   getState(id) {
@@ -57,8 +181,12 @@ class RoomManager {
     return {
       id: room.id,
       ownerId: room.ownerId,
-      participants: Array.from(room.participants.values()).map(p => ({ id:p.id, name:p.name, hasVoted:p.hasVoted })),
-      status: room.status
+      participants: Array.from(room.participants.values()).map((p) => ({
+        id: p.id,
+        name: p.name,
+        hasVoted: p.hasVoted,
+      })),
+      status: room.status,
     };
   }
 
@@ -66,36 +194,134 @@ class RoomManager {
     const room = this.rooms.get(id);
     if (!room) return null;
     const result = {};
-    for (const [id,p] of room.participants) result[id]=p.hasVoted;
+    for (const [id, p] of room.participants) result[id] = p.hasVoted;
     return result;
   }
 
   startReveal(id, namespace) {
     const room = this.rooms.get(id);
-    if (!room) return;
-    room.status = 'revealing';
+    if (!room) {
+      console.log(`❌ Reveal failed: Room ${id} not found`);
+      return;
+    }
+
+    // Check if anyone has voted before allowing reveal
+    const hasAnyVotes = Array.from(room.participants.values()).some(
+      (p) => p.hasVoted
+    );
+    if (!hasAnyVotes) {
+      console.log(`❌ Reveal blocked: No votes in room ${id}`);
+      return; // Don't start reveal if no one has voted
+    }
+
+    const votedCount = Array.from(room.participants.values()).filter(
+      (p) => p.hasVoted
+    ).length;
+    console.log(
+      `🎭 Starting reveal for room ${id} (${votedCount}/${room.participants.size} voted)`
+    );
+
+    room.status = "revealing";
     let remaining = 3;
     const interval = setInterval(() => {
-      remaining -=1;
-      namespace.to(id).emit('reveal:countdown', { remaining });
-      if (remaining<=0) {
+      remaining -= 1;
+      console.log(`⏱️  Room ${id} reveal countdown: ${remaining}`);
+      namespace.to(id).emit("reveal:countdown", { remaining });
+      if (remaining <= 0) {
         clearInterval(interval);
-        room.status = 'voting';
-        room.reveals +=1;
+        room.status = "voting";
+        room.reveals += 1;
         room.lastRevealAt = Date.now();
-        const revealed = Array.from(room.participants.values()).map(p=>({id:p.id,value:p.value}));
-        const vals = revealed.filter(v=>v.value!== '?' && v.value!==undefined).map(v=>v.value);
+        const revealed = Array.from(room.participants.values()).map((p) => ({
+          id: p.id,
+          value: p.value,
+        }));
+        const vals = revealed
+          .filter((v) => v.value !== "?" && v.value !== undefined)
+          .map((v) => v.value);
         const unique = [...new Set(vals)];
-        const unanimousValue = unique.length===1 && vals.length>0 ? unique[0]: undefined;
-        namespace.to(id).emit('reveal:complete',{revealedVotes:revealed, unanimousValue});
+        const unanimousValue =
+          unique.length === 1 && vals.length > 0 ? unique[0] : undefined;
+
+        console.log(`🎉 Reveal complete for room ${id}:`, {
+          totalReveals: room.reveals,
+          votesRevealed: revealed.length,
+          unanimousValue: unanimousValue || "none",
+        });
+
+        namespace
+          .to(id)
+          .emit("reveal:complete", { revealedVotes: revealed, unanimousValue });
       }
-    },1000);
+    }, 1000);
   }
 
-  leaveAll(userId){
-    for(const room of this.rooms.values()){
-      room.participants.delete(userId);
+  leaveRoom(roomId, userId) {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      console.log(
+        `❌ Leave room failed: Room ${roomId} not found (user: ${userId})`
+      );
+      return false;
     }
+
+    const participant = room.participants.get(userId);
+    const wasInRoom = room.participants.has(userId);
+    room.participants.delete(userId);
+
+    if (wasInRoom) {
+      console.log(
+        `🚪 User ${userId} (${
+          participant?.name || "unknown"
+        }) left room ${roomId}`
+      );
+    }
+
+    // If room is empty, schedule it for deletion instead of immediate deletion
+    if (room.participants.size === 0) {
+      this.scheduleRoomDeletion(roomId);
+      return { roomDeleted: false, wasInRoom, scheduled: true };
+    }
+
+    console.log(
+      `👥 Room ${roomId} now has ${room.participants.size} participants`
+    );
+    return { roomDeleted: false, wasInRoom, scheduled: false };
+  }
+
+  leaveAll(userId) {
+    console.log(`🚶 User ${userId} disconnecting from all rooms`);
+    const roomsToUpdate = [];
+    let roomsLeft = 0;
+
+    for (const [roomId, room] of this.rooms.entries()) {
+      if (room.participants.has(userId)) {
+        const participant = room.participants.get(userId);
+        room.participants.delete(userId);
+        roomsLeft++;
+
+        console.log(
+          `🚪 User ${userId} (${
+            participant?.name || "unknown"
+          }) left room ${roomId}`
+        );
+
+        // If room is empty, schedule it for deletion instead of immediate deletion
+        if (room.participants.size === 0) {
+          this.scheduleRoomDeletion(roomId);
+        } else {
+          roomsToUpdate.push(roomId);
+          console.log(
+            `👥 Room ${roomId} now has ${room.participants.size} participants`
+          );
+        }
+      }
+    }
+
+    console.log(
+      `📊 User ${userId} left ${roomsLeft} rooms. Total rooms: ${this.rooms.size}`
+    );
+    return roomsToUpdate; // Return room IDs that need state updates
   }
 }
 

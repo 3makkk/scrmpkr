@@ -1,70 +1,132 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useAuth } from '../AuthProvider';
-import { getSocket } from '../socket';
+import React, { useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../AuthProvider";
+import { useRoom } from "../hooks/useRoom.jsx";
+import LoginForm from "../components/LoginForm";
+import LoadingSpinner from "../components/LoadingSpinner";
+import PageLayout from "../components/PageLayout";
+import RoomHeader from "../components/RoomHeader";
+import ParticipantList from "../components/ParticipantList";
+import CountdownTimer from "../components/CountdownTimer";
+import VotingResults from "../components/VotingResults";
+import VotingDeck from "../components/VotingDeck";
+import RoomControls from "../components/RoomControls";
 
-const DECK = [0,1,2,3,5,8,13,21,34,55,'?'];
-
-export default function Room(){
+export default function Room() {
   const { roomId } = useParams();
-  const { account } = useAuth();
-  const [socket, setSocket] = useState(null);
-  const [state, setState] = useState(null);
-  const [progress, setProgress] = useState({});
-  const [countdown, setCountdown] = useState(null);
-  const [revealed, setRevealed] = useState(null);
+  const { account, login } = useAuth();
+  const navigate = useNavigate();
 
+  // Use the room hook instead of managing state locally
+  const {
+    roomState,
+    error,
+    isLoading,
+    revealed,
+    clearVotes,
+    joinRoom,
+    retryJoin,
+  } = useRoom();
+
+  // Join room when account and roomId are available
   useEffect(() => {
-    if (!account) return;
-    const s = getSocket({ name: account.name, userId: account.id });
-    setSocket(s);
-    s.emit('room:join',{ roomId }, ({ state }) => setState(state));
-    s.on('room:state', setState);
-    s.on('vote:progress', setProgress);
-    s.on('reveal:countdown', ({remaining})=>setCountdown(remaining));
-    s.on('reveal:complete', ({revealedVotes, unanimousValue})=>{
-      setRevealed(revealedVotes);
-      if(unanimousValue!==undefined){
-        import('canvas-confetti').then(m=>m.default());
-      }
-    });
-    s.on('votes:cleared', ()=>{ setRevealed(null); setCountdown(null); });
-  }, [roomId, account]);
+    if (!account || !roomId) return;
 
-  const cast = value => socket.emit('vote:cast',{ roomId, value });
-  const reveal = () => socket.emit('reveal:start',{ roomId });
-  const clear = () => socket.emit('vote:clear',{ roomId });
+    const cleanup = joinRoom(roomId, account);
 
-  if(!state) return <div>Loading...</div>;
-  const isOwner = account && account.id === state.ownerId;
+    // Return cleanup function
+    return cleanup;
+  }, [roomId, account, joinRoom]);
+
+  // Helper functions
+  const handleRetryJoin = () => {
+    retryJoin(roomId, account);
+  };
+
+  // Check if user is owner for the clear votes button
+  const isOwner = roomState?.ownerId === account?.id;
+
+  // Don't render if no account
+  if (!account) {
+    return <LoginForm onLogin={login} />;
+  }
+
+  // Show error state with retry option
+  if (error) {
+    return (
+      <PageLayout>
+        <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6">
+          <div className="text-red-600 text-lg font-medium">{error}</div>
+          <div className="space-y-4">
+            <button
+              onClick={handleRetryJoin}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => navigate("/")}
+              className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors ml-4"
+            >
+              Back to Home
+            </button>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // Show loading while joining room
+  if (isLoading || !roomState) {
+    return (
+      <PageLayout>
+        <div className="flex flex-col items-center justify-center min-h-[400px]">
+          <LoadingSpinner />
+          <p className="mt-4 text-gray-600">Joining room...</p>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
-    <div className="p-4 space-y-4">
-      <h1 className="text-xl">Room {roomId}</h1>
-      <div>
-        Participants:
-        <ul>
-          {state.participants.map(p=> <li key={p.id}>{p.name} {progress[p.id] && '✅'}</li>)}
-        </ul>
+    <PageLayout className="p-4">
+      <RoomHeader />
+
+      <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
+        {/* Participants Panel */}
+        <div className="lg:col-span-1">
+          <ParticipantList />
+        </div>
+
+        {/* Main Voting Area */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Countdown Timer */}
+          <CountdownTimer />
+
+          {/* Voting Results */}
+          <VotingResults />
+
+          {/* Voting Controls */}
+          {!revealed && (
+            <div className="space-y-6">
+              <VotingDeck />
+              <RoomControls />
+            </div>
+          )}
+
+          {/* Clear votes button when revealed */}
+          {revealed && isOwner && (
+            <div className="flex justify-center">
+              <button
+                onClick={clearVotes}
+                className="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+              >
+                Clear Votes
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-      {revealed && (
-        <div>
-          Revealed:
-          <ul>{revealed.map(r=> <li key={r.id}>{r.id}: {r.value}</li>)}</ul>
-        </div>
-      )}
-      {countdown!==null && <div>Revealing in {countdown}</div>}
-      {!revealed && (
-        <div className="flex space-x-2">
-          {DECK.map(v=> <button key={v} onClick={()=>cast(v)} className="border p-2">{v}</button>)}
-        </div>
-      )}
-      {isOwner && (
-        <div className="space-x-2">
-          <button onClick={reveal} className="btn">Reveal</button>
-          <button onClick={clear} className="btn">Clear</button>
-        </div>
-      )}
-    </div>
+    </PageLayout>
   );
 }

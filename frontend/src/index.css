@@ -1,4 +1,101 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-.btn { @apply bg-blue-500 text-white px-3 py-1 rounded; }
+
+@layer components {
+  .btn {
+    @apply bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 
+           text-white font-medium px-6 py-3 rounded-lg shadow-md 
+           transition-all duration-300 hover:shadow-lg
+           disabled:opacity-50 disabled:cursor-not-allowed
+           focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-transparent;
+  }
+
+  .btn-secondary {
+    @apply bg-white/5 backdrop-blur-sm border border-white/10 text-white font-medium 
+           px-6 py-3 rounded-lg shadow-md hover:bg-white/10 hover:border-white/20
+           transition-all duration-300 hover:shadow-lg
+           focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-transparent;
+  }
+
+  .btn-danger {
+    @apply bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 
+           text-white font-medium px-6 py-3 rounded-lg shadow-md 
+           transition-all duration-300 hover:shadow-lg
+           focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-transparent;
+  }
+
+  .card {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 shadow-2xl
+           animate-fade-in;
+  }
+
+  .input {
+    @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg px-4 py-3 
+           text-white placeholder-white/50 focus:outline-none focus:ring-2 
+           focus:ring-slate-400 focus:border-white/20 transition-all duration-300
+           focus:bg-white/10;
+  }
+
+  .poker-card {
+    @apply bg-gradient-to-br from-white to-gray-50 text-gray-700 font-medium text-lg
+           border border-gray-200 rounded-lg px-4 py-6 shadow-sm cursor-pointer
+           transition-all duration-200 hover:shadow-md hover:border-gray-300
+           hover:from-slate-50 hover:to-gray-100
+           focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2
+           min-h-[80px] flex items-center justify-center;
+  }
+
+  .poker-card.selected {
+    @apply from-slate-100 to-slate-200 text-slate-800 border-slate-400 shadow-md
+           ring-2 ring-slate-300 ring-offset-2 ring-offset-transparent;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  .animate-bounce-in {
+    animation: bounceIn 0.4s ease-out;
+  }
+
+  .animate-pulse-glow {
+    animation: pulseGlow 3s ease-in-out infinite;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 15px rgba(100, 116, 139, 0.3);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(100, 116, 139, 0.5);
+    transform: scale(1.01);
+  }
+}
