@@ -2,7 +2,17 @@ import { v4 as uuid } from "uuid";
 import logger from "./logger";
 
 export const FIB_DECK: Array<number | "?"> = [
-  0, 1, 2, 3, 5, 8, 13, 21, 34, 55, "?",
+  0,
+  1,
+  2,
+  3,
+  5,
+  8,
+  13,
+  21,
+  34,
+  55,
+  "?",
 ];
 
 type Participant = {
@@ -51,10 +61,10 @@ export class RoomManager {
     });
 
     logger.info(
-      { roomId: id, ownerId, ownerName: name || 'Owner' },
-      'Room was created'
+      { roomId: id, ownerId, ownerName: name || "Owner" },
+      "Room was created"
     );
-    logger.info({ totalRooms: this.rooms.size }, 'Room count was updated');
+    logger.info({ totalRooms: this.rooms.size }, "Room count was updated");
 
     return room;
   }
@@ -64,16 +74,16 @@ export class RoomManager {
     if (!room) {
       logger.warn(
         { roomId: id, userId: user.id, userName: user.name },
-        'Room join was rejected'
+        "Room join was rejected"
       );
-      throw new Error('Room not found');
+      throw new Error("Room not found");
     }
 
     // Cancel any pending deletion timeout for this room
     if (this.roomTimeouts.has(id)) {
       clearTimeout(this.roomTimeouts.get(id));
       this.roomTimeouts.delete(id);
-      logger.info({ roomId: id }, 'Room deletion timeout was cancelled');
+      logger.info({ roomId: id }, "Room deletion timeout was cancelled");
     }
 
     const wasAlreadyInRoom = room.participants.has(user.id);
@@ -90,11 +100,11 @@ export class RoomManager {
         userName: user.name,
         rejoined: wasAlreadyInRoom,
       },
-      'User joined room'
+      "User joined room"
     );
     logger.info(
       { roomId: id, participants: room.participants.size },
-      'Room participant count was updated'
+      "Room participant count was updated"
     );
 
     return room;
@@ -103,11 +113,17 @@ export class RoomManager {
   castVote(id: string, userId: string, value: number | "?") {
     const room = this.rooms.get(id);
     if (!room) {
-      logger.warn({ roomId: id, userId, value }, 'Vote was rejected, room not found');
+      logger.warn(
+        { roomId: id, userId, value },
+        "Vote was rejected, room not found"
+      );
       return;
     }
     if (!FIB_DECK.includes(value)) {
-      logger.warn({ roomId: id, userId, value }, 'Vote was rejected, invalid value');
+      logger.warn(
+        { roomId: id, userId, value },
+        "Vote was rejected, invalid value"
+      );
       return;
     }
 
@@ -125,7 +141,7 @@ export class RoomManager {
           value,
           previousVote,
         },
-        'User cast vote'
+        "User cast vote"
       );
 
       const votedCount = Array.from(room.participants.values()).filter(
@@ -137,17 +153,17 @@ export class RoomManager {
           votedCount,
           totalParticipants: room.participants.size,
         },
-        'Vote progress was recorded'
+        "Vote progress was recorded"
       );
     } else {
-      logger.warn({ roomId: id, userId }, 'Vote was rejected, user not found');
+      logger.warn({ roomId: id, userId }, "Vote was rejected, user not found");
     }
   }
 
   clearVotes(id: string) {
     const room = this.rooms.get(id);
     if (!room) {
-      logger.warn({ roomId: id }, 'Clear votes was rejected, room not found');
+      logger.warn({ roomId: id }, "Clear votes was rejected, room not found");
       return;
     }
 
@@ -160,10 +176,7 @@ export class RoomManager {
       delete p.value;
     }
 
-    logger.info(
-      { roomId: id, removedVotes: votedCount },
-      'Votes were cleared'
-    );
+    logger.info({ roomId: id, removedVotes: votedCount }, "Votes were cleared");
   }
 
   isOwner(id: string, userId: string) {
@@ -172,7 +185,7 @@ export class RoomManager {
     if (room && !isOwner) {
       logger.warn(
         { roomId: id, userId, ownerId: room.ownerId },
-        'Access was denied, user not owner'
+        "Access was denied, user not owner"
       );
     }
     return isOwner;
@@ -184,7 +197,7 @@ export class RoomManager {
     const hasVotes = Array.from(room.participants.values()).some(
       (p) => p.hasVoted
     );
-    logger.info({ roomId: id, hasVotes }, 'Room votes were checked');
+    logger.info({ roomId: id, hasVotes }, "Room votes were checked");
     return hasVotes;
   }
 
@@ -195,13 +208,13 @@ export class RoomManager {
       if (room && room.participants.size === 0) {
         this.rooms.delete(roomId);
         this.roomTimeouts.delete(roomId);
-        logger.info({ roomId }, 'Room was deleted after timeout');
-        logger.info({ totalRooms: this.rooms.size }, 'Room count was updated');
+        logger.info({ roomId }, "Room was deleted after timeout");
+        logger.info({ totalRooms: this.rooms.size }, "Room count was updated");
       }
     }, 30000); // 30 seconds
 
     this.roomTimeouts.set(roomId, timeout);
-    logger.info({ roomId }, 'Room deletion was scheduled');
+    logger.info({ roomId }, "Room deletion was scheduled");
   }
 
   cleanup() {
@@ -210,7 +223,7 @@ export class RoomManager {
       clearTimeout(timeout);
     }
     this.roomTimeouts.clear();
-    logger.info('Room deletion timeouts were cleared');
+    logger.info("Room deletion timeouts were cleared");
   }
 
   getState(id: string) {
@@ -239,7 +252,7 @@ export class RoomManager {
   startReveal(id: string, namespace: any) {
     const room = this.rooms.get(id);
     if (!room) {
-      logger.warn({ roomId: id }, 'Reveal was rejected, room not found');
+      logger.warn({ roomId: id }, "Reveal was rejected, room not found");
       return;
     }
 
@@ -248,7 +261,7 @@ export class RoomManager {
       (p) => p.hasVoted
     );
     if (!hasAnyVotes) {
-      logger.warn({ roomId: id }, 'Reveal was blocked, no votes');
+      logger.warn({ roomId: id }, "Reveal was blocked, no votes");
       return; // Don't start reveal if no one has voted
     }
 
@@ -261,15 +274,15 @@ export class RoomManager {
         votedCount,
         totalParticipants: room.participants.size,
       },
-      'Reveal was started'
+      "Reveal was started"
     );
 
     room.status = "revealing";
     let remaining = 3;
     const interval = setInterval(() => {
       remaining -= 1;
-      logger.info({ roomId: id, remaining }, 'Reveal countdown ticked');
-      namespace.to(id).emit('reveal:countdown', { remaining });
+      logger.info({ roomId: id, remaining }, "Reveal countdown ticked");
+      namespace.to(id).emit("reveal:countdown", { remaining });
       if (remaining <= 0) {
         clearInterval(interval);
         room.status = "voting";
@@ -291,9 +304,9 @@ export class RoomManager {
             roomId: id,
             totalReveals: room.reveals,
             votesRevealed: revealed.length,
-            unanimousValue: unanimousValue || 'none',
+            unanimousValue: unanimousValue || "none",
           },
-          'Reveal was completed'
+          "Reveal was completed"
         );
 
         namespace
@@ -306,7 +319,10 @@ export class RoomManager {
   leaveRoom(roomId: string, userId: string) {
     const room = this.rooms.get(roomId);
     if (!room) {
-      logger.warn({ roomId, userId }, 'Leave room was rejected, room not found');
+      logger.warn(
+        { roomId, userId },
+        "Leave room was rejected, room not found"
+      );
       return false;
     }
 
@@ -319,9 +335,9 @@ export class RoomManager {
         {
           roomId,
           userId,
-          userName: participant?.name || 'unknown',
+          userName: participant?.name || "unknown",
         },
-        'User left room'
+        "User left room"
       );
     }
 
@@ -333,12 +349,11 @@ export class RoomManager {
 
     logger.info(
       { roomId, participants: room.participants.size },
-      'Room participant count was updated'
+      "Room participant count was updated"
     );
     return { roomDeleted: false, wasInRoom, scheduled: false };
   }
 
-  
   leaveAll(userId: string) {
     logger.info({ userId }, "User disconnected from all rooms");
     const roomsToUpdate: string[] = [];
@@ -354,9 +369,9 @@ export class RoomManager {
           {
             roomId,
             userId,
-            userName: participant?.name || 'unknown',
+            userName: participant?.name || "unknown",
           },
-          'User left room'
+          "User left room"
         );
 
         // If room is empty, schedule it for deletion instead of immediate deletion
@@ -366,7 +381,7 @@ export class RoomManager {
           roomsToUpdate.push(roomId);
           logger.info(
             { roomId, participants: room.participants.size },
-            'Room participant count was updated'
+            "Room participant count was updated"
           );
         }
       }
@@ -374,7 +389,7 @@ export class RoomManager {
 
     logger.info(
       { userId, roomsLeft, totalRooms: this.rooms.size },
-      'User leave summary was recorded'
+      "User leave summary was recorded"
     );
     return roomsToUpdate; // Return room IDs that need state updates
   }

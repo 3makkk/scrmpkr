@@ -120,7 +120,10 @@ type RoomContextValue = {
   votedCount: number;
   allVoted: boolean;
   currentRoomId: string | null;
-  joinRoom: (roomId: string, account: { id: string; name: string }) => () => void;
+  joinRoom: (
+    roomId: string,
+    account: { id: string; name: string },
+  ) => () => void;
   leaveRoom: (callback?: () => void) => void;
   castVote: (value: number | "?") => void;
   revealVotes: () => void;
@@ -228,7 +231,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         s.emit("room:leave", { roomId });
       };
     },
-    [dispatch]
+    [dispatch],
   );
 
   const leaveRoom = useCallback(
@@ -241,7 +244,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         callback();
       }
     },
-    [socket, currentRoomId]
+    [socket, currentRoomId],
   );
 
   const castVote = useCallback(
@@ -251,7 +254,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         socket.emit("vote:cast", { roomId: currentRoomId, value });
       }
     },
-    [socket, currentRoomId, dispatch]
+    [socket, currentRoomId, dispatch],
   );
 
   const revealVotes = useCallback(() => {
@@ -286,7 +289,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    [socket, dispatch]
+    [socket, dispatch],
   );
 
   useEffect(() => {
@@ -330,4 +333,3 @@ export function useRoom() {
   }
   return context;
 }
-

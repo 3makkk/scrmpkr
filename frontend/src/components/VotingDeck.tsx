@@ -1,4 +1,3 @@
-import React from "react";
 import { useRoom } from "../hooks/useRoom";
 import { useAuth } from "../AuthProvider";
 import Card from "./Card";
@@ -13,9 +12,11 @@ export default function VotingDeck() {
   if (!roomState || !account) return null;
 
   const userParticipant = roomState.participants.find(
-    (p) => p.id === account.id
+    (p) => p.id === account.id,
   );
-  const hasUserVoted = !!(userParticipant && progress[userParticipant.id as keyof typeof progress]);
+  const hasUserVoted = !!(
+    userParticipant && progress[userParticipant.id as keyof typeof progress]
+  );
 
   return (
     <Card>

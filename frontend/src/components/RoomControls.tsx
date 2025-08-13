@@ -1,4 +1,3 @@
-import React from "react";
 import { useRoom } from "../hooks/useRoom";
 import { useAuth } from "../AuthProvider";
 import Card from "./Card";
@@ -22,6 +21,7 @@ export default function RoomControls() {
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         {!revealed && (
           <button
+            type="button"
             onClick={revealVotes}
             disabled={votedCount === 0}
             className="btn flex-1 max-w-xs"
@@ -33,6 +33,7 @@ export default function RoomControls() {
           </button>
         )}
         <button
+          type="button"
           onClick={clearVotes}
           className={`btn-danger ${
             revealed ? "flex-1 max-w-md" : "flex-1 max-w-xs"
