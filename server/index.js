@@ -5,6 +5,7 @@ const cors = require("cors");
 const { Server } = require("socket.io");
 const { verifyToken } = require("./tokenVerify");
 const { RoomManager } = require("./roomManager");
+const logger = require('./logger');
 
 const app = express();
 app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
@@ -24,106 +25,131 @@ namespace.use(async (socket, next) => {
     if (token) {
       const payload = await verifyToken(token);
       socket.user = { id: payload.sub, name: payload.name };
-      console.log(
-        `🔐 User authenticated via token: ${payload.sub} (${payload.name})`
+      logger.info(
+        { userId: payload.sub, userName: payload.name },
+        'User authenticated with token'
       );
     } else if (name && userId) {
       socket.user = { id: userId, name };
-      console.log(`👤 User authenticated via credentials: ${userId} (${name})`);
+      logger.info(
+        { userId, userName: name },
+        'User authenticated with credentials'
+      );
     } else {
-      console.log(`❌ Authentication failed: No valid credentials provided`);
-      throw new Error("No auth");
+      logger.warn('Authentication failed, no credentials provided');
+      throw new Error('No auth');
     }
     next();
   } catch (err) {
-    console.log(`❌ Authentication error:`, err.message);
+    logger.error({ error: err.message }, 'Authentication error occurred');
     next(err);
   }
 });
 
 namespace.on("connection", (socket) => {
-  console.log(
-    `🔌 User connected: ${socket.user.id} (${socket.user.name}) - Socket: ${socket.id}`
+  logger.info(
+    {
+      userId: socket.user.id,
+      userName: socket.user.name,
+      socketId: socket.id,
+    },
+    'User connected'
   );
 
   socket.on("room:create", ({ name }, cb) => {
-    console.log(
-      `🏗️  Room creation requested by ${socket.user.id} (${socket.user.name}) with name: "${name}"`
+    logger.info(
+      { userId: socket.user.id, userName: socket.user.name, name },
+      'Room creation was requested'
     );
     const room = rooms.createRoom(socket.user.id, name);
     socket.join(room.id);
-    console.log(`✅ User ${socket.user.id} joined socket room: ${room.id}`);
+    logger.info({ userId: socket.user.id, roomId: room.id }, 'User joined socket room');
     cb({ roomId: room.id });
     namespace.to(room.id).emit("room:state", rooms.getState(room.id));
   });
 
   socket.on("room:join", ({ roomId }, cb) => {
-    console.log(
-      `🚪 Room join requested: ${socket.user.id} (${socket.user.name}) -> room ${roomId}`
+    logger.info(
+      { userId: socket.user.id, userName: socket.user.name, roomId },
+      'Room join was requested'
     );
     try {
       const room = rooms.joinRoom(roomId, socket.user);
       socket.join(roomId);
-      console.log(`✅ User ${socket.user.id} joined socket room: ${roomId}`);
+      logger.info({ userId: socket.user.id, roomId }, 'User joined socket room');
       cb({ state: rooms.getState(roomId) });
       namespace.to(roomId).emit("room:state", rooms.getState(roomId));
     } catch (error) {
-      console.log(`❌ Room join failed: ${error.message}`);
+      logger.warn(
+        { userId: socket.user.id, roomId, error: error.message },
+        'Room join failed'
+      );
       cb({ error: error.message });
     }
   });
 
   socket.on("room:leave", ({ roomId }, cb) => {
-    console.log(
-      `🚪 Room leave requested: ${socket.user.id} (${socket.user.name}) -> room ${roomId}`
+    logger.info(
+      { userId: socket.user.id, userName: socket.user.name, roomId },
+      'Room leave was requested'
     );
     const result = rooms.leaveRoom(roomId, socket.user.id);
     if (result && result.wasInRoom) {
       socket.leave(roomId);
-      console.log(`✅ User ${socket.user.id} left socket room: ${roomId}`);
+      logger.info({ userId: socket.user.id, roomId }, 'User left socket room');
       // Notify other participants about the updated room state
       namespace.to(roomId).emit("room:state", rooms.getState(roomId));
       if (cb) cb({ success: true });
     } else {
-      console.log(`❌ Leave failed: User was not in room ${roomId}`);
+      logger.warn({ userId: socket.user.id, roomId }, 'Leave failed, user not in room');
       if (cb) cb({ success: false });
     }
   });
 
   socket.on("vote:cast", ({ roomId, value }) => {
-    console.log(
-      `🗳️  Vote cast: ${socket.user.id} (${socket.user.name}) -> room ${roomId}, value: ${value}`
+    logger.info(
+      {
+        userId: socket.user.id,
+        userName: socket.user.name,
+        roomId,
+        value,
+      },
+      'Vote was cast'
     );
     rooms.castVote(roomId, socket.user.id, value);
     namespace.to(roomId).emit("vote:progress", rooms.getProgress(roomId));
   });
 
   socket.on("reveal:start", ({ roomId }) => {
-    console.log(
-      `🎭 Reveal requested: ${socket.user.id} (${socket.user.name}) -> room ${roomId}`
+    logger.info(
+      { userId: socket.user.id, userName: socket.user.name, roomId },
+      'Reveal was requested'
     );
     // Ensure user is owner of this specific room and there are votes to reveal
     if (!rooms.isOwner(roomId, socket.user.id)) {
-      console.log(
-        `🚫 Reveal denied: User ${socket.user.id} is not owner of room ${roomId}`
+      logger.warn(
+        { userId: socket.user.id, roomId },
+        'Reveal was denied, user not owner'
       );
       return;
     }
     if (!rooms.hasAnyVotes(roomId)) {
-      console.log(`🚫 Reveal denied: No votes in room ${roomId}`);
+      logger.warn({ roomId }, 'Reveal was denied, no votes');
       return; // Don't allow reveal if no votes
     }
     rooms.startReveal(roomId, namespace);
   });
 
   socket.on("vote:clear", ({ roomId }) => {
-    console.log(
-      `🧹 Clear votes requested: ${socket.user.id} (${socket.user.name}) -> room ${roomId}`
+    logger.info(
+      { userId: socket.user.id, userName: socket.user.name, roomId },
+      'Clear votes was requested'
     );
     // Ensure user is owner of this specific room
     if (!rooms.isOwner(roomId, socket.user.id)) {
-      console.log(
-        `🚫 Clear denied: User ${socket.user.id} is not owner of room ${roomId}`
+      logger.warn(
+        { userId: socket.user.id, roomId },
+        'Clear votes was denied, user not owner'
       );
       return;
     }
@@ -133,18 +159,23 @@ namespace.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log(
-      `🔌 User disconnected: ${socket.user.id} (${socket.user.name}) - Socket: ${socket.id}`
+    logger.info(
+      {
+        userId: socket.user.id,
+        userName: socket.user.name,
+        socketId: socket.id,
+      },
+      'User disconnected'
     );
     // Remove user from all rooms and update affected rooms
     const updatedRoomIds = rooms.leaveAll(socket.user.id);
     // Emit updated state to all affected rooms
     updatedRoomIds.forEach((roomId) => {
-      console.log(`📡 Sending room state update to room ${roomId}`);
+      logger.info({ roomId }, 'Room state update was sent');
       namespace.to(roomId).emit("room:state", rooms.getState(roomId));
     });
   });
 });
 
 const port = process.env.PORT || 4000;
-server.listen(port, () => console.log(`🚀 Server listening on port ${port}`));
+server.listen(port, () => logger.info({ port }, 'Server started listening'));
