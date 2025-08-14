@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  server:
+    image: ${REGISTRY:-scrmpkr}/server:${IMAGE_TAG:-latest}
+    environment:
+      PORT: "4000"
+      CORS_ORIGIN: ${CORS_ORIGIN}
+    networks:
+      - default
+      - traefik
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+      update_config:
+        order: stop-first
+        failure_action: rollback
+        monitor: 5s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=${TRAEFIK_NETWORK}"
+        - "traefik.http.routers.scrmpkr-api.rule=Host(`${SERVER_HOST}`) && PathPrefix(`${API_PATH_PREFIX}`)"
+        - "traefik.http.routers.scrmpkr-api.entrypoints=${TRAEFIK_ENTRYPOINTS}"
+        - "traefik.http.routers.scrmpkr-api.middlewares=scrmpkr-api-strip@docker"
+        - "traefik.http.middlewares.scrmpkr-api-strip.stripprefix.prefixes=${API_PATH_PREFIX}"
+        - "traefik.http.services.scrmpkr-api.loadbalancer.server.port=4000"
+        - "traefik.http.routers.scrmpkr-api.tls=${TRAEFIK_TLS}"
+
+  frontend:
+    image: ${REGISTRY:-scrmpkr}/frontend:${IMAGE_TAG:-latest}
+    networks:
+      - default
+      - traefik
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: any
+        delay: 5s
+      update_config:
+        order: start-first
+        failure_action: rollback
+        monitor: 5s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=${TRAEFIK_NETWORK}"
+        - "traefik.http.routers.scrmpkr-web.rule=Host(`${FRONTEND_HOST}`) && PathPrefix(`/`)"
+        - "traefik.http.routers.scrmpkr-web.entrypoints=${TRAEFIK_ENTRYPOINTS}"
+        - "traefik.http.services.scrmpkr-web.loadbalancer.server.port=80"
+        - "traefik.http.routers.scrmpkr-web.tls=${TRAEFIK_TLS}"
+
+networks:
+  traefik:
+    external: true
+    name: ${TRAEFIK_NETWORK}

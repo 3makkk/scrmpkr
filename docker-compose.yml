@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    image: scrmpkr/server:latest
+    restart: unless-stopped
+    environment:
+      PORT: "4000"
+      CORS_ORIGIN: ${CORS_ORIGIN}
+    networks:
+      - default
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=${TRAEFIK_NETWORK}"
+      - "traefik.http.routers.scrmpkr-api.rule=Host(`${SERVER_HOST}`) && PathPrefix(`${API_PATH_PREFIX}`)"
+      - "traefik.http.routers.scrmpkr-api.entrypoints=${TRAEFIK_ENTRYPOINTS}"
+      - "traefik.http.routers.scrmpkr-api.middlewares=scrmpkr-api-strip@docker"
+      - "traefik.http.middlewares.scrmpkr-api-strip.stripprefix.prefixes=${API_PATH_PREFIX}"
+      - "traefik.http.services.scrmpkr-api.loadbalancer.server.port=4000"
+      - "traefik.http.routers.scrmpkr-api.tls=${TRAEFIK_TLS}"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_AZURE_TENANT_ID: ${VITE_AZURE_TENANT_ID}
+        VITE_AZURE_CLIENT_ID: ${VITE_AZURE_CLIENT_ID}
+        VITE_REDIRECT_URI: ${VITE_REDIRECT_URI}
+        VITE_API_URL: ${VITE_API_URL}
+    image: scrmpkr/frontend:latest
+    restart: unless-stopped
+    networks:
+      - default
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=${TRAEFIK_NETWORK}"
+      - "traefik.http.routers.scrmpkr-web.rule=Host(`${FRONTEND_HOST}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.scrmpkr-web.entrypoints=${TRAEFIK_ENTRYPOINTS}"
+      - "traefik.http.services.scrmpkr-web.loadbalancer.server.port=80"
+      - "traefik.http.routers.scrmpkr-web.tls=${TRAEFIK_TLS}"
+
+networks:
+  traefik:
+    external: true
+    name: ${TRAEFIK_NETWORK}

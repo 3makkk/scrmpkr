@@ -23,3 +23,92 @@ jobs:
       - run: pnpm lint
       - run: pnpm build
       # - run: pnpm test
+
+  docker:
+    name: Build and Push Images
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+    env:
+      REGISTRY: ghcr.io/${{ github.repository_owner }}
+      IMAGE_TAG: ${{ github.sha }}
+      FRONTEND_HOST: scrmpkr.friedemann.dev
+      SERVER_HOST: scrmpkr.friedemann.dev
+      API_PATH_PREFIX: /api
+      VITE_API_URL: https://scrmpkr.friedemann.dev/api
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build + Push server
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: server/Dockerfile
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ env.REGISTRY }}/server:latest
+            ${{ env.REGISTRY }}/server:${{ env.IMAGE_TAG }}
+      - name: Build + Push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: frontend/Dockerfile
+          push: true
+          platforms: linux/amd64
+          build-args: |
+            VITE_API_URL=${{ env.VITE_API_URL }}
+          tags: |
+            ${{ env.REGISTRY }}/frontend:latest
+            ${{ env.REGISTRY }}/frontend:${{ env.IMAGE_TAG }}
+
+  deploy:
+    name: Deploy Stack (Swarm)
+    runs-on: ubuntu-latest
+    needs: docker
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copy stack file to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "docker-stack.yml"
+          target: "~/scrmpkr"
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          REGISTRY: ghcr.io/${{ github.repository_owner }}
+          IMAGE_TAG: ${{ github.sha }}
+          TRAEFIK_NETWORK: ${{ secrets.TRAEFIK_NETWORK }}
+          TRAEFIK_ENTRYPOINTS: websecure
+          TRAEFIK_TLS: true
+          FRONTEND_HOST: scrmpkr.friedemann.dev
+          SERVER_HOST: scrmpkr.friedemann.dev
+          API_PATH_PREFIX: /api
+          CORS_ORIGIN: https://scrmpkr.friedemann.dev
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            cd ~/scrmpkr
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+            export REGISTRY IMAGE_TAG TRAEFIK_NETWORK TRAEFIK_ENTRYPOINTS TRAEFIK_TLS FRONTEND_HOST SERVER_HOST API_PATH_PREFIX CORS_ORIGIN
+            docker network create --driver overlay --attachable "$TRAEFIK_NETWORK" || true
+            docker stack deploy -c docker-stack.yml scrmpkr --with-registry-auth
