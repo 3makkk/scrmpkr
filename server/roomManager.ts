@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto";
-import type { Namespace } from "socket.io";
 import logger from "./logger";
 
 export const FIB_DECK: Array<number | "?"> = [
@@ -36,6 +35,31 @@ type Room = {
 export type User = {
   id: string;
   name: string;
+};
+
+export type RoomState = {
+  id: string;
+  ownerId: string;
+  participants: Array<{ id: string; name: string; hasVoted: boolean }>;
+  status: "voting" | "revealing";
+};
+
+export type VoteProgress = Record<string, boolean>;
+export type RevealedVote = { id: string; value?: number | "?" };
+
+export type PokerNamespace = {
+  to(roomId: string): {
+    emit: {
+      (ev: "reveal:countdown", payload: { remaining: number }): boolean;
+      (
+        ev: "reveal:complete",
+        payload: { revealedVotes: RevealedVote[]; unanimousValue?: number }
+      ): boolean;
+      (ev: "room:state", state: RoomState): boolean;
+      (ev: "vote:progress", progress: VoteProgress): boolean;
+      (ev: "votes:cleared"): boolean;
+    };
+  };
 };
 
 export class RoomManager {
@@ -232,16 +256,7 @@ export class RoomManager {
     logger.info("Room deletion timeouts were cleared");
   }
 
-  getState(id: string): {
-    id: string;
-    ownerId: string;
-    participants: Array<{
-      id: string;
-      name: string;
-      hasVoted: boolean;
-    }>;
-    status: "voting" | "revealing";
-  } | null {
+  getState(id: string): RoomState | null {
     const room = this.rooms.get(id);
     if (!room) return null;
     return {
@@ -256,15 +271,15 @@ export class RoomManager {
     };
   }
 
-  getProgress(id: string): Record<string, boolean> | null {
+  getProgress(id: string): VoteProgress | null {
     const room = this.rooms.get(id);
     if (!room) return null;
-    const result: Record<string, boolean> = {};
+    const result: VoteProgress = {};
     for (const [id, p] of room.participants) result[id] = p.hasVoted;
     return result;
   }
 
-  startReveal(id: string, namespace: Namespace): void {
+  startReveal(id: string, namespace: PokerNamespace): void {
     const room = this.rooms.get(id);
     if (!room) {
       logger.warn({ roomId: id }, "Reveal was rejected, room not found");

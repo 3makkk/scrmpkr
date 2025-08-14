@@ -14,13 +14,9 @@ export default function Home() {
   const createRoom = () => {
     if (!account) return;
     const socket = getSocket({ name: account.name, userId: account.id });
-    socket.emit(
-      "room:create",
-      { name: account.name },
-      ({ roomId }: { roomId: string }) => {
-        navigate(`/r/${roomId}`);
-      },
-    );
+    socket.emit("room:create", { name: account.name }, ({ roomId }) => {
+      navigate(`/r/${roomId}`);
+    });
   };
 
   const joinRoom = () => {

@@ -8,16 +8,13 @@ import {
 } from "react";
 import type { Socket } from "socket.io-client";
 import { getSocket } from "../socket";
-
-export type Participant = { id: string; name: string; hasVoted: boolean };
-export type RoomState = {
-  id: string;
-  ownerId: string;
-  participants: Participant[];
-  status: "voting" | "revealing";
-};
-type Progress = Record<string, boolean>;
-type RevealedVote = { id: string; value?: number | "?" };
+import type {
+  ServerToClientEvents,
+  ClientToServerEvents,
+  RoomState,
+  VoteProgress as Progress,
+  RevealedVote,
+} from "@scrmpkr/shared";
 
 type RoomAction =
   | { type: "RESET_ROOM" }
@@ -122,7 +119,7 @@ type RoomContextValue = {
   currentRoomId: string | null;
   joinRoom: (
     roomId: string,
-    account: { id: string; name: string },
+    account: { id: string; name: string }
   ) => () => void;
   leaveRoom: (callback?: () => void) => void;
   castVote: (value: number | "?") => void;
@@ -135,7 +132,8 @@ const RoomContext = createContext<RoomContextValue | undefined>(undefined);
 
 export function RoomProvider({ children }: { children: React.ReactNode }) {
   const [roomData, dispatch] = useReducer(roomReducer, initialRoomState);
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const [socket, setSocket] =
+    useState<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
 
   const { roomState, error, progress, countdown, revealed, selectedCard } =
@@ -165,22 +163,16 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       }, 10000);
 
       console.log(`📡 Attempting to join room ${roomId}`);
-      s.emit("room:join", { roomId }, (response: any) => {
+      s.emit("room:join", { roomId }, (response) => {
         clearTimeout(joinTimeout);
         console.log(`📨 Room join response for ${roomId}:`, response);
 
-        if (response && response.error) {
+        if ("error" in response) {
           console.error("Failed to join room:", response.error);
           dispatch({ type: "SET_ERROR", payload: response.error });
-        } else if (response && response.state) {
+        } else if ("state" in response) {
           console.log(`✅ Successfully joined room ${roomId}`);
           dispatch({ type: "SET_ROOM_STATE", payload: response.state });
-        } else {
-          console.error("Invalid response from server:", response);
-          dispatch({
-            type: "SET_ERROR",
-            payload: "Invalid response from server",
-          });
         }
       });
 
@@ -231,7 +223,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         s.emit("room:leave", { roomId });
       };
     },
-    [dispatch],
+    []
   );
 
   const leaveRoom = useCallback(
@@ -244,7 +236,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         callback();
       }
     },
-    [socket, currentRoomId],
+    [socket, currentRoomId]
   );
 
   const castVote = useCallback(
@@ -254,7 +246,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         socket.emit("vote:cast", { roomId: currentRoomId, value });
       }
     },
-    [socket, currentRoomId, dispatch],
+    [socket, currentRoomId]
   );
 
   const revealVotes = useCallback(() => {
@@ -270,7 +262,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   }, [socket, currentRoomId]);
 
   const retryJoin = useCallback(
-    (roomId: string, account: { id: string; name: string }) => {
+    (roomId: string, _account: { id: string; name: string }) => {
       dispatch({ type: "RESET_ROOM" });
 
       if (socket) {
@@ -278,10 +270,9 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
           dispatch({ type: "TIMEOUT_ERROR" });
         }, 10000);
 
-        socket.emit("room:join", { roomId }, (response: any) => {
+        socket.emit("room:join", { roomId }, (response) => {
           clearTimeout(retryTimeout);
-
-          if (response.error) {
+          if ("error" in response) {
             dispatch({ type: "SET_ERROR", payload: response.error });
           } else {
             dispatch({ type: "SET_ROOM_STATE", payload: response.state });
@@ -289,7 +280,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    [socket, dispatch],
+    [socket]
   );
 
   useEffect(() => {
@@ -300,7 +291,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         socket.disconnect();
       }
     };
-  }, []);
+  }, [socket, currentRoomId]);
 
   const contextValue: RoomContextValue = {
     roomState,
