@@ -31,13 +31,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    env:
-      REGISTRY: ghcr.io/${{ github.repository_owner }}
-      IMAGE_TAG: ${{ github.sha }}
-      FRONTEND_HOST: scrmpkr.friedemann.dev
-      SERVER_HOST: scrmpkr.friedemann.dev
-      API_PATH_PREFIX: /api
-      VITE_API_URL: https://scrmpkr.friedemann.dev/api
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU
@@ -58,8 +51,8 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: |
-            ${{ env.REGISTRY }}/server:latest
-            ${{ env.REGISTRY }}/server:${{ env.IMAGE_TAG }}
+            ghcr.io/${{ github.repository_owner }}/server:latest
+            ghcr.io/${{ github.repository_owner }}/server:${{ github.sha }}
       - name: Build + Push frontend
         uses: docker/build-push-action@v5
         with:
@@ -67,11 +60,9 @@ jobs:
           file: frontend/Dockerfile
           push: true
           platforms: linux/amd64
-          build-args: |
-            VITE_API_URL=${{ env.VITE_API_URL }}
           tags: |
-            ${{ env.REGISTRY }}/frontend:latest
-            ${{ env.REGISTRY }}/frontend:${{ env.IMAGE_TAG }}
+            ghcr.io/${{ github.repository_owner }}/frontend:latest
+            ghcr.io/${{ github.repository_owner }}/frontend:${{ github.sha }}
 
   deploy:
     name: Deploy Stack (Swarm)
@@ -90,16 +81,6 @@ jobs:
           target: "~/scrmpkr"
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
-        env:
-          REGISTRY: ghcr.io/${{ github.repository_owner }}
-          IMAGE_TAG: ${{ github.sha }}
-          TRAEFIK_NETWORK: ${{ secrets.TRAEFIK_NETWORK }}
-          TRAEFIK_ENTRYPOINTS: websecure
-          TRAEFIK_TLS: true
-          FRONTEND_HOST: scrmpkr.friedemann.dev
-          SERVER_HOST: scrmpkr.friedemann.dev
-          API_PATH_PREFIX: /api
-          CORS_ORIGIN: https://scrmpkr.friedemann.dev
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
@@ -109,6 +90,5 @@ jobs:
             set -euo pipefail
             cd ~/scrmpkr
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-            export REGISTRY IMAGE_TAG TRAEFIK_NETWORK TRAEFIK_ENTRYPOINTS TRAEFIK_TLS FRONTEND_HOST SERVER_HOST API_PATH_PREFIX CORS_ORIGIN
-            docker network create --driver overlay --attachable "$TRAEFIK_NETWORK" || true
+            docker network create --driver overlay --attachable traefik_proxy || true
             docker stack deploy -c docker-stack.yml scrmpkr --with-registry-auth

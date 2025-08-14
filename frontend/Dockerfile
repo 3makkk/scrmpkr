@@ -3,8 +3,8 @@ FROM node:20-alpine AS base
 WORKDIR /app
 RUN corepack enable
 
-# Build-time env passed as ARG to embed in static assets
-ARG VITE_API_URL
+# Build-time env passed as ARG to embed in static assets (defaulted for KISS)
+ARG VITE_API_URL="https://scrmpkr.friedemann.dev/api"
 ENV VITE_API_URL=${VITE_API_URL}
 
 # Install only manifest files first for better caching

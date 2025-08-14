@@ -14,23 +14,16 @@ docker network create traefik_proxy
 ```
 
 ## Configure
-1. Copy the env example and fill in values:
-   ```
-   cp .env.example .env
-   ```
-   - `FRONTEND_HOST`, `SERVER_HOST`: public hostnames routed by Traefik
-   - `TRAEFIK_NETWORK`: the external Docker network name used by Traefik
-   - `TRAEFIK_ENTRYPOINTS`: typically `websecure` if Traefik terminates TLS
-   - `TRAEFIK_TLS`: set `true` to enable TLS on routers
-   - Frontend `VITE_*`: public values baked into the static build
-   - Server secrets (`TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_ISSUER`): set real values in `.env` (do not commit)
-   - `CORS_ORIGIN`: must match `https://<FRONTEND_HOST>`
-
-2. Ensure your frontend API URL is set correctly in `.env` as `VITE_API_URL`.
+- Nothing to configure for hostnames or Traefik: values are hard-coded for simplicity.
+  - Host: `scrmpkr.friedemann.dev`
+  - API path prefix: `/api`
+  - Traefik network: `traefik_proxy`, entrypoint: `websecure`, TLS: `true`
+  - Server `CORS_ORIGIN`: `https://scrmpkr.friedemann.dev`
+  - Frontend API URL baked at build: `https://scrmpkr.friedemann.dev/api`
 
 ## Build and Run
 ```
-# Build images (uses build args from .env for frontend)
+# Build images
 docker compose build
 
 # Start services (joins Traefik external network)
@@ -42,14 +35,14 @@ docker compose up -d
 - Traefik routes traffic to both via labels and the external network.
 
 ## Traefik Labels Summary
-- Frontend router `scrmpkr-web`: `Host(\`${FRONTEND_HOST}\`) && PathPrefix(\`/\`)` → port `80`
-- API router `scrmpkr-api`: `Host(\`${SERVER_HOST}\`) && PathPrefix(\`${API_PATH_PREFIX}\`)` → port `4000`
-- Middleware `scrmpkr-api-strip` strips `${API_PATH_PREFIX}` so backend sees `/` (Socket.io path `/socket.io` works via `/api/socket.io` at the edge)
-- Both attach to `${TRAEFIK_NETWORK}` and use `${TRAEFIK_ENTRYPOINTS}` (e.g., `websecure`)
+- Frontend router `scrmpkr-web`: `Host(\`scrmpkr.friedemann.dev\`) && PathPrefix(\`/\`)` → port `80`
+- API router `scrmpkr-api`: `Host(\`scrmpkr.friedemann.dev\`) && PathPrefix(\`/api\`)` → port `4000`
+- Middleware `scrmpkr-api-strip` strips `/api` so backend sees `/` (Socket.io path `/socket.io` works via `/api/socket.io` at the edge)
+- Both attach to `traefik_proxy` and use entrypoint `websecure` with TLS enabled
 
 ## Environment Contract
-- Server required at runtime: `CORS_ORIGIN`, `PORT=4000` (default)
-- Frontend required at build: `VITE_API_URL` (e.g., `https://scrmpkr.friedemann.dev/api`)
+- Server required at runtime: none beyond defaults; `PORT=4000` is set, `CORS_ORIGIN` is hard-coded in compose/stack
+- Frontend required at build: none; API URL is defaulted in the Dockerfile
 
 ## Common Gotchas
 - 404 on SPA routes: ensured by nginx `try_files` → `index.html` fallback.
@@ -72,20 +65,11 @@ Build and push images to a registry, then deploy the stack. The stack file canno
 docker network create --driver overlay --attachable ${TRAEFIK_NETWORK:-traefik_proxy}
 ```
 
-2) Choose an image registry and tag in `.env` (optional defaults are provided):
+2) Build and push images (example for amd64) to GHCR:
 
 ```
-REGISTRY=ghcr.io/<your-account>
-IMAGE_TAG=v1
-```
-
-3) Build and push images (example for amd64):
-
-```
-docker buildx build --platform linux/amd64 -t $REGISTRY/server:$IMAGE_TAG -f server/Dockerfile . --push
-docker buildx build --platform linux/amd64 \
-  --build-arg VITE_API_URL=$VITE_API_URL \
-  -t $REGISTRY/frontend:$IMAGE_TAG -f frontend/Dockerfile . --push
+docker buildx build --platform linux/amd64 -t ghcr.io/<owner>/server:latest -f server/Dockerfile . --push
+docker buildx build --platform linux/amd64 -t ghcr.io/<owner>/frontend:latest -f frontend/Dockerfile . --push
 ```
 
 4) Deploy the stack:
@@ -105,4 +89,4 @@ docker service logs -f scrmpkr_frontend
 Notes:
 - The API service runs with `replicas: 1` because it maintains in-memory room state; scaling requires a shared adapter (e.g., Redis) for Socket.io.
 - The frontend is stateless and runs with `replicas: 2` by default.
-- Ensure Traefik is configured with the Docker provider in swarm mode and is attached to `${TRAEFIK_NETWORK}`.
+- Ensure Traefik is configured with the Docker provider in swarm mode and is attached to `traefik_proxy`.
