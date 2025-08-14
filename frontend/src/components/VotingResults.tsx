@@ -1,4 +1,3 @@
-import React from "react";
 import { useRoom } from "../hooks/useRoom";
 import Card from "./Card";
 
@@ -9,7 +8,10 @@ export default function VotingResults() {
 
   const { participants } = roomState;
 
-  const numericVotes = revealed.filter((r) => typeof r.value === "number") as { id: string; value: number }[];
+  const numericVotes = revealed.filter((r) => typeof r.value === "number") as {
+    id: string;
+    value: number;
+  }[];
   const average =
     numericVotes.length > 0
       ? (
@@ -24,7 +26,7 @@ export default function VotingResults() {
           revealed.filter((v) => v.value === a.value).length >=
           revealed.filter((v) => v.value === b.value).length
             ? a
-            : b
+            : b,
         ).value
       : "N/A";
 
@@ -36,7 +38,7 @@ export default function VotingResults() {
         Voting Results
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {revealed.map((r, index) => (
+        {revealed.map((r) => (
           <div
             key={r.id}
             className="bg-slate-500/20 rounded-lg p-4 text-center transition-all duration-300 hover:bg-slate-500/30"

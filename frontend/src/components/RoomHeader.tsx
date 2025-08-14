@@ -1,4 +1,3 @@
-import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useRoom } from "../hooks/useRoom";
 import Card from "./Card";
@@ -26,7 +25,7 @@ export default function RoomHeader() {
               {votedCount} of {roomState.participants.length} participants voted
             </p>
           </div>
-          <button onClick={handleLeave} className="btn-secondary">
+          <button type="button" onClick={handleLeave} className="btn-secondary">
             Leave Room
           </button>
         </div>

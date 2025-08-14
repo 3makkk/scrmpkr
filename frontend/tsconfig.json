@@ -14,8 +14,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@scrmpkr/shared": ["../shared/src"],
+      "@scrmpkr/shared/*": ["../shared/src/*"]
+    }
   },
   "include": ["src", "vite-env.d.ts"]
 }
-

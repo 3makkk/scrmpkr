@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../AuthProvider";
 import { useNavigate } from "react-router-dom";
 import { getSocket } from "../socket";
@@ -14,7 +14,7 @@ export default function Home() {
   const createRoom = () => {
     if (!account) return;
     const socket = getSocket({ name: account.name, userId: account.id });
-    socket.emit("room:create", { name: account.name }, ({ roomId }: { roomId: string }) => {
+    socket.emit("room:create", { name: account.name }, ({ roomId }) => {
       navigate(`/r/${roomId}`);
     });
   };
@@ -32,6 +32,7 @@ export default function Home() {
         primaryButtonText="Enter"
         secondaryButton={
           <button
+            type="button"
             disabled
             className="btn-secondary w-full opacity-50 cursor-not-allowed"
           >
@@ -58,7 +59,7 @@ export default function Home() {
             <h2 className="text-lg font-medium text-white/90 mb-6">
               Start a new session
             </h2>
-            <button onClick={createRoom} className="btn w-full">
+            <button type="button" onClick={createRoom} className="btn w-full">
               Create New Room
             </button>
           </div>
@@ -89,6 +90,7 @@ export default function Home() {
                 }
               />
               <button
+                type="button"
                 onClick={joinRoom}
                 disabled={!joiningId.trim()}
                 className="btn-secondary w-full"

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthProvider";
 import { useRoom } from "../hooks/useRoom";
@@ -61,12 +61,14 @@ export default function Room() {
           <div className="text-red-600 text-lg font-medium">{error}</div>
           <div className="space-y-4">
             <button
+              type="button"
               onClick={handleRetryJoin}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Try Again
             </button>
             <button
+              type="button"
               onClick={() => navigate("/")}
               className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors ml-4"
             >
@@ -120,6 +122,7 @@ export default function Room() {
           {revealed && isOwner && (
             <div className="flex justify-center">
               <button
+                type="button"
                 onClick={clearVotes}
                 className="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
               >
