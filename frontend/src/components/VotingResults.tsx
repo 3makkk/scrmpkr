@@ -9,7 +9,7 @@ export default function VotingResults() {
 
   const { participants } = roomState;
 
-  const numericVotes = revealed.filter((r) => typeof r.value === "number");
+  const numericVotes = revealed.filter((r) => typeof r.value === "number") as { id: string; value: number }[];
   const average =
     numericVotes.length > 0
       ? (

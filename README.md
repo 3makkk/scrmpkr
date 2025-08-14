@@ -10,6 +10,13 @@ Install dependencies with [pnpm](https://pnpm.io):
 pnpm install
 ```
 
+This repo now uses TypeScript for both frontend and server.
+Build all packages:
+
+```
+pnpm build
+```
+
 ### Backend
 
 Create `server/.env` using `server/.env.example`.
@@ -50,3 +57,5 @@ pnpm dev:frontend
 ```
 pnpm test
 ```
+
+Note: Jest is currently configured for JavaScript tests. To run server tests against TypeScript sources, either build first and point tests at compiled output, or add ts-jest to transpile on the fly.
