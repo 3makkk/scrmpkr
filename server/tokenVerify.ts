@@ -34,7 +34,11 @@ export function verifyToken(
       },
       (err, decoded) => {
         if (err) return reject(err);
-        resolve((decoded || {}) as JwtPayload & { name?: string });
+        resolve(
+          (decoded || {}) as JwtPayload & {
+            name?: string;
+          }
+        );
       }
     );
   });

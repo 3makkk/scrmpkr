@@ -1,4 +1,5 @@
-import { v4 as uuid } from "uuid";
+import { randomUUID } from "node:crypto";
+import type { Namespace } from "socket.io";
 import logger from "./logger";
 
 export const FIB_DECK: Array<number | "?"> = [
@@ -32,6 +33,11 @@ type Room = {
   lastRevealAt: number;
 };
 
+export type User = {
+  id: string;
+  name: string;
+};
+
 export class RoomManager {
   constructor() {
     this.rooms = new Map<string, Room>();
@@ -42,8 +48,8 @@ export class RoomManager {
   private rooms: Map<string, Room>;
   private roomTimeouts: Map<string, NodeJS.Timeout>;
 
-  createRoom(ownerId: string, name?: string) {
-    const id = uuid();
+  createRoom(ownerId: string, name?: string): Room {
+    const id = randomUUID();
     const room: Room = {
       id,
       ownerId,
@@ -69,7 +75,7 @@ export class RoomManager {
     return room;
   }
 
-  joinRoom(id: string, user: { id: string; name: string }) {
+  joinRoom(id: string, user: User): Room {
     const room = this.rooms.get(id);
     if (!room) {
       logger.warn(
@@ -110,7 +116,7 @@ export class RoomManager {
     return room;
   }
 
-  castVote(id: string, userId: string, value: number | "?") {
+  castVote(id: string, userId: string, value: number | "?"): void {
     const room = this.rooms.get(id);
     if (!room) {
       logger.warn(
@@ -160,7 +166,7 @@ export class RoomManager {
     }
   }
 
-  clearVotes(id: string) {
+  clearVotes(id: string): void {
     const room = this.rooms.get(id);
     if (!room) {
       logger.warn({ roomId: id }, "Clear votes was rejected, room not found");
@@ -179,9 +185,9 @@ export class RoomManager {
     logger.info({ roomId: id, removedVotes: votedCount }, "Votes were cleared");
   }
 
-  isOwner(id: string, userId: string) {
+  isOwner(id: string, userId: string): boolean {
     const room = this.rooms.get(id);
-    const isOwner = room && room.ownerId === userId;
+    const isOwner = !!room && room.ownerId === userId;
     if (room && !isOwner) {
       logger.warn(
         { roomId: id, userId, ownerId: room.ownerId },
@@ -191,7 +197,7 @@ export class RoomManager {
     return isOwner;
   }
 
-  hasAnyVotes(id: string) {
+  hasAnyVotes(id: string): boolean {
     const room = this.rooms.get(id);
     if (!room) return false;
     const hasVotes = Array.from(room.participants.values()).some(
@@ -201,7 +207,7 @@ export class RoomManager {
     return hasVotes;
   }
 
-  scheduleRoomDeletion(roomId: string) {
+  scheduleRoomDeletion(roomId: string): void {
     // Schedule room deletion after 30 seconds of being empty
     const timeout = setTimeout(() => {
       const room = this.rooms.get(roomId);
@@ -217,7 +223,7 @@ export class RoomManager {
     logger.info({ roomId }, "Room deletion was scheduled");
   }
 
-  cleanup() {
+  cleanup(): void {
     // Clear all pending timeouts
     for (const timeout of this.roomTimeouts.values()) {
       clearTimeout(timeout);
@@ -226,7 +232,16 @@ export class RoomManager {
     logger.info("Room deletion timeouts were cleared");
   }
 
-  getState(id: string) {
+  getState(id: string): {
+    id: string;
+    ownerId: string;
+    participants: Array<{
+      id: string;
+      name: string;
+      hasVoted: boolean;
+    }>;
+    status: "voting" | "revealing";
+  } | null {
     const room = this.rooms.get(id);
     if (!room) return null;
     return {
@@ -241,7 +256,7 @@ export class RoomManager {
     };
   }
 
-  getProgress(id: string) {
+  getProgress(id: string): Record<string, boolean> | null {
     const room = this.rooms.get(id);
     if (!room) return null;
     const result: Record<string, boolean> = {};
@@ -249,7 +264,7 @@ export class RoomManager {
     return result;
   }
 
-  startReveal(id: string, namespace: any) {
+  startReveal(id: string, namespace: Namespace): void {
     const room = this.rooms.get(id);
     if (!room) {
       logger.warn({ roomId: id }, "Reveal was rejected, room not found");
@@ -316,7 +331,10 @@ export class RoomManager {
     }, 1000);
   }
 
-  leaveRoom(roomId: string, userId: string) {
+  leaveRoom(
+    roomId: string,
+    userId: string
+  ): false | { roomDeleted: boolean; wasInRoom: boolean; scheduled: boolean } {
     const room = this.rooms.get(roomId);
     if (!room) {
       logger.warn(
@@ -354,7 +372,7 @@ export class RoomManager {
     return { roomDeleted: false, wasInRoom, scheduled: false };
   }
 
-  leaveAll(userId: string) {
+  leaveAll(userId: string): string[] {
     logger.info({ userId }, "User disconnected from all rooms");
     const roomsToUpdate: string[] = [];
     let roomsLeft = 0;

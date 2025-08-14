@@ -4,7 +4,7 @@ import http from "http";
 import cors from "cors";
 import { Server } from "socket.io";
 import { verifyToken } from "./tokenVerify";
-import { RoomManager } from "./roomManager";
+import { RoomManager, type User } from "./roomManager";
 import logger from "./logger";
 
 const app = express();
@@ -18,19 +18,25 @@ const io = new Server(server, {
 
 const rooms = new RoomManager();
 
-const namespace = io.of("/poker");
+type AuthenticatedSocket = import("socket.io").Socket & { user: User };
+type AuthPayload = { token?: string; name?: string; userId?: string };
+
+const namespace: import("socket.io").Namespace = io.of("/poker");
 namespace.use(async (socket, next) => {
   try {
-    const { token, name, userId } = (socket.handshake.auth || {}) as any;
+    const { token, name, userId } = (socket.handshake.auth || {}) as AuthPayload;
     if (token) {
-      const payload: any = await verifyToken(token);
-      (socket as any).user = { id: payload.sub, name: payload.name };
+      const payload = await verifyToken(token);
+      (socket as AuthenticatedSocket).user = {
+        id: String(payload.sub),
+        name: payload.name ?? "",
+      };
       logger.info(
         { userId: payload.sub, userName: payload.name },
         "User authenticated with token"
       );
     } else if (name && userId) {
-      (socket as any).user = { id: userId as string, name: name as string };
+      (socket as AuthenticatedSocket).user = { id: String(userId), name: String(name) };
       logger.info(
         { userId, userName: name },
         "User authenticated with credentials"
@@ -41,17 +47,18 @@ namespace.use(async (socket, next) => {
     }
     next();
   } catch (err) {
-    const e = err as Error;
+    const e = err instanceof Error ? err : new Error(String(err));
     logger.error({ error: e.message }, "Authentication error occurred");
-    next(e as any);
+    next(e);
   }
 });
 
-namespace.on("connection", (socket) => {
+namespace.on("connection", (socket: import("socket.io").Socket) => {
+  const s = socket as AuthenticatedSocket;
   logger.info(
     {
-      userId: (socket as any).user.id,
-      userName: (socket as any).user.name,
+      userId: s.user.id,
+      userName: s.user.name,
       socketId: socket.id,
     },
     "User connected"
@@ -62,16 +69,16 @@ namespace.on("connection", (socket) => {
     ({ name }: { name: string }, cb: (resp: { roomId: string }) => void) => {
       logger.info(
         {
-          userId: (socket as any).user.id,
-          userName: (socket as any).user.name,
+          userId: s.user.id,
+          userName: s.user.name,
           name,
         },
         "Room creation was requested"
       );
-      const room = rooms.createRoom((socket as any).user.id, name);
+      const room = rooms.createRoom(s.user.id, name);
       socket.join(room.id);
       logger.info(
-        { userId: (socket as any).user.id, roomId: room.id },
+        { userId: s.user.id, roomId: room.id },
         "User joined socket room"
       );
       cb({ roomId: room.id });
@@ -81,28 +88,37 @@ namespace.on("connection", (socket) => {
 
   socket.on(
     "room:join",
-    ({ roomId }: { roomId: string }, cb: (resp: any) => void) => {
+    (
+      { roomId }: { roomId: string },
+      cb: (
+        resp:
+          | { state: NonNullable<ReturnType<typeof rooms.getState>> }
+          | { error: string }
+      ) => void
+    ) => {
       logger.info(
         {
-          userId: (socket as any).user.id,
-          userName: (socket as any).user.name,
+          userId: s.user.id,
+          userName: s.user.name,
           roomId,
         },
         "Room join was requested"
       );
       try {
-        const room = rooms.joinRoom(roomId, (socket as any).user);
+        const room = rooms.joinRoom(roomId, s.user);
         socket.join(roomId);
         logger.info(
-          { userId: (socket as any).user.id, roomId },
+          { userId: s.user.id, roomId },
           "User joined socket room"
         );
-        cb({ state: rooms.getState(roomId) });
+        const state = rooms.getState(roomId);
+        // state is non-null after successful join
+        cb({ state: state as NonNullable<typeof state> });
         namespace.to(roomId).emit("room:state", rooms.getState(roomId));
       } catch (error) {
         const e = error as Error;
         logger.warn(
-          { userId: (socket as any).user.id, roomId, error: e.message },
+          { userId: s.user.id, roomId, error: e.message },
           "Room join failed"
         );
         cb({ error: e.message });
@@ -118,17 +134,17 @@ namespace.on("connection", (socket) => {
     ) => {
       logger.info(
         {
-          userId: (socket as any).user.id,
-          userName: (socket as any).user.name,
+          userId: s.user.id,
+          userName: s.user.name,
           roomId,
         },
         "Room leave was requested"
       );
-      const result = rooms.leaveRoom(roomId, (socket as any).user.id);
+      const result = rooms.leaveRoom(roomId, s.user.id);
       if (result && result.wasInRoom) {
         socket.leave(roomId);
         logger.info(
-          { userId: (socket as any).user.id, roomId },
+          { userId: s.user.id, roomId },
           "User left socket room"
         );
         // Notify other participants about the updated room state
@@ -136,7 +152,7 @@ namespace.on("connection", (socket) => {
         if (cb) cb({ success: true });
       } else {
         logger.warn(
-          { userId: (socket as any).user.id, roomId },
+          { userId: s.user.id, roomId },
           "Leave failed, user not in room"
         );
         if (cb) cb({ success: false });
@@ -149,14 +165,14 @@ namespace.on("connection", (socket) => {
     ({ roomId, value }: { roomId: string; value: number | "?" }) => {
       logger.info(
         {
-          userId: (socket as any).user.id,
-          userName: (socket as any).user.name,
+          userId: s.user.id,
+          userName: s.user.name,
           roomId,
           value,
         },
         "Vote was cast"
       );
-      rooms.castVote(roomId, (socket as any).user.id, value);
+      rooms.castVote(roomId, s.user.id, value);
       namespace.to(roomId).emit("vote:progress", rooms.getProgress(roomId));
     }
   );
@@ -164,16 +180,16 @@ namespace.on("connection", (socket) => {
   socket.on("reveal:start", ({ roomId }: { roomId: string }) => {
     logger.info(
       {
-        userId: (socket as any).user.id,
-        userName: (socket as any).user.name,
+        userId: s.user.id,
+        userName: s.user.name,
         roomId,
       },
       "Reveal was requested"
     );
     // Ensure user is owner of this specific room and there are votes to reveal
-    if (!rooms.isOwner(roomId, (socket as any).user.id)) {
+    if (!rooms.isOwner(roomId, s.user.id)) {
       logger.warn(
-        { userId: (socket as any).user.id, roomId },
+        { userId: s.user.id, roomId },
         "Reveal was denied, user not owner"
       );
       return;
@@ -188,16 +204,16 @@ namespace.on("connection", (socket) => {
   socket.on("vote:clear", ({ roomId }: { roomId: string }) => {
     logger.info(
       {
-        userId: (socket as any).user.id,
-        userName: (socket as any).user.name,
+        userId: s.user.id,
+        userName: s.user.name,
         roomId,
       },
       "Clear votes was requested"
     );
     // Ensure user is owner of this specific room
-    if (!rooms.isOwner(roomId, (socket as any).user.id)) {
+    if (!rooms.isOwner(roomId, s.user.id)) {
       logger.warn(
-        { userId: (socket as any).user.id, roomId },
+        { userId: s.user.id, roomId },
         "Clear votes was denied, user not owner"
       );
       return;
@@ -210,14 +226,14 @@ namespace.on("connection", (socket) => {
   socket.on("disconnect", () => {
     logger.info(
       {
-        userId: (socket as any).user.id,
-        userName: (socket as any).user.name,
+        userId: s.user.id,
+        userName: s.user.name,
         socketId: socket.id,
       },
       "User disconnected"
     );
     // Remove user from all rooms and update affected rooms
-    const updatedRoomIds = rooms.leaveAll((socket as any).user.id);
+    const updatedRoomIds = rooms.leaveAll(s.user.id);
     // Emit updated state to all affected rooms
     updatedRoomIds.forEach((roomId) => {
       logger.info({ roomId }, "Room state update was sent");
