@@ -3,7 +3,6 @@ import express from "express";
 import http from "node:http";
 import cors from "cors";
 import { Server } from "socket.io";
-import { verifyToken } from "./tokenVerify";
 import {
   RoomManager,
   type User,
@@ -65,24 +64,13 @@ const io = new Server<
 
 const rooms = new RoomManager();
 
-type AuthPayload = { token?: string; name?: string; userId?: string };
+type AuthPayload = { name?: string; userId?: string };
 
 const namespace = io.of("/poker");
 namespace.use(async (socket, next) => {
   try {
-    const { token, name, userId } = (socket.handshake.auth ||
-      {}) as AuthPayload;
-    if (token) {
-      const payload = await verifyToken(token);
-      socket.data.user = {
-        id: String(payload.sub),
-        name: payload.name ?? "",
-      };
-      logger.info(
-        { userId: payload.sub, userName: payload.name },
-        "User authenticated with token",
-      );
-    } else if (name && userId) {
+    const { name, userId } = (socket.handshake.auth || {}) as AuthPayload;
+    if (name && userId) {
       socket.data.user = { id: String(userId), name: String(name) };
       logger.info(
         { userId, userName: name },

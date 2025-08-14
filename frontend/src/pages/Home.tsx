@@ -30,15 +30,6 @@ export default function Home() {
         subtitle="Collaborative estimation made simple"
         onLogin={login}
         primaryButtonText="Enter"
-        secondaryButton={
-          <button
-            type="button"
-            disabled
-            className="btn-secondary w-full opacity-50 cursor-not-allowed"
-          >
-            Azure Login (coming soon)
-          </button>
-        }
       />
     );
   }

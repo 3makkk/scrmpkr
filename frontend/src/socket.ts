@@ -5,7 +5,7 @@ import type {
 } from "@scrmpkr/shared";
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | undefined;
-export type AuthPayload = { name: string; userId: string } | { token: string };
+export type AuthPayload = { name: string; userId: string };
 export function getSocket(
   auth: AuthPayload,
 ): Socket<ServerToClientEvents, ClientToServerEvents> {
