@@ -26,18 +26,17 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   "room:create": (
     data: { name: string },
-    cb: (resp: { roomId: string }) => void
+    cb: (resp: { roomId: string }) => void,
   ) => void;
   "room:join": (
     data: { roomId: string },
-    cb: (resp: { state: RoomState } | { error: string }) => void
+    cb: (resp: { state: RoomState } | { error: string }) => void,
   ) => void;
   "room:leave": (
     data: { roomId: string },
-    cb?: (resp: { success: boolean }) => void
+    cb?: (resp: { success: boolean }) => void,
   ) => void;
   "vote:cast": (data: { roomId: string; value: number | "?" }) => void;
   "reveal:start": (data: { roomId: string }) => void;
   "vote:clear": (data: { roomId: string }) => void;
 }
-

@@ -119,7 +119,7 @@ type RoomContextValue = {
   currentRoomId: string | null;
   joinRoom: (
     roomId: string,
-    account: { id: string; name: string }
+    account: { id: string; name: string },
   ) => () => void;
   leaveRoom: (callback?: () => void) => void;
   castVote: (value: number | "?") => void;
@@ -132,8 +132,10 @@ const RoomContext = createContext<RoomContextValue | undefined>(undefined);
 
 export function RoomProvider({ children }: { children: React.ReactNode }) {
   const [roomData, dispatch] = useReducer(roomReducer, initialRoomState);
-  const [socket, setSocket] =
-    useState<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
+  const [socket, setSocket] = useState<Socket<
+    ServerToClientEvents,
+    ClientToServerEvents
+  > | null>(null);
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
 
   const { roomState, error, progress, countdown, revealed, selectedCard } =
@@ -223,7 +225,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         s.emit("room:leave", { roomId });
       };
     },
-    []
+    [],
   );
 
   const leaveRoom = useCallback(
@@ -236,7 +238,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         callback();
       }
     },
-    [socket, currentRoomId]
+    [socket, currentRoomId],
   );
 
   const castVote = useCallback(
@@ -246,7 +248,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         socket.emit("vote:cast", { roomId: currentRoomId, value });
       }
     },
-    [socket, currentRoomId]
+    [socket, currentRoomId],
   );
 
   const revealVotes = useCallback(() => {
@@ -280,7 +282,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    [socket]
+    [socket],
   );
 
   useEffect(() => {

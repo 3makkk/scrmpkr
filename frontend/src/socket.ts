@@ -7,13 +7,12 @@ import type {
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | undefined;
 export type AuthPayload = { name: string; userId: string } | { token: string };
 export function getSocket(
-  auth: AuthPayload
+  auth: AuthPayload,
 ): Socket<ServerToClientEvents, ClientToServerEvents> {
   if (!socket) {
-    const created = io(`${import.meta.env.VITE_API_URL}/poker`, { auth }) as Socket<
-      ServerToClientEvents,
-      ClientToServerEvents
-    >;
+    const created = io(`${import.meta.env.VITE_API_URL}/poker`, {
+      auth,
+    }) as Socket<ServerToClientEvents, ClientToServerEvents>;
     socket = created;
   }
   return socket;

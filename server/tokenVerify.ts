@@ -7,7 +7,7 @@ const client = jwksClient({
 
 function getKey(
   header: JwtHeader,
-  callback: (err: Error | null, key?: string) => void
+  callback: (err: Error | null, key?: string) => void,
 ) {
   if (!header.kid) return callback(new Error("Missing key id"));
   client.getSigningKey(header.kid, (err, key) => {
@@ -21,7 +21,7 @@ function getKey(
 }
 
 export function verifyToken(
-  token: string
+  token: string,
 ): Promise<JwtPayload & { name?: string }> {
   return new Promise((resolve, reject) => {
     jwt.verify(
@@ -37,9 +37,9 @@ export function verifyToken(
         resolve(
           (decoded || {}) as JwtPayload & {
             name?: string;
-          }
+          },
         );
-      }
+      },
     );
   });
 }
