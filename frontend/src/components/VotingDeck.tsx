@@ -30,7 +30,7 @@ export default function VotingDeck() {
             value={value}
             isSelected={selectedCard === value}
             onClick={castVote}
-            disabled={hasUserVoted}
+            disabled={roomState.status === "revealing"}
           />
         ))}
       </div>
