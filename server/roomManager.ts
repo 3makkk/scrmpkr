@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import logger from "./logger";
 
 export const FIB_DECK: Array<number | "?"> = [
   0, 1, 2, 3, 5, 8, 13, 21, 34, 55, "?",
@@ -25,7 +26,7 @@ export class RoomManager {
   constructor() {
     this.rooms = new Map<string, Room>();
     this.roomTimeouts = new Map<string, NodeJS.Timeout>(); // Track deletion timeouts for empty rooms
-    console.log("🏠 RoomManager initialized");
+    logger.info("RoomManager was initialized");
   }
 
   private rooms: Map<string, Room>;
@@ -49,10 +50,11 @@ export class RoomManager {
       hasVoted: false,
     });
 
-    console.log(
-      `🎯 Room created: ${id} by user ${ownerId} (${name || "Owner"})`
+    logger.info(
+      { roomId: id, ownerId, ownerName: name || 'Owner' },
+      'Room was created'
     );
-    console.log(`📊 Total rooms: ${this.rooms.size}`);
+    logger.info({ totalRooms: this.rooms.size }, 'Room count was updated');
 
     return room;
   }
@@ -60,19 +62,18 @@ export class RoomManager {
   joinRoom(id: string, user: { id: string; name: string }) {
     const room = this.rooms.get(id);
     if (!room) {
-      console.log(
-        `❌ Failed to join room ${id}: Room not found (user: ${user.id}/${user.name})`
+      logger.warn(
+        { roomId: id, userId: user.id, userName: user.name },
+        'Room join was rejected'
       );
-      throw new Error("Room not found");
+      throw new Error('Room not found');
     }
 
     // Cancel any pending deletion timeout for this room
     if (this.roomTimeouts.has(id)) {
       clearTimeout(this.roomTimeouts.get(id));
       this.roomTimeouts.delete(id);
-      console.log(
-        `⏰ Cancelled deletion timeout for room ${id} - user rejoined`
-      );
+      logger.info({ roomId: id }, 'Room deletion timeout was cancelled');
     }
 
     const wasAlreadyInRoom = room.participants.has(user.id);
@@ -82,12 +83,19 @@ export class RoomManager {
       hasVoted: false,
     });
 
-    console.log(
-      `👋 User ${user.id} (${user.name}) ${
-        wasAlreadyInRoom ? "rejoined" : "joined"
-      } room ${id}`
+    logger.info(
+      {
+        roomId: id,
+        userId: user.id,
+        userName: user.name,
+        rejoined: wasAlreadyInRoom,
+      },
+      'User joined room'
     );
-    console.log(`👥 Room ${id} now has ${room.participants.size} participants`);
+    logger.info(
+      { roomId: id, participants: room.participants.size },
+      'Room participant count was updated'
+    );
 
     return room;
   }
@@ -95,15 +103,11 @@ export class RoomManager {
   castVote(id: string, userId: string, value: number | "?") {
     const room = this.rooms.get(id);
     if (!room) {
-      console.log(
-        `❌ Vote failed: Room ${id} not found (user: ${userId}, value: ${value})`
-      );
+      logger.warn({ roomId: id, userId, value }, 'Vote was rejected, room not found');
       return;
     }
     if (!FIB_DECK.includes(value)) {
-      console.log(
-        `❌ Vote failed: Invalid value ${value} (user: ${userId}, room: ${id})`
-      );
+      logger.warn({ roomId: id, userId, value }, 'Vote was rejected, invalid value');
       return;
     }
 
@@ -113,27 +117,37 @@ export class RoomManager {
       p.hasVoted = true;
       p.value = value;
 
-      console.log(
-        `🗳️  User ${userId} (${p.name}) voted ${value} in room ${id}${
-          previousVote ? ` (changed from ${previousVote})` : ""
-        }`
+      logger.info(
+        {
+          roomId: id,
+          userId,
+          userName: p.name,
+          value,
+          previousVote,
+        },
+        'User cast vote'
       );
 
       const votedCount = Array.from(room.participants.values()).filter(
         (p) => p.hasVoted
       ).length;
-      console.log(
-        `📈 Room ${id}: ${votedCount}/${room.participants.size} participants have voted`
+      logger.info(
+        {
+          roomId: id,
+          votedCount,
+          totalParticipants: room.participants.size,
+        },
+        'Vote progress was recorded'
       );
     } else {
-      console.log(`❌ Vote failed: User ${userId} not found in room ${id}`);
+      logger.warn({ roomId: id, userId }, 'Vote was rejected, user not found');
     }
   }
 
   clearVotes(id: string) {
     const room = this.rooms.get(id);
     if (!room) {
-      console.log(`❌ Clear votes failed: Room ${id} not found`);
+      logger.warn({ roomId: id }, 'Clear votes was rejected, room not found');
       return;
     }
 
@@ -146,15 +160,19 @@ export class RoomManager {
       delete p.value;
     }
 
-    console.log(`🧹 Votes cleared in room ${id} (${votedCount} votes removed)`);
+    logger.info(
+      { roomId: id, removedVotes: votedCount },
+      'Votes were cleared'
+    );
   }
 
   isOwner(id: string, userId: string) {
     const room = this.rooms.get(id);
     const isOwner = room && room.ownerId === userId;
     if (room && !isOwner) {
-      console.log(
-        `🚫 Access denied: User ${userId} is not owner of room ${id} (owner: ${room.ownerId})`
+      logger.warn(
+        { roomId: id, userId, ownerId: room.ownerId },
+        'Access was denied, user not owner'
       );
     }
     return isOwner;
@@ -166,9 +184,7 @@ export class RoomManager {
     const hasVotes = Array.from(room.participants.values()).some(
       (p) => p.hasVoted
     );
-    console.log(
-      `🔍 Room ${id} vote check: ${hasVotes ? "has votes" : "no votes yet"}`
-    );
+    logger.info({ roomId: id, hasVotes }, 'Room votes were checked');
     return hasVotes;
   }
 
@@ -179,13 +195,13 @@ export class RoomManager {
       if (room && room.participants.size === 0) {
         this.rooms.delete(roomId);
         this.roomTimeouts.delete(roomId);
-        console.log(`🗑️  Room ${roomId} deleted after timeout (empty)`);
-        console.log(`📊 Total rooms: ${this.rooms.size}`);
+        logger.info({ roomId }, 'Room was deleted after timeout');
+        logger.info({ totalRooms: this.rooms.size }, 'Room count was updated');
       }
     }, 30000); // 30 seconds
 
     this.roomTimeouts.set(roomId, timeout);
-    console.log(`⏰ Room ${roomId} scheduled for deletion in 30 seconds`);
+    logger.info({ roomId }, 'Room deletion was scheduled');
   }
 
   cleanup() {
@@ -194,7 +210,7 @@ export class RoomManager {
       clearTimeout(timeout);
     }
     this.roomTimeouts.clear();
-    console.log("🧹 All room deletion timeouts cleared");
+    logger.info('Room deletion timeouts were cleared');
   }
 
   getState(id: string) {
@@ -223,7 +239,7 @@ export class RoomManager {
   startReveal(id: string, namespace: any) {
     const room = this.rooms.get(id);
     if (!room) {
-      console.log(`❌ Reveal failed: Room ${id} not found`);
+      logger.warn({ roomId: id }, 'Reveal was rejected, room not found');
       return;
     }
 
@@ -232,23 +248,28 @@ export class RoomManager {
       (p) => p.hasVoted
     );
     if (!hasAnyVotes) {
-      console.log(`❌ Reveal blocked: No votes in room ${id}`);
+      logger.warn({ roomId: id }, 'Reveal was blocked, no votes');
       return; // Don't start reveal if no one has voted
     }
 
     const votedCount = Array.from(room.participants.values()).filter(
       (p) => p.hasVoted
     ).length;
-    console.log(
-      `🎭 Starting reveal for room ${id} (${votedCount}/${room.participants.size} voted)`
+    logger.info(
+      {
+        roomId: id,
+        votedCount,
+        totalParticipants: room.participants.size,
+      },
+      'Reveal was started'
     );
 
     room.status = "revealing";
     let remaining = 3;
     const interval = setInterval(() => {
       remaining -= 1;
-      console.log(`⏱️  Room ${id} reveal countdown: ${remaining}`);
-      namespace.to(id).emit("reveal:countdown", { remaining });
+      logger.info({ roomId: id, remaining }, 'Reveal countdown ticked');
+      namespace.to(id).emit('reveal:countdown', { remaining });
       if (remaining <= 0) {
         clearInterval(interval);
         room.status = "voting";
@@ -265,11 +286,15 @@ export class RoomManager {
         const unanimousValue: number | undefined =
           unique.length === 1 && vals.length > 0 ? unique[0] : undefined;
 
-        console.log(`🎉 Reveal complete for room ${id}:`, {
-          totalReveals: room.reveals,
-          votesRevealed: revealed.length,
-          unanimousValue: unanimousValue || "none",
-        });
+        logger.info(
+          {
+            roomId: id,
+            totalReveals: room.reveals,
+            votesRevealed: revealed.length,
+            unanimousValue: unanimousValue || 'none',
+          },
+          'Reveal was completed'
+        );
 
         namespace
           .to(id)
@@ -281,9 +306,7 @@ export class RoomManager {
   leaveRoom(roomId: string, userId: string) {
     const room = this.rooms.get(roomId);
     if (!room) {
-      console.log(
-        `❌ Leave room failed: Room ${roomId} not found (user: ${userId})`
-      );
+      logger.warn({ roomId, userId }, 'Leave room was rejected, room not found');
       return false;
     }
 
@@ -292,10 +315,13 @@ export class RoomManager {
     room.participants.delete(userId);
 
     if (wasInRoom) {
-      console.log(
-        `🚪 User ${userId} (${
-          participant?.name || "unknown"
-        }) left room ${roomId}`
+      logger.info(
+        {
+          roomId,
+          userId,
+          userName: participant?.name || 'unknown',
+        },
+        'User left room'
       );
     }
 
@@ -305,14 +331,16 @@ export class RoomManager {
       return { roomDeleted: false, wasInRoom, scheduled: true };
     }
 
-    console.log(
-      `👥 Room ${roomId} now has ${room.participants.size} participants`
+    logger.info(
+      { roomId, participants: room.participants.size },
+      'Room participant count was updated'
     );
     return { roomDeleted: false, wasInRoom, scheduled: false };
   }
 
+  
   leaveAll(userId: string) {
-    console.log(`🚶 User ${userId} disconnecting from all rooms`);
+    logger.info({ userId }, "User disconnected from all rooms");
     const roomsToUpdate: string[] = [];
     let roomsLeft = 0;
 
@@ -322,10 +350,13 @@ export class RoomManager {
         room.participants.delete(userId);
         roomsLeft++;
 
-        console.log(
-          `🚪 User ${userId} (${
-            participant?.name || "unknown"
-          }) left room ${roomId}`
+        logger.info(
+          {
+            roomId,
+            userId,
+            userName: participant?.name || 'unknown',
+          },
+          'User left room'
         );
 
         // If room is empty, schedule it for deletion instead of immediate deletion
@@ -333,15 +364,17 @@ export class RoomManager {
           this.scheduleRoomDeletion(roomId);
         } else {
           roomsToUpdate.push(roomId);
-          console.log(
-            `👥 Room ${roomId} now has ${room.participants.size} participants`
+          logger.info(
+            { roomId, participants: room.participants.size },
+            'Room participant count was updated'
           );
         }
       }
     }
 
-    console.log(
-      `📊 User ${userId} left ${roomsLeft} rooms. Total rooms: ${this.rooms.size}`
+    logger.info(
+      { userId, roomsLeft, totalRooms: this.rooms.size },
+      'User leave summary was recorded'
     );
     return roomsToUpdate; // Return room IDs that need state updates
   }
