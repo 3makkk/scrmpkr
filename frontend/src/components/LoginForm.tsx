@@ -1,5 +1,14 @@
 import React, { useState } from "react";
 
+type Props = {
+  title: string;
+  subtitle?: string;
+  onLogin: (name: string) => void;
+  primaryButtonText?: string;
+  secondaryButton?: React.ReactNode;
+  autoFocus?: boolean;
+};
+
 export default function LoginForm({
   title,
   subtitle,
@@ -7,7 +16,7 @@ export default function LoginForm({
   primaryButtonText = "Enter",
   secondaryButton = null,
   autoFocus = false,
-}) {
+}: Props) {
   const [name, setName] = useState("");
 
   const handleLogin = () => {
@@ -16,7 +25,7 @@ export default function LoginForm({
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && name.trim()) {
       handleLogin();
     }

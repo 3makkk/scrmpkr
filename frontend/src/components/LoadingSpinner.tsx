@@ -1,7 +1,7 @@
 import React from "react";
 import Card from "./Card";
 
-export default function LoadingSpinner({ message = "Loading..." }) {
+export default function LoadingSpinner({ message = "Loading..." }: { message?: string }) {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <Card className="text-center">

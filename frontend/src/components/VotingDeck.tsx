@@ -4,7 +4,7 @@ import { useAuth } from "../AuthProvider";
 import Card from "./Card";
 import PokerCard from "./PokerCard";
 
-const DECK = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, "?"];
+const DECK: Array<number | "?"> = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, "?"];
 
 export default function VotingDeck() {
   const { selectedCard, castVote, progress, roomState } = useRoom();
@@ -15,7 +15,7 @@ export default function VotingDeck() {
   const userParticipant = roomState.participants.find(
     (p) => p.id === account.id
   );
-  const hasUserVoted = userParticipant && progress[userParticipant.id];
+  const hasUserVoted = !!(userParticipant && progress[userParticipant.id as keyof typeof progress]);
 
   return (
     <Card>

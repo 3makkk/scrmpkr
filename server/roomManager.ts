@@ -1,21 +1,43 @@
-const { v4: uuid } = require("uuid");
+import { v4 as uuid } from "uuid";
 
-const FIB_DECK = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, "?"];
+export const FIB_DECK: Array<number | "?"> = [
+  0, 1, 2, 3, 5, 8, 13, 21, 34, 55, "?",
+];
 
-class RoomManager {
+type Participant = {
+  id: string;
+  name: string;
+  hasVoted: boolean;
+  value?: number | "?";
+};
+
+type Room = {
+  id: string;
+  ownerId: string;
+  name?: string;
+  participants: Map<string, Participant>;
+  status: "voting" | "revealing";
+  reveals: number;
+  lastRevealAt: number;
+};
+
+export class RoomManager {
   constructor() {
-    this.rooms = new Map();
-    this.roomTimeouts = new Map(); // Track deletion timeouts for empty rooms
+    this.rooms = new Map<string, Room>();
+    this.roomTimeouts = new Map<string, NodeJS.Timeout>(); // Track deletion timeouts for empty rooms
     console.log("🏠 RoomManager initialized");
   }
 
-  createRoom(ownerId, name) {
+  private rooms: Map<string, Room>;
+  private roomTimeouts: Map<string, NodeJS.Timeout>;
+
+  createRoom(ownerId: string, name?: string) {
     const id = uuid();
-    const room = {
+    const room: Room = {
       id,
       ownerId,
       name,
-      participants: new Map(),
+      participants: new Map<string, Participant>(),
       status: "voting",
       reveals: 0,
       lastRevealAt: Date.now(),
@@ -35,7 +57,7 @@ class RoomManager {
     return room;
   }
 
-  joinRoom(id, user) {
+  joinRoom(id: string, user: { id: string; name: string }) {
     const room = this.rooms.get(id);
     if (!room) {
       console.log(
@@ -70,7 +92,7 @@ class RoomManager {
     return room;
   }
 
-  castVote(id, userId, value) {
+  castVote(id: string, userId: string, value: number | "?") {
     const room = this.rooms.get(id);
     if (!room) {
       console.log(
@@ -108,7 +130,7 @@ class RoomManager {
     }
   }
 
-  clearVotes(id) {
+  clearVotes(id: string) {
     const room = this.rooms.get(id);
     if (!room) {
       console.log(`❌ Clear votes failed: Room ${id} not found`);
@@ -127,7 +149,7 @@ class RoomManager {
     console.log(`🧹 Votes cleared in room ${id} (${votedCount} votes removed)`);
   }
 
-  isOwner(id, userId) {
+  isOwner(id: string, userId: string) {
     const room = this.rooms.get(id);
     const isOwner = room && room.ownerId === userId;
     if (room && !isOwner) {
@@ -138,7 +160,7 @@ class RoomManager {
     return isOwner;
   }
 
-  hasAnyVotes(id) {
+  hasAnyVotes(id: string) {
     const room = this.rooms.get(id);
     if (!room) return false;
     const hasVotes = Array.from(room.participants.values()).some(
@@ -150,7 +172,7 @@ class RoomManager {
     return hasVotes;
   }
 
-  scheduleRoomDeletion(roomId) {
+  scheduleRoomDeletion(roomId: string) {
     // Schedule room deletion after 30 seconds of being empty
     const timeout = setTimeout(() => {
       const room = this.rooms.get(roomId);
@@ -175,7 +197,7 @@ class RoomManager {
     console.log("🧹 All room deletion timeouts cleared");
   }
 
-  getState(id) {
+  getState(id: string) {
     const room = this.rooms.get(id);
     if (!room) return null;
     return {
@@ -190,15 +212,15 @@ class RoomManager {
     };
   }
 
-  getProgress(id) {
+  getProgress(id: string) {
     const room = this.rooms.get(id);
     if (!room) return null;
-    const result = {};
+    const result: Record<string, boolean> = {};
     for (const [id, p] of room.participants) result[id] = p.hasVoted;
     return result;
   }
 
-  startReveal(id, namespace) {
+  startReveal(id: string, namespace: any) {
     const room = this.rooms.get(id);
     if (!room) {
       console.log(`❌ Reveal failed: Room ${id} not found`);
@@ -238,9 +260,9 @@ class RoomManager {
         }));
         const vals = revealed
           .filter((v) => v.value !== "?" && v.value !== undefined)
-          .map((v) => v.value);
+          .map((v) => v.value as number);
         const unique = [...new Set(vals)];
-        const unanimousValue =
+        const unanimousValue: number | undefined =
           unique.length === 1 && vals.length > 0 ? unique[0] : undefined;
 
         console.log(`🎉 Reveal complete for room ${id}:`, {
@@ -256,7 +278,7 @@ class RoomManager {
     }, 1000);
   }
 
-  leaveRoom(roomId, userId) {
+  leaveRoom(roomId: string, userId: string) {
     const room = this.rooms.get(roomId);
     if (!room) {
       console.log(
@@ -289,9 +311,9 @@ class RoomManager {
     return { roomDeleted: false, wasInRoom, scheduled: false };
   }
 
-  leaveAll(userId) {
+  leaveAll(userId: string) {
     console.log(`🚶 User ${userId} disconnecting from all rooms`);
-    const roomsToUpdate = [];
+    const roomsToUpdate: string[] = [];
     let roomsLeft = 0;
 
     for (const [roomId, room] of this.rooms.entries()) {
@@ -325,4 +347,4 @@ class RoomManager {
   }
 }
 
-module.exports = { RoomManager, FIB_DECK };
+export default RoomManager;
