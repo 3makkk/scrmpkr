@@ -5,19 +5,19 @@ This repo ships first-class Docker images for the API (server) and the Vite Reac
 ## Prerequisites
 - Docker and Docker Compose v2
 - A running Traefik instance (v2+) on the same Docker host
-- A shared external Docker network (e.g., `traefik_proxy`) that Traefik and this stack join
+- A shared external Docker network (e.g., `proxy`) that Traefik and this stack join
 
 Create the external network if it does not exist:
 
 ```
-docker network create traefik_proxy
+docker network create proxy
 ```
 
 ## Configure
 - Nothing to configure for hostnames or Traefik: values are hard-coded for simplicity.
   - Host: `scrmpkr.friedemann.dev`
   - API path prefix: `/api`
-  - Traefik network: `traefik_proxy`, entrypoint: `websecure`, TLS: `true`
+  - Traefik network: `proxy`, entrypoint: `websecure`, TLS: `true`
   - Server `CORS_ORIGIN`: `https://scrmpkr.friedemann.dev`
   - Frontend API URL baked at build: `https://scrmpkr.friedemann.dev/api`
 
@@ -38,7 +38,7 @@ docker compose up -d
 - Frontend router `scrmpkr-web`: `Host(\`scrmpkr.friedemann.dev\`) && PathPrefix(\`/\`)` → port `80`
 - API router `scrmpkr-api`: `Host(\`scrmpkr.friedemann.dev\`) && PathPrefix(\`/api\`)` → port `4000`
 - Middleware `scrmpkr-api-strip` strips `/api` so backend sees `/` (Socket.io path `/socket.io` works via `/api/socket.io` at the edge)
-- Both attach to `traefik_proxy` and use entrypoint `websecure` with TLS enabled
+- Both attach to `proxy` and use entrypoint `websecure` with TLS enabled
 
 ## Environment Contract
 - Server required at runtime: none beyond defaults; `PORT=4000` is set, `CORS_ORIGIN` is hard-coded in compose/stack
@@ -62,7 +62,7 @@ Build and push images to a registry, then deploy the stack. The stack file canno
 1) Create the external overlay network shared with Traefik (once):
 
 ```
-docker network create --driver overlay --attachable ${TRAEFIK_NETWORK:-traefik_proxy}
+docker network create --driver overlay --attachable proxy
 ```
 
 2) Build and push images (example for amd64) to GHCR:
@@ -89,4 +89,4 @@ docker service logs -f scrmpkr_frontend
 Notes:
 - The API service runs with `replicas: 1` because it maintains in-memory room state; scaling requires a shared adapter (e.g., Redis) for Socket.io.
 - The frontend is stateless and runs with `replicas: 2` by default.
-- Ensure Traefik is configured with the Docker provider in swarm mode and is attached to `traefik_proxy`.
+- Ensure Traefik is configured with the Docker provider in swarm mode and is attached to `proxy`.

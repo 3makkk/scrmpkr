@@ -15,7 +15,7 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=traefik_proxy"
+      - "traefik.docker.network=proxy"
       - "traefik.http.routers.scrmpkr-api.rule=Host(`scrmpkr.friedemann.dev`) && PathPrefix(`/api`)"
       - "traefik.http.routers.scrmpkr-api.entrypoints=websecure"
       - "traefik.http.routers.scrmpkr-api.middlewares=scrmpkr-api-strip@docker"
@@ -34,7 +34,7 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=traefik_proxy"
+      - "traefik.docker.network=proxy"
       - "traefik.http.routers.scrmpkr-web.rule=Host(`scrmpkr.friedemann.dev`) && PathPrefix(`/`)"
       - "traefik.http.routers.scrmpkr-web.entrypoints=websecure"
       - "traefik.http.services.scrmpkr-web.loadbalancer.server.port=80"
@@ -43,4 +43,4 @@ services:
 networks:
   traefik:
     external: true
-    name: traefik_proxy
+    name: proxy
