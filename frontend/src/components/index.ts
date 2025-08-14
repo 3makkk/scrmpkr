@@ -1,4 +1,3 @@
-// Component exports for easier imports
 export { default as Card } from "./Card";
 export { default as CountdownTimer } from "./CountdownTimer";
 export { default as LoadingSpinner } from "./LoadingSpinner";

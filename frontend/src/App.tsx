@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./AuthProvider";
-import { RoomProvider } from "./hooks/useRoom.jsx";
+import { RoomProvider } from "./hooks/useRoom";
 import Home from "./pages/Home";
 import Room from "./pages/Room";
 

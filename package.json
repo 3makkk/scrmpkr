@@ -5,7 +5,9 @@
     "dev:server": "pnpm --filter server dev",
     "dev:frontend": "pnpm --filter frontend dev",
     "dev": "pnpm -r dev",
-    "test": "pnpm -r test"
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
   },
   "packageManager": "pnpm@9.15.5+sha1.cb1f6372ef64e2ba352f2f46325adead1c99ff8f"
 }

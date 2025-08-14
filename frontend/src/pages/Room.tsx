@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthProvider";
-import { useRoom } from "../hooks/useRoom.jsx";
+import { useRoom } from "../hooks/useRoom";
 import LoginForm from "../components/LoginForm";
 import LoadingSpinner from "../components/LoadingSpinner";
 import PageLayout from "../components/PageLayout";
@@ -40,7 +40,9 @@ export default function Room() {
 
   // Helper functions
   const handleRetryJoin = () => {
-    retryJoin(roomId, account);
+    if (roomId && account) {
+      retryJoin(roomId, account);
+    }
   };
 
   // Check if user is owner for the clear votes button
@@ -48,7 +50,7 @@ export default function Room() {
 
   // Don't render if no account
   if (!account) {
-    return <LoginForm onLogin={login} />;
+    return <LoginForm title="Scrum Poker" onLogin={login} />;
   }
 
   // Show error state with retry option
