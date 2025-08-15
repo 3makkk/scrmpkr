@@ -5,7 +5,9 @@ RUN corepack enable
 
 # Build-time env passed as ARG to embed in static assets (defaulted for KISS)
 ARG VITE_API_URL="https://scrmpkr.friedemann.dev/api"
+ARG VITE_SOCKET_PATH="/api/socket.io/"
 ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_SOCKET_PATH=${VITE_SOCKET_PATH}
 
 # Install only manifest files first for better caching
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
