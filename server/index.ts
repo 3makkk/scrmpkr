@@ -118,6 +118,11 @@ namespace.on("connection", (socket) => {
       const state = rooms.getState(room.id);
       if (state) namespace.to(room.id).emit("room:state", state);
     }
+    {
+      const progress = rooms.getProgress(room.id);
+      if (progress)
+        namespace.to(room.id).emit("vote:progress", progress as VoteProgress);
+    }
   });
 
   socket.on("room:join", ({ roomId }, cb) => {
@@ -151,6 +156,11 @@ namespace.on("connection", (socket) => {
       );
       cb({ error: e.message });
     }
+    {
+      const progress = rooms.getProgress(roomId);
+      if (progress)
+        namespace.to(roomId).emit("vote:progress", progress as VoteProgress);
+    }
   });
 
   socket.on("room:leave", ({ roomId }, cb) => {
@@ -173,6 +183,11 @@ namespace.on("connection", (socket) => {
       {
         const state = rooms.getState(roomId);
         if (state) namespace.to(roomId).emit("room:state", state);
+      }
+      {
+        const progress = rooms.getProgress(roomId);
+        if (progress)
+          namespace.to(roomId).emit("vote:progress", progress as VoteProgress);
       }
       if (cb) cb({ success: true });
     } else {
@@ -273,6 +288,9 @@ namespace.on("connection", (socket) => {
       logger.info({ roomId }, "Room state update was sent");
       const state = rooms.getState(roomId);
       if (state) namespace.to(roomId).emit("room:state", state);
+      const progress = rooms.getProgress(roomId);
+      if (progress)
+        namespace.to(roomId).emit("vote:progress", progress as VoteProgress);
     });
   });
 });
