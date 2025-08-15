@@ -1,4 +1,4 @@
-const { RoomManager, FIB_DECK } = require("../roomManager");
+import { RoomManager, FIB_DECK } from "../roomManager";
 
 test("create and join room", () => {
   const rm = new RoomManager();
@@ -15,4 +15,21 @@ test("cast vote and progress", () => {
   rm.castVote(room.id, "owner", FIB_DECK[3]);
   const progress = rm.getProgress(room.id);
   expect(progress.owner).toBe(true);
+});
+
+test("clear votes resets progress", () => {
+  const rm = new RoomManager();
+  const room = rm.createRoom("owner", "Alice");
+  rm.joinRoom(room.id, { id: "bob", name: "Bob" });
+  rm.castVote(room.id, "owner", FIB_DECK[2]);
+  rm.castVote(room.id, "bob", FIB_DECK[3]);
+  // Sanity check votes recorded
+  let progress = rm.getProgress(room.id);
+  expect(progress.owner).toBe(true);
+  expect(progress.bob).toBe(true);
+  // Clear and verify all false
+  rm.clearVotes(room.id);
+  progress = rm.getProgress(room.id);
+  expect(progress.owner).toBe(false);
+  expect(progress.bob).toBe(false);
 });

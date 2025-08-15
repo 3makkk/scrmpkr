@@ -244,10 +244,16 @@ namespace.on("connection", (socket) => {
       return;
     }
     rooms.clearVotes(roomId);
+    // Notify clients that votes were cleared, and broadcast fresh state + progress
     namespace.to(roomId).emit("votes:cleared");
     {
       const state = rooms.getState(roomId);
       if (state) namespace.to(roomId).emit("room:state", state);
+    }
+    {
+      const progress = rooms.getProgress(roomId);
+      if (progress)
+        namespace.to(roomId).emit("vote:progress", progress as VoteProgress);
     }
   });
 

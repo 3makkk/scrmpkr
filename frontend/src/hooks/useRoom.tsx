@@ -85,6 +85,7 @@ const roomReducer = (state: RoomData, action: RoomAction): RoomData => {
         revealed: null,
         countdown: null,
         selectedCard: null,
+        progress: {},
       };
     case "TIMEOUT_ERROR":
       return {
@@ -142,7 +143,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     roomData;
 
   const isLoading = !roomState && !error;
-  const votedCount = Object.keys(progress).length;
+  const votedCount = Object.values(progress).filter(Boolean).length;
   const allVoted = roomState
     ? roomState.participants.every((p) => progress[p.id])
     : false;
