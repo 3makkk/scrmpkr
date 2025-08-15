@@ -32,15 +32,15 @@ interface ServerToClientEvents {
 interface ClientToServerEvents {
   "room:create": (
     data: { name: string },
-    cb: (resp: { roomId: string }) => void
+    cb: (resp: { roomId: string }) => void,
   ) => void;
   "room:join": (
     data: { roomId: string },
-    cb: (resp: { state: RoomState } | { error: string }) => void
+    cb: (resp: { state: RoomState } | { error: string }) => void,
   ) => void;
   "room:leave": (
     data: { roomId: string },
-    cb?: (resp: { success: boolean }) => void
+    cb?: (resp: { success: boolean }) => void,
   ) => void;
   "vote:cast": (data: { roomId: string; value: number | "?" }) => void;
   "reveal:start": (data: { roomId: string }) => void;
@@ -74,7 +74,7 @@ namespace.use(async (socket, next) => {
       socket.data.user = { id: String(userId), name: String(name) };
       logger.info(
         { userId, userName: name },
-        "User authenticated with credentials"
+        "User authenticated with credentials",
       );
     } else {
       logger.warn("Authentication failed, no credentials provided");
@@ -95,7 +95,7 @@ namespace.on("connection", (socket) => {
       userName: socket.data.user.name,
       socketId: socket.id,
     },
-    "User connected"
+    "User connected",
   );
 
   socket.on("room:create", ({ name }, cb) => {
@@ -105,13 +105,13 @@ namespace.on("connection", (socket) => {
         userName: socket.data.user.name,
         name,
       },
-      "Room creation was requested"
+      "Room creation was requested",
     );
     const room = rooms.createRoom(socket.data.user.id, name);
     socket.join(room.id);
     logger.info(
       { userId: socket.data.user.id, roomId: room.id },
-      "User joined socket room"
+      "User joined socket room",
     );
     cb({ roomId: room.id });
     {
@@ -127,14 +127,14 @@ namespace.on("connection", (socket) => {
         userName: socket.data.user.name,
         roomId,
       },
-      "Room join was requested"
+      "Room join was requested",
     );
     try {
       const _room = rooms.joinRoom(roomId, socket.data.user);
       socket.join(roomId);
       logger.info(
         { userId: socket.data.user.id, roomId },
-        "User joined socket room"
+        "User joined socket room",
       );
       const state = rooms.getState(roomId);
       if (state) {
@@ -147,7 +147,7 @@ namespace.on("connection", (socket) => {
       const e = error as Error;
       logger.warn(
         { userId: socket.data.user.id, roomId, error: e.message },
-        "Room join failed"
+        "Room join failed",
       );
       cb({ error: e.message });
     }
@@ -160,14 +160,14 @@ namespace.on("connection", (socket) => {
         userName: socket.data.user.name,
         roomId,
       },
-      "Room leave was requested"
+      "Room leave was requested",
     );
     const result = rooms.leaveRoom(roomId, socket.data.user.id);
     if (result !== false && result.wasInRoom) {
       socket.leave(roomId);
       logger.info(
         { userId: socket.data.user.id, roomId },
-        "User left socket room"
+        "User left socket room",
       );
       // Notify other participants about the updated room state
       {
@@ -178,7 +178,7 @@ namespace.on("connection", (socket) => {
     } else {
       logger.warn(
         { userId: socket.data.user.id, roomId },
-        "Leave failed, user not in room"
+        "Leave failed, user not in room",
       );
       if (cb) cb({ success: false });
     }
@@ -192,7 +192,7 @@ namespace.on("connection", (socket) => {
         roomId,
         value,
       },
-      "Vote was cast"
+      "Vote was cast",
     );
     rooms.castVote(roomId, socket.data.user.id, value);
     {
@@ -209,13 +209,13 @@ namespace.on("connection", (socket) => {
         userName: socket.data.user.name,
         roomId,
       },
-      "Reveal was requested"
+      "Reveal was requested",
     );
     // Ensure user is owner of this specific room and there are votes to reveal
     if (!rooms.isOwner(roomId, socket.data.user.id)) {
       logger.warn(
         { userId: socket.data.user.id, roomId },
-        "Reveal was denied, user not owner"
+        "Reveal was denied, user not owner",
       );
       return;
     }
@@ -233,13 +233,13 @@ namespace.on("connection", (socket) => {
         userName: socket.data.user.name,
         roomId,
       },
-      "Clear votes was requested"
+      "Clear votes was requested",
     );
     // Ensure user is owner of this specific room
     if (!rooms.isOwner(roomId, socket.data.user.id)) {
       logger.warn(
         { userId: socket.data.user.id, roomId },
-        "Clear votes was denied, user not owner"
+        "Clear votes was denied, user not owner",
       );
       return;
     }
@@ -258,7 +258,7 @@ namespace.on("connection", (socket) => {
         userName: socket.data.user.name,
         socketId: socket.id,
       },
-      "User disconnected"
+      "User disconnected",
     );
     // Remove user from all rooms and update affected rooms
     const updatedRoomIds = rooms.leaveAll(socket.data.user.id);

@@ -7,7 +7,7 @@ import type {
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | undefined;
 export type AuthPayload = { name: string; userId: string };
 export function getSocket(
-  auth: AuthPayload
+  auth: AuthPayload,
 ): Socket<ServerToClientEvents, ClientToServerEvents> {
   if (!socket) {
     const apiUrl = import.meta.env.VITE_API_URL;
