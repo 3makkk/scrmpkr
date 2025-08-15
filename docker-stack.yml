@@ -7,8 +7,7 @@ services:
       PORT: "4000"
       CORS_ORIGIN: https://scrmpkr.friedemann.dev
     networks:
-      - default
-      - traefik
+      - proxy
     deploy:
       replicas: 1
       restart_policy:
@@ -23,18 +22,18 @@ services:
         - "traefik.docker.network=proxy"
         - "traefik.http.routers.scrmpkr-api.rule=Host(`scrmpkr.friedemann.dev`) && PathPrefix(`/api`)"
         - "traefik.http.routers.scrmpkr-api.entrypoints=websecure"
-        - "traefik.http.routers.scrmpkr-api.middlewares=scrmpkr-api-strip@docker"
+        - "traefik.http.routers.scrmpkr-api.middlewares=scrmpkr-api-strip"
         - "traefik.http.middlewares.scrmpkr-api-strip.stripprefix.prefixes=/api"
         - "traefik.http.services.scrmpkr-api.loadbalancer.server.port=4000"
         - "traefik.http.routers.scrmpkr-api.tls=true"
+        - "traefik.http.routers.scrmpkr-api.tls.certresolver=le"
 
   frontend:
     image: ghcr.io/3makkk/frontend:latest
     networks:
-      - default
-      - traefik
+      - proxy
     deploy:
-      replicas: 2
+      replicas: 1
       restart_policy:
         condition: any
         delay: 5s
@@ -49,8 +48,9 @@ services:
         - "traefik.http.routers.scrmpkr-web.entrypoints=websecure"
         - "traefik.http.services.scrmpkr-web.loadbalancer.server.port=80"
         - "traefik.http.routers.scrmpkr-web.tls=true"
+        - "traefik.http.routers.scrmpkr-web.tls.certresolver=le"
 
 networks:
-  traefik:
+  proxy:
     external: true
     name: proxy
