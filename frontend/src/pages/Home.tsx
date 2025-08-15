@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useAuth } from "../AuthProvider";
 import { useNavigate } from "react-router-dom";
-import { getSocket } from "../socket";
 import LoginForm from "../components/LoginForm";
 import PageLayout from "../components/PageLayout";
 import Card from "../components/Card";
+import { getSocket } from "../socket";
 
 export default function Home() {
   const { account, login } = useAuth();
@@ -13,8 +13,8 @@ export default function Home() {
 
   const createRoom = () => {
     if (!account) return;
-    const socket = getSocket({ name: account.name, userId: account.id });
-    socket.emit("room:create", { name: account.name }, ({ roomId }) => {
+    const s = getSocket({ name: account.name, userId: account.id });
+    s.emit("room:create", { name: account.name }, ({ roomId }) => {
       navigate(`/r/${roomId}`);
     });
   };

@@ -18,15 +18,8 @@ export default function Room() {
   const navigate = useNavigate();
 
   // Use the room hook instead of managing state locally
-  const {
-    roomState,
-    error,
-    isLoading,
-    revealed,
-    clearVotes,
-    joinRoom,
-    retryJoin,
-  } = useRoom();
+  const { roomState, error, isLoading, revealed, clearVotes, joinRoom } =
+    useRoom();
 
   // Join room when account and roomId are available
   useEffect(() => {
@@ -37,13 +30,6 @@ export default function Room() {
     // Return cleanup function
     return cleanup;
   }, [roomId, account, joinRoom]);
-
-  // Helper functions
-  const handleRetryJoin = () => {
-    if (roomId && account) {
-      retryJoin(roomId, account);
-    }
-  };
 
   // Check if user is owner for the clear votes button
   const isOwner = roomState?.ownerId === account?.id;
@@ -60,13 +46,6 @@ export default function Room() {
         <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6">
           <div className="text-red-600 text-lg font-medium">{error}</div>
           <div className="space-y-4">
-            <button
-              type="button"
-              onClick={handleRetryJoin}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Try Again
-            </button>
             <button
               type="button"
               onClick={() => navigate("/")}

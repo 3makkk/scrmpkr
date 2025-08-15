@@ -2,7 +2,7 @@ import {
   createContext,
   useContext,
   useReducer,
-  useEffect,
+  useRef,
   useState,
   useCallback,
 } from "react";
@@ -120,20 +120,19 @@ type RoomContextValue = {
   currentRoomId: string | null;
   joinRoom: (
     roomId: string,
-    account: { id: string; name: string },
+    account: { id: string; name: string }
   ) => () => void;
   leaveRoom: (callback?: () => void) => void;
   castVote: (value: number | "?") => void;
   revealVotes: () => void;
   clearVotes: () => void;
-  retryJoin: (roomId: string, account: { id: string; name: string }) => void;
 };
 
 const RoomContext = createContext<RoomContextValue | undefined>(undefined);
 
 export function RoomProvider({ children }: { children: React.ReactNode }) {
   const [roomData, dispatch] = useReducer(roomReducer, initialRoomState);
-  const [socket, setSocket] = useState<Socket<
+  const socketRef = useRef<Socket<
     ServerToClientEvents,
     ClientToServerEvents
   > | null>(null);
@@ -157,27 +156,33 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
 
       dispatch({ type: "RESET_ROOM" });
 
+      // Use a persistent user socket
       const s = getSocket({ name: account.name, userId: account.id });
-      setSocket(s);
+      socketRef.current = s;
 
-      const joinTimeout = setTimeout(() => {
-        console.log(`⏰ Join timeout for room ${roomId}`);
-        dispatch({ type: "TIMEOUT_ERROR" });
-      }, 10000);
+      let joinTimeout: NodeJS.Timeout | null = null;
+      const startJoin = () => {
+        console.log(`📡 Attempting to join room ${roomId}`);
+        joinTimeout = setTimeout(() => {
+          console.log(`⏰ Join timeout for room ${roomId}`);
+          dispatch({ type: "TIMEOUT_ERROR" });
+        }, 10000);
+        s.emit("room:join", { roomId }, (response) => {
+          if (joinTimeout) clearTimeout(joinTimeout);
+          console.log(`📨 Room join response for ${roomId}:`, response);
 
-      console.log(`📡 Attempting to join room ${roomId}`);
-      s.emit("room:join", { roomId }, (response) => {
-        clearTimeout(joinTimeout);
-        console.log(`📨 Room join response for ${roomId}:`, response);
+          if ("error" in response) {
+            console.error("Failed to join room:", response.error);
+            dispatch({ type: "SET_ERROR", payload: response.error });
+          } else if ("state" in response) {
+            console.log(`✅ Successfully joined room ${roomId}`);
+            dispatch({ type: "SET_ROOM_STATE", payload: response.state });
+          }
+        });
+      };
 
-        if ("error" in response) {
-          console.error("Failed to join room:", response.error);
-          dispatch({ type: "SET_ERROR", payload: response.error });
-        } else if ("state" in response) {
-          console.log(`✅ Successfully joined room ${roomId}`);
-          dispatch({ type: "SET_ROOM_STATE", payload: response.state });
-        }
-      });
+      if (s.connected) startJoin();
+      else s.once("connect", startJoin);
 
       const handleRoomState = (newState: RoomState) => {
         console.log(`📊 Room state update for ${roomId}:`, newState);
@@ -217,7 +222,8 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
 
       return () => {
         console.log(`🧹 Cleaning up room ${roomId} listeners`);
-        clearTimeout(joinTimeout);
+        if (joinTimeout) clearTimeout(joinTimeout);
+        s.off("connect", startJoin);
         s.off("room:state", handleRoomState);
         s.off("vote:progress", handleVoteProgress);
         s.off("reveal:countdown", handleRevealCountdown);
@@ -226,75 +232,47 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         s.emit("room:leave", { roomId });
       };
     },
-    [],
+    []
   );
 
   const leaveRoom = useCallback(
     (callback?: () => void) => {
-      if (socket && currentRoomId) {
-        socket.emit("room:leave", { roomId: currentRoomId }, () => {
+      const s = socketRef.current;
+      if (s && currentRoomId) {
+        s.emit("room:leave", { roomId: currentRoomId }, () => {
           if (callback) callback();
         });
       } else if (callback) {
         callback();
       }
     },
-    [socket, currentRoomId],
+    [currentRoomId]
   );
 
   const castVote = useCallback(
     (value: number | "?") => {
-      if (socket && currentRoomId) {
+      const s = socketRef.current;
+      if (s && currentRoomId) {
         dispatch({ type: "SET_SELECTED_CARD", payload: value });
-        socket.emit("vote:cast", { roomId: currentRoomId, value });
+        s.emit("vote:cast", { roomId: currentRoomId, value });
       }
     },
-    [socket, currentRoomId],
+    [currentRoomId]
   );
 
   const revealVotes = useCallback(() => {
-    if (socket && currentRoomId) {
-      socket.emit("reveal:start", { roomId: currentRoomId });
+    const s = socketRef.current;
+    if (s && currentRoomId) {
+      s.emit("reveal:start", { roomId: currentRoomId });
     }
-  }, [socket, currentRoomId]);
+  }, [currentRoomId]);
 
   const clearVotes = useCallback(() => {
-    if (socket && currentRoomId) {
-      socket.emit("vote:clear", { roomId: currentRoomId });
+    const s = socketRef.current;
+    if (s && currentRoomId) {
+      s.emit("vote:clear", { roomId: currentRoomId });
     }
-  }, [socket, currentRoomId]);
-
-  const retryJoin = useCallback(
-    (roomId: string, _account: { id: string; name: string }) => {
-      dispatch({ type: "RESET_ROOM" });
-
-      if (socket) {
-        const retryTimeout = setTimeout(() => {
-          dispatch({ type: "TIMEOUT_ERROR" });
-        }, 10000);
-
-        socket.emit("room:join", { roomId }, (response) => {
-          clearTimeout(retryTimeout);
-          if ("error" in response) {
-            dispatch({ type: "SET_ERROR", payload: response.error });
-          } else {
-            dispatch({ type: "SET_ROOM_STATE", payload: response.state });
-          }
-        });
-      }
-    },
-    [socket],
-  );
-
-  useEffect(() => {
-    return () => {
-      console.log(`🔌 RoomProvider unmounting, disconnecting socket`);
-      if (socket && currentRoomId) {
-        socket.emit("room:leave", { roomId: currentRoomId });
-        socket.disconnect();
-      }
-    };
-  }, [socket, currentRoomId]);
+  }, [currentRoomId]);
 
   const contextValue: RoomContextValue = {
     roomState,
@@ -312,7 +290,6 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     castVote,
     revealVotes,
     clearVotes,
-    retryJoin,
   };
 
   return (
