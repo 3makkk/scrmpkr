@@ -61,7 +61,7 @@ jobs:
           push: true
           platforms: linux/amd64
           build-args: |
-            VITE_API_URL=https://scrmpkr.friedemann.dev/api
+            VITE_API_URL=https://scrmpkr.friedemann.dev
             VITE_SOCKET_PATH=/api/socket.io/
           tags: |
             ghcr.io/${{ github.repository_owner }}/frontend:latest
