@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    image: scrmpkr/server:latest
+    restart: unless-stopped
+    environment:
+      PORT: "4000"
+      CORS_ORIGIN: https://scrmpkr.friedemann.dev
+    networks:
+      - default
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.scrmpkr-api.rule=Host(`scrmpkr.friedemann.dev`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.scrmpkr-api.entrypoints=websecure"
+      - "traefik.http.routers.scrmpkr-api.middlewares=scrmpkr-api-strip@docker"
+      - "traefik.http.middlewares.scrmpkr-api-strip.stripprefix.prefixes=/api"
+      - "traefik.http.services.scrmpkr-api.loadbalancer.server.port=4000"
+      - "traefik.http.routers.scrmpkr-api.tls=true"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    image: scrmpkr/frontend:latest
+    restart: unless-stopped
+    networks:
+      - default
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.scrmpkr-web.rule=Host(`scrmpkr.friedemann.dev`) && PathPrefix(`/`)"
+      - "traefik.http.routers.scrmpkr-web.entrypoints=websecure"
+      - "traefik.http.services.scrmpkr-web.loadbalancer.server.port=80"
+      - "traefik.http.routers.scrmpkr-web.tls=true"
+
+networks:
+  traefik:
+    external: true
+    name: proxy
