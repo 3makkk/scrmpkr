@@ -241,7 +241,7 @@ export class RoomManager {
         logger.info({ roomId }, "Room was deleted after timeout");
         logger.info({ totalRooms: this.rooms.size }, "Room count was updated");
       }
-    }, 30000); // 30 seconds
+    }, 30 * 60 * 1000); // 30 minutes
 
     this.roomTimeouts.set(roomId, timeout);
     logger.info({ roomId }, "Room deletion was scheduled");
