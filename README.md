@@ -2,6 +2,21 @@
 
 Lightweight internal Scrum Poker web app with a simple name-based login (stored only in your browser) and a placeholder Azure AD authentication, Socket.io realtime backend, and React frontend.
 
+## Prerequisites
+
+1. **Set up Docker Context**: Create a Docker context named `friedemann.dev` to deploy to your remote server:
+
+   ```bash
+   docker context create friedemann.dev --docker "host=ssh://user@your-server-ip"
+   ```
+
+   Replace `user@your-server-ip` with your actual SSH connection details.
+
+2. **Test the context**:
+   ```bash
+   docker --context friedemann.dev info
+   ```
+
 ## Setup
 
 Install dependencies with [pnpm](https://pnpm.io):
