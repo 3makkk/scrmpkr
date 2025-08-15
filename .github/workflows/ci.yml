@@ -90,5 +90,4 @@ jobs:
             set -euo pipefail
             cd ~/scrmpkr
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-            docker network create --driver overlay --attachable proxy || true
             docker stack deploy -c docker-stack.yml scrmpkr --with-registry-auth
