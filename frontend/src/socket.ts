@@ -11,11 +11,10 @@ export function getSocket(
 ): Socket<ServerToClientEvents, ClientToServerEvents> {
   if (!socket) {
     const apiUrl = import.meta.env.VITE_API_URL;
-    const socketPath = import.meta.env.VITE_SOCKET_PATH;
 
     const created = io(`${apiUrl}/poker`, {
       auth,
-      ...(socketPath && { path: socketPath }),
+      path: import.meta.env.VITE_SOCKET_PATH,
     }) as Socket<ServerToClientEvents, ClientToServerEvents>;
     socket = created;
   }
