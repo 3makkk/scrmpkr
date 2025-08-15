@@ -1,4 +1,4 @@
-import Fireworks from "react-canvas-confetti/dist/presets/Fireworks";
+import Fireworks from "react-canvas-confetti/dist/presets/fireworks";
 import { useRoom } from "../hooks/useRoom";
 
 export default function ConfettiOverlay() {
