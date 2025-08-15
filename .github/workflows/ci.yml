@@ -60,6 +60,9 @@ jobs:
           file: frontend/Dockerfile
           push: true
           platforms: linux/amd64
+          build-args: |
+            VITE_API_URL=https://scrmpkr.friedemann.dev/api
+            VITE_SOCKET_PATH=/api/socket.io/
           tags: |
             ghcr.io/${{ github.repository_owner }}/frontend:latest
             ghcr.io/${{ github.repository_owner }}/frontend:${{ github.sha }}
