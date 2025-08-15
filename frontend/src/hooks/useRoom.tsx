@@ -120,7 +120,7 @@ type RoomContextValue = {
   currentRoomId: string | null;
   joinRoom: (
     roomId: string,
-    account: { id: string; name: string }
+    account: { id: string; name: string },
   ) => () => void;
   leaveRoom: (callback?: () => void) => void;
   castVote: (value: number | "?") => void;
@@ -198,16 +198,12 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       };
       const handleRevealComplete = ({
         revealedVotes,
-        unanimousValue,
       }: {
         revealedVotes: RevealedVote[];
         unanimousValue?: number;
       }) => {
         console.log(`🎉 Reveal complete for ${roomId}`);
         dispatch({ type: "SET_REVEALED", payload: revealedVotes });
-        if (unanimousValue !== undefined) {
-          import("canvas-confetti").then((m) => m.default());
-        }
       };
       const handleVotesCleared = () => {
         console.log(`🧹 Votes cleared for ${roomId}`);
@@ -232,7 +228,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         s.emit("room:leave", { roomId });
       };
     },
-    []
+    [],
   );
 
   const leaveRoom = useCallback(
@@ -246,7 +242,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         callback();
       }
     },
-    [currentRoomId]
+    [currentRoomId],
   );
 
   const castVote = useCallback(
@@ -257,7 +253,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         s.emit("vote:cast", { roomId: currentRoomId, value });
       }
     },
-    [currentRoomId]
+    [currentRoomId],
   );
 
   const revealVotes = useCallback(() => {

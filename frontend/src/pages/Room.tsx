@@ -11,6 +11,7 @@ import CountdownTimer from "../components/CountdownTimer";
 import VotingResults from "../components/VotingResults";
 import VotingDeck from "../components/VotingDeck";
 import RoomControls from "../components/RoomControls";
+import ConfettiOverlay from "../components/ConfettiOverlay";
 
 export default function Room() {
   const { roomId } = useParams();
@@ -73,6 +74,7 @@ export default function Room() {
 
   return (
     <PageLayout className="p-4">
+      <ConfettiOverlay />
       <RoomHeader />
 
       <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
