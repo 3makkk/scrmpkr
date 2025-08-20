@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   server:
-    image: ghcr.io/3makkk/server:latest
+    image: ghcr.io/3makkk/scrmpkr-server:${IMAGE_TAG}
     environment:
       PORT: "4000"
       CORS_ORIGIN: https://scrmpkr.friedemann.dev
@@ -19,7 +19,7 @@ services:
         monitor: 5s
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=proxy"
+        - "traefik.swarm.network=proxy"
         - "traefik.http.routers.scrmpkr-api.rule=Host(`scrmpkr.friedemann.dev`) && PathPrefix(`/api`)"
         - "traefik.http.routers.scrmpkr-api.entrypoints=websecure"
         - "traefik.http.routers.scrmpkr-api.middlewares=scrmpkr-api-strip"
@@ -29,7 +29,7 @@ services:
         - "traefik.http.routers.scrmpkr-api.tls.certresolver=le"
 
   frontend:
-    image: ghcr.io/3makkk/frontend:latest
+    image: ghcr.io/3makkk/scrmpkr-frontend:${IMAGE_TAG:-latest}
     networks:
       - proxy
     deploy:
@@ -43,7 +43,7 @@ services:
         monitor: 5s
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=proxy"
+        - "traefik.swarm.network=proxy"
         - "traefik.http.routers.scrmpkr-web.rule=Host(`scrmpkr.friedemann.dev`) && PathPrefix(`/`)"
         - "traefik.http.routers.scrmpkr-web.entrypoints=websecure"
         - "traefik.http.services.scrmpkr-web.loadbalancer.server.port=80"

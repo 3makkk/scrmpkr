@@ -51,8 +51,7 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: |
-            ghcr.io/${{ github.repository_owner }}/server:latest
-            ghcr.io/${{ github.repository_owner }}/server:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/scrmpkr-server:${{ github.sha }}
       - name: Build + Push frontend
         uses: docker/build-push-action@v5
         with:
@@ -64,8 +63,7 @@ jobs:
             VITE_API_URL=https://scrmpkr.friedemann.dev
             VITE_SOCKET_PATH=/api/socket.io/
           tags: |
-            ghcr.io/${{ github.repository_owner }}/frontend:latest
-            ghcr.io/${{ github.repository_owner }}/frontend:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/scrmpkr-frontend:${{ github.sha }}
 
   deploy:
     name: Deploy Stack (Swarm)
@@ -88,4 +86,4 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker --context friedemann.dev login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Deploy stack using Docker context
         run: |
-          docker --context friedemann.dev stack deploy -c docker-stack.yml scrmpkr --with-registry-auth
+          IMAGE_TAG=${{ github.sha }} docker --context friedemann.dev stack deploy -c docker-stack.yml scrmpkr --with-registry-auth

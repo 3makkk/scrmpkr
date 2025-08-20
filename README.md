@@ -74,3 +74,10 @@ pnpm test
 ```
 
 Note: Jest is currently configured for JavaScript tests. To run server tests against TypeScript sources, either build first and point tests at compiled output, or add ts-jest to transpile on the fly.
+
+### Deploy
+
+- Build+Push: `GIT_SHA=$(git rev-parse --short=40 HEAD) && docker buildx build --platform linux/amd64 -t ghcr.io/3makkk/scrmpkr-server:${GIT_SHA} -f server/Dockerfile . --push && docker buildx build --platform linux/amd64 -t ghcr.io/3makkk/scrmpkr-frontend:${GIT_SHA} -f frontend/Dockerfile . --push`
+- Deploy: `export IMAGE_TAG=${GIT_SHA} && docker stack deploy -c docker-stack.yml scrmpkr`
+
+The frontend listens on port `80` and the API on `4000` internally. Traefik routes HTTPS traffic for `scrmpkr.friedemann.dev` to the services via the external `proxy` network.
