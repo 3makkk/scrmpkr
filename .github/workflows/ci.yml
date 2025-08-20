@@ -33,6 +33,8 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
+      - name: Set SHORT_SHA
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -51,7 +53,7 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: |
-            ghcr.io/${{ github.repository_owner }}/scrmpkr-server:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/scrmpkr-server:${{ env.SHORT_SHA }}
       - name: Build + Push frontend
         uses: docker/build-push-action@v5
         with:
@@ -63,7 +65,7 @@ jobs:
             VITE_API_URL=https://scrmpkr.friedemann.dev
             VITE_SOCKET_PATH=/api/socket.io/
           tags: |
-            ghcr.io/${{ github.repository_owner }}/scrmpkr-frontend:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/scrmpkr-frontend:${{ env.SHORT_SHA }}
 
   deploy:
     name: Deploy Stack (Swarm)
@@ -72,6 +74,8 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
     steps:
       - uses: actions/checkout@v4
+      - name: Set SHORT_SHA
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
@@ -86,4 +90,4 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker --context friedemann.dev login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Deploy stack using Docker context
         run: |
-          IMAGE_TAG=${{ github.sha }} docker --context friedemann.dev stack deploy -c docker-stack.yml scrmpkr --with-registry-auth
+          IMAGE_TAG=${SHORT_SHA} docker --context friedemann.dev stack deploy -c docker-stack.yml scrmpkr --with-registry-auth
