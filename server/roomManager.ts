@@ -28,8 +28,6 @@ type Room = {
   name?: string;
   participants: Map<string, Participant>;
   status: "voting" | "revealing";
-  reveals: number;
-  lastRevealAt: number;
 };
 
 export type User = {
@@ -65,12 +63,10 @@ export type PokerNamespace = {
 export class RoomManager {
   constructor() {
     this.rooms = new Map<string, Room>();
-    this.roomTimeouts = new Map<string, NodeJS.Timeout>(); // Track deletion timeouts for empty rooms
     logger.info("RoomManager was initialized");
   }
 
   private rooms: Map<string, Room>;
-  private roomTimeouts: Map<string, NodeJS.Timeout>;
 
   createRoom(ownerId: string, name?: string): Room {
     const id = randomUUID();
@@ -80,8 +76,6 @@ export class RoomManager {
       name,
       participants: new Map<string, Participant>(),
       status: "voting",
-      reveals: 0,
-      lastRevealAt: Date.now(),
     };
     this.rooms.set(id, room);
     room.participants.set(ownerId, {
@@ -94,7 +88,6 @@ export class RoomManager {
       { roomId: id, ownerId, ownerName: name || "Owner" },
       "Room was created",
     );
-    logger.info({ totalRooms: this.rooms.size }, "Room count was updated");
 
     return room;
   }
@@ -107,13 +100,6 @@ export class RoomManager {
         "Room join was rejected",
       );
       throw new Error("Room not found");
-    }
-
-    // Cancel any pending deletion timeout for this room
-    if (this.roomTimeouts.has(id)) {
-      clearTimeout(this.roomTimeouts.get(id));
-      this.roomTimeouts.delete(id);
-      logger.info({ roomId: id }, "Room deletion timeout was cancelled");
     }
 
     const wasAlreadyInRoom = room.participants.has(user.id);
@@ -231,37 +217,6 @@ export class RoomManager {
     return hasVotes;
   }
 
-  scheduleRoomDeletion(roomId: string): void {
-    // Schedule room deletion after 30 seconds of being empty
-    const timeout = setTimeout(
-      () => {
-        const room = this.rooms.get(roomId);
-        if (room && room.participants.size === 0) {
-          this.rooms.delete(roomId);
-          this.roomTimeouts.delete(roomId);
-          logger.info({ roomId }, "Room was deleted after timeout");
-          logger.info(
-            { totalRooms: this.rooms.size },
-            "Room count was updated",
-          );
-        }
-      },
-      30 * 60 * 1000,
-    ); // 30 minutes
-
-    this.roomTimeouts.set(roomId, timeout);
-    logger.info({ roomId }, "Room deletion was scheduled");
-  }
-
-  cleanup(): void {
-    // Clear all pending timeouts
-    for (const timeout of this.roomTimeouts.values()) {
-      clearTimeout(timeout);
-    }
-    this.roomTimeouts.clear();
-    logger.info("Room deletion timeouts were cleared");
-  }
-
   getState(id: string): RoomState | null {
     const room = this.rooms.get(id);
     if (!room) return null;
@@ -322,8 +277,6 @@ export class RoomManager {
       if (remaining <= 0) {
         clearInterval(interval);
         room.status = "voting";
-        room.reveals += 1;
-        room.lastRevealAt = Date.now();
         const revealed = Array.from(room.participants.values()).map((p) => ({
           id: p.id,
           value: p.value,
@@ -338,7 +291,6 @@ export class RoomManager {
         logger.info(
           {
             roomId: id,
-            totalReveals: room.reveals,
             votesRevealed: revealed.length,
             unanimousValue: unanimousValue || "none",
           },
@@ -355,7 +307,7 @@ export class RoomManager {
   leaveRoom(
     roomId: string,
     userId: string,
-  ): false | { roomDeleted: boolean; wasInRoom: boolean; scheduled: boolean } {
+  ): false | { roomDeleted: boolean; wasInRoom: boolean } {
     const room = this.rooms.get(roomId);
     if (!room) {
       logger.warn(
@@ -380,17 +332,17 @@ export class RoomManager {
       );
     }
 
-    // If room is empty, schedule it for deletion instead of immediate deletion
     if (room.participants.size === 0) {
-      this.scheduleRoomDeletion(roomId);
-      return { roomDeleted: false, wasInRoom, scheduled: true };
+      this.rooms.delete(roomId);
+      logger.info({ roomId }, "Room was deleted");
+      return { roomDeleted: true, wasInRoom };
     }
 
     logger.info(
       { roomId, participants: room.participants.size },
       "Room participant count was updated",
     );
-    return { roomDeleted: false, wasInRoom, scheduled: false };
+    return { roomDeleted: false, wasInRoom };
   }
 
   leaveAll(userId: string): string[] {
@@ -413,9 +365,9 @@ export class RoomManager {
           "User left room",
         );
 
-        // If room is empty, schedule it for deletion instead of immediate deletion
         if (room.participants.size === 0) {
-          this.scheduleRoomDeletion(roomId);
+          this.rooms.delete(roomId);
+          logger.info({ roomId }, "Room was deleted");
         } else {
           roomsToUpdate.push(roomId);
           logger.info(
@@ -426,10 +378,7 @@ export class RoomManager {
       }
     }
 
-    logger.info(
-      { userId, roomsLeft, totalRooms: this.rooms.size },
-      "User leave summary was recorded",
-    );
+    logger.info({ userId, roomsLeft }, "User leave summary was recorded");
     return roomsToUpdate; // Return room IDs that need state updates
   }
 }

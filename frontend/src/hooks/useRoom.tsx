@@ -225,7 +225,6 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         s.off("reveal:countdown", handleRevealCountdown);
         s.off("reveal:complete", handleRevealComplete);
         s.off("votes:cleared", handleVotesCleared);
-        s.emit("room:leave", { roomId });
       };
     },
     [],
@@ -238,6 +237,8 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         s.emit("room:leave", { roomId: currentRoomId }, () => {
           if (callback) callback();
         });
+        setCurrentRoomId(null);
+        dispatch({ type: "RESET_ROOM" });
       } else if (callback) {
         callback();
       }
