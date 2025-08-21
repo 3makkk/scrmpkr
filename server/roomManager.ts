@@ -51,7 +51,7 @@ export type PokerNamespace = {
       (ev: "reveal:countdown", payload: { remaining: number }): boolean;
       (
         ev: "reveal:complete",
-        payload: { revealedVotes: RevealedVote[]; unanimousValue?: number }
+        payload: { revealedVotes: RevealedVote[]; unanimousValue?: number },
       ): boolean;
       (ev: "room:state", state: RoomState): boolean;
       (ev: "vote:progress", progress: VoteProgress): boolean;
@@ -86,7 +86,7 @@ export class RoomManager {
 
     logger.info(
       { roomId: id, ownerId, ownerName: name || "Owner" },
-      "Room was created"
+      "Room was created",
     );
 
     return room;
@@ -97,7 +97,7 @@ export class RoomManager {
     if (!room) {
       logger.warn(
         { roomId: id, userId: user.id, userName: user.name },
-        "Room join was rejected"
+        "Room join was rejected",
       );
       throw new Error("Room not found");
     }
@@ -116,11 +116,11 @@ export class RoomManager {
         userName: user.name,
         rejoined: wasAlreadyInRoom,
       },
-      "User joined room"
+      "User joined room",
     );
     logger.info(
       { roomId: id, participants: room.participants.size },
-      "Room participant count was updated"
+      "Room participant count was updated",
     );
 
     return room;
@@ -131,14 +131,14 @@ export class RoomManager {
     if (!room) {
       logger.warn(
         { roomId: id, userId, value },
-        "Vote was rejected, room not found"
+        "Vote was rejected, room not found",
       );
       return;
     }
     if (!FIB_DECK.includes(value)) {
       logger.warn(
         { roomId: id, userId, value },
-        "Vote was rejected, invalid value"
+        "Vote was rejected, invalid value",
       );
       return;
     }
@@ -157,11 +157,11 @@ export class RoomManager {
           value,
           previousVote,
         },
-        "User cast vote"
+        "User cast vote",
       );
 
       const votedCount = Array.from(room.participants.values()).filter(
-        (p) => p.hasVoted
+        (p) => p.hasVoted,
       ).length;
       logger.info(
         {
@@ -169,7 +169,7 @@ export class RoomManager {
           votedCount,
           totalParticipants: room.participants.size,
         },
-        "Vote progress was recorded"
+        "Vote progress was recorded",
       );
     } else {
       logger.warn({ roomId: id, userId }, "Vote was rejected, user not found");
@@ -184,7 +184,7 @@ export class RoomManager {
     }
 
     const votedCount = Array.from(room.participants.values()).filter(
-      (p) => p.hasVoted
+      (p) => p.hasVoted,
     ).length;
     room.status = "voting";
     for (const p of room.participants.values()) {
@@ -201,7 +201,7 @@ export class RoomManager {
     if (room && !isOwner) {
       logger.warn(
         { roomId: id, userId, ownerId: room.ownerId },
-        "Access was denied, user not owner"
+        "Access was denied, user not owner",
       );
     }
     return isOwner;
@@ -211,7 +211,7 @@ export class RoomManager {
     const room = this.rooms.get(id);
     if (!room) return false;
     const hasVotes = Array.from(room.participants.values()).some(
-      (p) => p.hasVoted
+      (p) => p.hasVoted,
     );
     logger.info({ roomId: id, hasVotes }, "Room votes were checked");
     return hasVotes;
@@ -249,7 +249,7 @@ export class RoomManager {
 
     // Check if anyone has voted before allowing reveal
     const hasAnyVotes = Array.from(room.participants.values()).some(
-      (p) => p.hasVoted
+      (p) => p.hasVoted,
     );
     if (!hasAnyVotes) {
       logger.warn({ roomId: id }, "Reveal was blocked, no votes");
@@ -257,7 +257,7 @@ export class RoomManager {
     }
 
     const votedCount = Array.from(room.participants.values()).filter(
-      (p) => p.hasVoted
+      (p) => p.hasVoted,
     ).length;
     logger.info(
       {
@@ -265,7 +265,7 @@ export class RoomManager {
         votedCount,
         totalParticipants: room.participants.size,
       },
-      "Reveal was started"
+      "Reveal was started",
     );
 
     room.status = "revealing";
@@ -294,7 +294,7 @@ export class RoomManager {
             votesRevealed: revealed.length,
             unanimousValue: unanimousValue || "none",
           },
-          "Reveal was completed"
+          "Reveal was completed",
         );
 
         namespace
@@ -306,13 +306,13 @@ export class RoomManager {
 
   leaveRoom(
     roomId: string,
-    userId: string
+    userId: string,
   ): false | { roomDeleted: boolean; wasInRoom: boolean } {
     const room = this.rooms.get(roomId);
     if (!room) {
       logger.warn(
         { roomId, userId },
-        "Leave room was rejected, room not found"
+        "Leave room was rejected, room not found",
       );
       return false;
     }
@@ -328,7 +328,7 @@ export class RoomManager {
           userId,
           userName: participant?.name || "unknown",
         },
-        "User left room"
+        "User left room",
       );
     }
 
@@ -340,7 +340,7 @@ export class RoomManager {
 
     logger.info(
       { roomId, participants: room.participants.size },
-      "Room participant count was updated"
+      "Room participant count was updated",
     );
     return { roomDeleted: false, wasInRoom };
   }
@@ -362,7 +362,7 @@ export class RoomManager {
             userId,
             userName: participant?.name || "unknown",
           },
-          "User left room"
+          "User left room",
         );
 
         if (room.participants.size === 0) {
@@ -372,7 +372,7 @@ export class RoomManager {
           roomsToUpdate.push(roomId);
           logger.info(
             { roomId, participants: room.participants.size },
-            "Room participant count was updated"
+            "Room participant count was updated",
           );
         }
       }
