@@ -21,6 +21,10 @@ export function getSocket(
       autoConnect: true,
       reconnection: true,
     }) as Socket<ServerToClientEvents, ClientToServerEvents>;
+
+    window.addEventListener("beforeunload", () => {
+      socket?.disconnect();
+    });
   } else if (socket.disconnected) {
     socket.connect();
   }
