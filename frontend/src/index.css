@@ -38,19 +38,56 @@
   }
 
   .poker-card {
-    @apply bg-gradient-to-br from-white to-gray-50 text-gray-700 font-medium text-lg
-           border border-gray-200 rounded-lg px-4 py-6 shadow-sm cursor-pointer
-           transition-all duration-200 hover:shadow-md hover:border-gray-300
-           hover:from-slate-50 hover:to-gray-100
-           focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2
-           min-h-[80px] flex items-center justify-center;
+    @apply relative bg-gradient-to-br from-slate-800 to-slate-900 text-slate-200 font-medium overflow-hidden
+           border border-slate-700 rounded-xl shadow-sm cursor-pointer
+           transition-transform duration-200 ease-out hover:shadow-md hover:border-slate-600
+           focus:outline-none focus:ring-1 focus:ring-slate-400 focus:ring-offset-0
+           w-full flex items-center justify-center select-none
+           will-change-transform z-0;
+    transform-origin: center;
+    aspect-ratio: 5 / 7; /* maintain 5:7 ratio; height derives from width */
+  }
+
+  .poker-card:hover {
+    transform: translateY(-8px) rotate(-2deg);
+    z-index: 10;
   }
 
   .poker-card.selected {
-    @apply from-slate-100 to-slate-200 text-slate-800 border-slate-400 shadow-md
-           ring-2 ring-slate-300 ring-offset-2 ring-offset-transparent;
+    @apply shadow-lg scale-[1.03];
+    transform: translateY(-14px) rotate(-4deg);
+    z-index: 20;
+  }
+
+  .poker-card.disabled {
+    @apply opacity-60 cursor-not-allowed;
+  }
+
+  /* subtle ornament pattern overlay */
+  .poker-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,.03) 0 2px, transparent 3px),
+      radial-gradient(circle at 80% 80%, rgba(255,255,255,.025) 0 2px, transparent 3px);
+    background-size: 48px 48px, 72px 72px;
+    opacity: .35;
+    pointer-events: none;
+  }
+
+  /* inner frame */
+  .poker-card .inner-frame {
+    @apply absolute inset-2 rounded-lg border border-slate-700/70;
+  }
+
+  /* ornamental glyphs */
+  .poker-card .ornament {
+    @apply absolute text-xs md:text-sm opacity-30 select-none pointer-events-none text-slate-300;
   }
 }
+
+/* removed stack styles; using grid to prevent overflow */
 
 @layer utilities {
   .animate-fade-in {
