@@ -78,6 +78,6 @@ Note: Jest is currently configured for JavaScript tests. To run server tests aga
 ### Deploy
 
 - Build+Push: `SHORT_SHA=$(git rev-parse --short HEAD) && docker buildx build --platform linux/amd64 -t ghcr.io/3makkk/scrmpkr-server:${SHORT_SHA} -f server/Dockerfile . --push && docker buildx build --platform linux/amd64 -t ghcr.io/3makkk/scrmpkr-frontend:${SHORT_SHA} -f frontend/Dockerfile . --push`
-- Deploy: `export IMAGE_TAG=${SHORT_SHA} && docker stack deploy -c docker-stack.yml scrmpkr`
+- Deploy: `export IMAGE_TAG=${SHORT_SHA} && docker --context friedemann.dev stack deploy -c docker-stack.yml scrmpkr`
 
 The frontend listens on port `80` and the API on `4000` internally. Traefik routes HTTPS traffic for `scrmpkr.friedemann.dev` to the services via the external `proxy` network.

@@ -90,8 +90,6 @@ jobs:
         run: |
           echo "Creating Docker context..."
           docker context create friedemann.dev --docker "host=ssh://${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}"
-          echo "Testing Docker context..."
-          docker --context friedemann.dev info
       - name: Log in to GHCR on remote Docker
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker --context friedemann.dev login ghcr.io -u ${{ github.actor }} --password-stdin
