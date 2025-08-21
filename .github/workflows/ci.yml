@@ -82,9 +82,16 @@ jobs:
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+      - name: Test SSH connection
+        run: |
+          echo "Testing SSH connection to ${{ secrets.DEPLOY_HOST }}..."
+          ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "echo 'SSH connection successful' && docker --version"
       - name: Create Docker context
         run: |
+          echo "Creating Docker context..."
           docker context create friedemann.dev --docker "host=ssh://${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}"
+          echo "Testing Docker context..."
+          docker --context friedemann.dev info
       - name: Log in to GHCR on remote Docker
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker --context friedemann.dev login ghcr.io -u ${{ github.actor }} --password-stdin
