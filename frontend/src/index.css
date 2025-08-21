@@ -69,10 +69,20 @@
     position: absolute;
     inset: 0;
     background-image:
-      radial-gradient(circle at 20% 20%, rgba(255,255,255,.03) 0 2px, transparent 3px),
-      radial-gradient(circle at 80% 80%, rgba(255,255,255,.025) 0 2px, transparent 3px);
-    background-size: 48px 48px, 72px 72px;
-    opacity: .35;
+      radial-gradient(
+        circle at 20% 20%,
+        rgba(255, 255, 255, 0.03) 0 2px,
+        transparent 3px
+      ),
+      radial-gradient(
+        circle at 80% 80%,
+        rgba(255, 255, 255, 0.025) 0 2px,
+        transparent 3px
+      );
+    background-size:
+      48px 48px,
+      72px 72px;
+    opacity: 0.35;
     pointer-events: none;
   }
 

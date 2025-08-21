@@ -41,10 +41,18 @@ export default function PokerCard({
       {/* ornaments */}
       <div className={`ornament top-2 right-2 ${ornament}`}>❖</div>
       <div className={`ornament bottom-2 left-2 ${ornament} rotate-180`}>❖</div>
-      <div className={`ornament top-1/2 left-3 -translate-y-1/2 ${ornament}`}>✤</div>
-      <div className={`ornament top-1/2 right-3 -translate-y-1/2 ${ornament} rotate-180`}>✤</div>
+      <div className={`ornament top-1/2 left-3 -translate-y-1/2 ${ornament}`}>
+        ✤
+      </div>
+      <div
+        className={`ornament top-1/2 right-3 -translate-y-1/2 ${ornament} rotate-180`}
+      >
+        ✤
+      </div>
       {/* small top-left */}
-      <div className={`absolute top-2 left-2 text-xs md:text-sm font-semibold text-slate-200`}>
+      <div
+        className={`absolute top-2 left-2 text-xs md:text-sm font-semibold text-slate-200`}
+      >
         {value}
       </div>
       {/* small bottom-right mirrored */}
@@ -54,7 +62,11 @@ export default function PokerCard({
         {value}
       </div>
       {/* big center translucent */}
-      <div className={`text-5xl md:text-6xl font-extrabold ${faint} opacity-15`}>{value}</div>
+      <div
+        className={`text-5xl md:text-6xl font-extrabold ${faint} opacity-15`}
+      >
+        {value}
+      </div>
     </button>
   );
 }

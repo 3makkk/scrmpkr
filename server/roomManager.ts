@@ -233,15 +233,21 @@ export class RoomManager {
 
   scheduleRoomDeletion(roomId: string): void {
     // Schedule room deletion after 30 seconds of being empty
-    const timeout = setTimeout(() => {
-      const room = this.rooms.get(roomId);
-      if (room && room.participants.size === 0) {
-        this.rooms.delete(roomId);
-        this.roomTimeouts.delete(roomId);
-        logger.info({ roomId }, "Room was deleted after timeout");
-        logger.info({ totalRooms: this.rooms.size }, "Room count was updated");
-      }
-    }, 30 * 60 * 1000); // 30 minutes
+    const timeout = setTimeout(
+      () => {
+        const room = this.rooms.get(roomId);
+        if (room && room.participants.size === 0) {
+          this.rooms.delete(roomId);
+          this.roomTimeouts.delete(roomId);
+          logger.info({ roomId }, "Room was deleted after timeout");
+          logger.info(
+            { totalRooms: this.rooms.size },
+            "Room count was updated",
+          );
+        }
+      },
+      30 * 60 * 1000,
+    ); // 30 minutes
 
     this.roomTimeouts.set(roomId, timeout);
     logger.info({ roomId }, "Room deletion was scheduled");
