@@ -89,6 +89,14 @@ namespace.use(async (socket, next) => {
 });
 
 namespace.on("connection", (socket) => {
+  const transport = socket.conn.transport.name; // in most cases, "polling"
+  logger.info(`Socket connected using transport: ${transport}`);
+
+  socket.conn.on("upgrade", () => {
+    const upgradedTransport = socket.conn.transport.name; // in most cases, "websocket"
+    logger.info(`Socket upgraded to transport: ${upgradedTransport}`);
+  });
+
   logger.info(
     {
       userId: socket.data.user.id,

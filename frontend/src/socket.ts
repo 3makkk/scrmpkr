@@ -20,6 +20,7 @@ export function getSocket(
       path,
       autoConnect: true,
       reconnection: true,
+      withCredentials: true,
     }) as Socket<ServerToClientEvents, ClientToServerEvents>;
 
     window.addEventListener("beforeunload", () => {
@@ -28,5 +29,6 @@ export function getSocket(
   } else if (socket.disconnected) {
     socket.connect();
   }
+
   return socket;
 }
