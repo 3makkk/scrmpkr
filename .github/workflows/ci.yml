@@ -85,7 +85,7 @@ jobs:
       - name: Test SSH connection
         run: |
           echo "Testing SSH connection to ${{ secrets.DEPLOY_HOST }}..."
-          ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "echo 'SSH connection successful' && docker --version"
+          ssh -o HostKeyAlgorithms=+ssh-ed25519 ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "echo 'SSH connection successful' && docker --version"
       - name: Create Docker context
         run: |
           echo "Creating Docker context..."
