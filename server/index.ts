@@ -103,7 +103,6 @@ namespace.on("connection", (socket) => {
       {
         userId: socket.data.user.id,
         userName: socket.data.user.name,
-        name,
       },
       "Room creation was requested",
     );
