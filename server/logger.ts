@@ -1,13 +1,25 @@
 import pino from "pino";
 
-const transport =
+const options: pino.LoggerOptions =
   process.env.NODE_ENV === "production"
-    ? undefined
+    ? {
+        formatters: {
+          level: (label: string) => {
+            return { level: label };
+          },
+        },
+        redact: {
+          paths: ["userName"],
+          remove: true,
+        },
+      }
     : {
-        target: "pino-pretty",
-        options: { colorize: true },
+        transport: {
+          target: "pino-pretty",
+          options: { colorize: true },
+        },
       };
 
-const logger = pino({ level: process.env.LOG_LEVEL || "info", transport });
+const logger = pino({ level: process.env.LOG_LEVEL || "info", ...options });
 
 export default logger;
