@@ -19,6 +19,7 @@ FROM base AS deps
 RUN pnpm install -r --frozen-lockfile
 
 FROM deps AS build
+ENV NODE_ENV='production'
 COPY . .
 RUN pnpm --filter frontend build
 

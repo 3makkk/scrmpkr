@@ -1,5 +1,6 @@
 import { useRoom } from "../hooks/useRoom";
 import Card from "./Card";
+import { useVotingStats } from "../hooks/useVotingStats";
 
 export default function VotingResults() {
   const { revealed, roomState } = useRoom();
@@ -7,30 +8,8 @@ export default function VotingResults() {
   if (!revealed || !roomState) return null;
 
   const { participants } = roomState;
-
-  const numericVotes = revealed.filter((r) => typeof r.value === "number") as {
-    id: string;
-    value: number;
-  }[];
-  const average =
-    numericVotes.length > 0
-      ? (
-          numericVotes.reduce((sum, r) => sum + r.value, 0) /
-          numericVotes.length
-        ).toFixed(1)
-      : "N/A";
-
-  const mostCommon =
-    revealed.length > 0
-      ? revealed.reduce((a, b) =>
-          revealed.filter((v) => v.value === a.value).length >=
-          revealed.filter((v) => v.value === b.value).length
-            ? a
-            : b,
-        ).value
-      : "N/A";
-
-  const hasConsensus = new Set(revealed.map((r) => r.value)).size === 1;
+  const { average, hasConsensus, showMostCommon, mostCommon } =
+    useVotingStats(revealed);
 
   return (
     <Card className="animate-fade-in">
@@ -58,10 +37,14 @@ export default function VotingResults() {
             <div className="text-slate-300 text-sm font-light">Average</div>
             <div className="text-lg font-medium text-white">{average}</div>
           </div>
-          <div>
-            <div className="text-slate-300 text-sm font-light">Most Common</div>
-            <div className="text-lg font-medium text-white">{mostCommon}</div>
-          </div>
+          {showMostCommon && (
+            <div>
+              <div className="text-slate-300 text-sm font-light">
+                Most Common
+              </div>
+              <div className="text-lg font-medium text-white">{mostCommon}</div>
+            </div>
+          )}
           <div>
             <div className="text-slate-300 text-sm font-light">Consensus</div>
             <div className="text-lg font-medium text-white">
