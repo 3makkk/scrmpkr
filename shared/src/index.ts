@@ -6,7 +6,7 @@ export type RoomState = {
   id: string;
   ownerId: string;
   participants: Participant[];
-  status: "voting" | "revealing";
+  status: "voting";
 };
 
 export type VoteProgress = Record<string, boolean>;
@@ -15,7 +15,6 @@ export type RevealedVote = { id: string; value?: number | "?" };
 export interface ServerToClientEvents {
   "room:state": (state: RoomState) => void;
   "vote:progress": (progress: VoteProgress) => void;
-  "reveal:countdown": (payload: { remaining: number }) => void;
   "reveal:complete": (payload: {
     revealedVotes: RevealedVote[];
     unanimousValue?: number;

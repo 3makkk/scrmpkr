@@ -1,6 +1,5 @@
 export { default as Card } from "./Card";
 export { default as ConfettiOverlay } from "./ConfettiOverlay";
-export { default as CountdownTimer } from "./CountdownTimer";
 export { default as LoadingSpinner } from "./LoadingSpinner";
 export { default as LoginForm } from "./LoginForm";
 export { default as PageLayout } from "./PageLayout";
