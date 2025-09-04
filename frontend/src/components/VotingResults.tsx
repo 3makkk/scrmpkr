@@ -5,11 +5,10 @@ import { useVotingStats } from "../hooks/useVotingStats";
 export default function VotingResults() {
   const { revealed, roomState } = useRoom();
 
-  if (!revealed || !roomState) return null;
-
-  const { participants } = roomState;
   const { average, hasConsensus, showMostCommon, mostCommon } =
     useVotingStats(revealed);
+
+  if (!revealed || !roomState) return null;
 
   return (
     <Card className="animate-fade-in">
@@ -23,7 +22,7 @@ export default function VotingResults() {
             className="bg-slate-500/20 rounded-lg p-4 text-center transition-all duration-300 hover:bg-slate-500/30"
           >
             <div className="text-white/80 text-sm mb-2">
-              {participants.find((p) => p.id === r.id)?.name || r.id}
+              {roomState.participants.find((p) => p.id === r.id)?.name || r.id}
             </div>
             <div className="text-3xl font-bold text-white">{r.value}</div>
           </div>
