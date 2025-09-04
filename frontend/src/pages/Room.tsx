@@ -7,7 +7,6 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import PageLayout from "../components/PageLayout";
 import RoomHeader from "../components/RoomHeader";
 import ParticipantList from "../components/ParticipantList";
-import CountdownTimer from "../components/CountdownTimer";
 import VotingResults from "../components/VotingResults";
 import VotingDeck from "../components/VotingDeck";
 import RoomControls from "../components/RoomControls";
@@ -85,9 +84,6 @@ export default function Room() {
 
         {/* Main Voting Area */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Countdown Timer */}
-          <CountdownTimer />
-
           {/* Voting Results */}
           <VotingResults />
 

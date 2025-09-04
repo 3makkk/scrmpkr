@@ -21,7 +21,6 @@ type RoomAction =
   | { type: "SET_ROOM_STATE"; payload: RoomState }
   | { type: "SET_ERROR"; payload: string }
   | { type: "SET_PROGRESS"; payload: Progress }
-  | { type: "SET_COUNTDOWN"; payload: number | null }
   | { type: "SET_REVEALED"; payload: RevealedVote[] | null }
   | { type: "SET_SELECTED_CARD"; payload: number | "?" | null }
   | { type: "CLEAR_VOTES" }
@@ -31,7 +30,6 @@ type RoomData = {
   roomState: RoomState | null;
   error: string | null;
   progress: Progress;
-  countdown: number | null;
   revealed: RevealedVote[] | null;
   selectedCard: number | "?" | null;
 };
@@ -43,7 +41,6 @@ const roomReducer = (state: RoomData, action: RoomAction): RoomData => {
         roomState: null,
         error: null,
         progress: {},
-        countdown: null,
         revealed: null,
         selectedCard: null,
       };
@@ -64,11 +61,6 @@ const roomReducer = (state: RoomData, action: RoomAction): RoomData => {
         ...state,
         progress: action.payload,
       };
-    case "SET_COUNTDOWN":
-      return {
-        ...state,
-        countdown: action.payload,
-      };
     case "SET_REVEALED":
       return {
         ...state,
@@ -83,7 +75,6 @@ const roomReducer = (state: RoomData, action: RoomAction): RoomData => {
       return {
         ...state,
         revealed: null,
-        countdown: null,
         selectedCard: null,
         progress: {},
       };
@@ -102,7 +93,6 @@ const initialRoomState: RoomData = {
   roomState: null,
   error: null,
   progress: {},
-  countdown: null,
   revealed: null,
   selectedCard: null,
 };
@@ -111,7 +101,6 @@ type RoomContextValue = {
   roomState: RoomState | null;
   error: string | null;
   progress: Progress;
-  countdown: number | null;
   revealed: RevealedVote[] | null;
   selectedCard: number | "?" | null;
   isLoading: boolean;
@@ -138,8 +127,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   > | null>(null);
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
 
-  const { roomState, error, progress, countdown, revealed, selectedCard } =
-    roomData;
+  const { roomState, error, progress, revealed, selectedCard } = roomData;
 
   const isLoading = !roomState && !error;
   const votedCount = Object.values(progress).filter(Boolean).length;
@@ -192,10 +180,6 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         console.log(`🗳️  Vote progress for ${roomId}:`, progress);
         dispatch({ type: "SET_PROGRESS", payload: progress });
       };
-      const handleRevealCountdown = ({ remaining }: { remaining: number }) => {
-        console.log(`⏰ Reveal countdown: ${remaining}`);
-        dispatch({ type: "SET_COUNTDOWN", payload: remaining });
-      };
       const handleRevealComplete = ({
         revealedVotes,
       }: {
@@ -212,7 +196,6 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
 
       s.on("room:state", handleRoomState);
       s.on("vote:progress", handleVoteProgress);
-      s.on("reveal:countdown", handleRevealCountdown);
       s.on("reveal:complete", handleRevealComplete);
       s.on("votes:cleared", handleVotesCleared);
 
@@ -222,7 +205,6 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         s.off("connect", startJoin);
         s.off("room:state", handleRoomState);
         s.off("vote:progress", handleVoteProgress);
-        s.off("reveal:countdown", handleRevealCountdown);
         s.off("reveal:complete", handleRevealComplete);
         s.off("votes:cleared", handleVotesCleared);
       };
@@ -275,7 +257,6 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     roomState,
     error,
     progress,
-    countdown,
     revealed,
     selectedCard,
     isLoading,

@@ -21,7 +21,6 @@ const server = http.createServer(app);
 interface ServerToClientEvents {
   "room:state": (state: RoomState) => void;
   "vote:progress": (progress: VoteProgress) => void;
-  "reveal:countdown": (payload: { remaining: number }) => void;
   "reveal:complete": (payload: {
     revealedVotes: RevealedVote[];
     unanimousValue?: number;

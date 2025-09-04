@@ -27,7 +27,7 @@ type Room = {
   ownerId: string;
   name?: string;
   participants: Map<string, Participant>;
-  status: "voting" | "revealing";
+  status: "voting";
 };
 
 export type User = {
@@ -39,7 +39,7 @@ export type RoomState = {
   id: string;
   ownerId: string;
   participants: Array<{ id: string; name: string; hasVoted: boolean }>;
-  status: "voting" | "revealing";
+  status: "voting";
 };
 
 export type VoteProgress = Record<string, boolean>;
@@ -48,7 +48,6 @@ export type RevealedVote = { id: string; value?: number | "?" };
 export type PokerNamespace = {
   to(roomId: string): {
     emit: {
-      (ev: "reveal:countdown", payload: { remaining: number }): boolean;
       (
         ev: "reveal:complete",
         payload: { revealedVotes: RevealedVote[]; unanimousValue?: number },
@@ -186,7 +185,6 @@ export class RoomManager {
     const votedCount = Array.from(room.participants.values()).filter(
       (p) => p.hasVoted,
     ).length;
-    room.status = "voting";
     for (const p of room.participants.values()) {
       p.hasVoted = false;
       delete p.value;
@@ -268,40 +266,29 @@ export class RoomManager {
       "Reveal was started",
     );
 
-    room.status = "revealing";
-    let remaining = 3;
-    const interval = setInterval(() => {
-      remaining -= 1;
-      logger.info({ roomId: id, remaining }, "Reveal countdown ticked");
-      namespace.to(id).emit("reveal:countdown", { remaining });
-      if (remaining <= 0) {
-        clearInterval(interval);
-        room.status = "voting";
-        const revealed = Array.from(room.participants.values()).map((p) => ({
-          id: p.id,
-          value: p.value,
-        }));
-        const vals = revealed
-          .filter((v) => v.value !== "?" && v.value !== undefined)
-          .map((v) => v.value as number);
-        const unique = [...new Set(vals)];
-        const unanimousValue: number | undefined =
-          unique.length === 1 && vals.length > 0 ? unique[0] : undefined;
+    const revealed = Array.from(room.participants.values()).map((p) => ({
+      id: p.id,
+      value: p.value,
+    }));
+    const vals = revealed
+      .filter((v) => v.value !== "?" && v.value !== undefined)
+      .map((v) => v.value as number);
+    const unique = [...new Set(vals)];
+    const unanimousValue: number | undefined =
+      unique.length === 1 && vals.length > 0 ? unique[0] : undefined;
 
-        logger.info(
-          {
-            roomId: id,
-            votesRevealed: revealed.length,
-            unanimousValue: unanimousValue || "none",
-          },
-          "Reveal was completed",
-        );
+    logger.info(
+      {
+        roomId: id,
+        votesRevealed: revealed.length,
+        unanimousValue: unanimousValue || "none",
+      },
+      "Reveal was completed",
+    );
 
-        namespace
-          .to(id)
-          .emit("reveal:complete", { revealedVotes: revealed, unanimousValue });
-      }
-    }, 1000);
+    namespace
+      .to(id)
+      .emit("reveal:complete", { revealedVotes: revealed, unanimousValue });
   }
 
   leaveRoom(
