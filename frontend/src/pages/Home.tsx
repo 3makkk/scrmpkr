@@ -60,9 +60,7 @@ export default function Home() {
               <div className="w-full border-t border-white/10"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900 text-white/50">
-                or
-              </span>
+              <span className="px-4 bg-black text-white/50">or</span>
             </div>
           </div>
 

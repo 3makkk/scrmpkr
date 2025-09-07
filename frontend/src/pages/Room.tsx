@@ -49,7 +49,7 @@ export default function Room() {
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors ml-4"
+              className="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors ml-4"
             >
               Back to Home
             </button>
@@ -65,7 +65,7 @@ export default function Room() {
       <PageLayout>
         <div className="flex flex-col items-center justify-center min-h-[400px]">
           <LoadingSpinner />
-          <p className="mt-4 text-gray-600">Joining room...</p>
+          <p className="mt-4 text-gray-400">Joining room...</p>
         </div>
       </PageLayout>
     );
