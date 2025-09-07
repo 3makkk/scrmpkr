@@ -1,6 +1,7 @@
 import { useRoom } from "../hooks/useRoom";
 import Card from "./Card";
 import { useVotingStats } from "../hooks/useVotingStats";
+import BarVoteChart, { type BarVoteItem } from "./ds/BarVoteChart";
 
 export default function VotingResults() {
   const { revealed, roomState } = useRoom();
@@ -10,24 +11,45 @@ export default function VotingResults() {
 
   if (!revealed || !roomState) return null;
 
+  // Group votes by value -> list of names
+  const nameOf = (id: string) =>
+    roomState.participants.find((p) => p.id === id)?.name || id;
+
+  const numericGroups = new Map<number, string[]>();
+  const unknownGroup: string[] = [];
+
+  for (const r of revealed) {
+    if (typeof r.value === "number") {
+      const arr = numericGroups.get(r.value) ?? [];
+      arr.push(nameOf(r.id));
+      numericGroups.set(r.value, arr);
+    } else {
+      unknownGroup.push(nameOf(r.id));
+    }
+  }
+
+  const items: BarVoteItem[] = [
+    ...Array.from(numericGroups.entries()).map(([value, names]) => ({
+      value,
+      names,
+    })),
+    ...(unknownGroup.length > 0
+      ? [
+          {
+            value: "?",
+            names: unknownGroup,
+          } as BarVoteItem,
+        ]
+      : []),
+  ];
+
   return (
     <Card className="animate-fade-in">
       <h2 className="text-2xl font-light text-white mb-6 text-center">
         Voting Results
       </h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {revealed.map((r) => (
-          <div
-            key={r.id}
-            className="bg-slate-500/20 rounded-lg p-4 text-center transition-all duration-300 hover:bg-slate-500/30"
-          >
-            <div className="text-white/80 text-sm mb-2">
-              {roomState.participants.find((p) => p.id === r.id)?.name || r.id}
-            </div>
-            <div className="text-3xl font-bold text-white">{r.value}</div>
-          </div>
-        ))}
-      </div>
+
+      <BarVoteChart items={items} sortBy="value" order="desc" showCount />
 
       {/* Statistics */}
       <div className="mt-6 pt-6 border-t border-slate-500/30">
@@ -38,9 +60,7 @@ export default function VotingResults() {
           </div>
           {showMostCommon && (
             <div>
-              <div className="text-slate-300 text-sm font-light">
-                Most Common
-              </div>
+              <div className="text-slate-300 text-sm font-light">Most Common</div>
               <div className="text-lg font-medium text-white">{mostCommon}</div>
             </div>
           )}

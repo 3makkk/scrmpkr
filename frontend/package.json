@@ -8,6 +8,8 @@
     "dev": "vite --host",
     "build": "vite build",
     "test": "vitest run",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "keywords": [],
@@ -22,6 +24,12 @@
     "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
+    "storybook": "^7.6.0",
+    "@storybook/addon-essentials": "^7.6.0",
+    "@storybook/addon-interactions": "^7.6.0",
+    "@storybook/addon-links": "^7.6.0",
+    "@storybook/react": "^7.6.0",
+    "@storybook/react-vite": "^7.6.0",
     "@vitejs/plugin-react": "^4.0.0",
     "autoprefixer": "^10.4.7",
     "vitest": "^1.6.0",
