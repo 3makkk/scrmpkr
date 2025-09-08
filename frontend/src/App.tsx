@@ -8,7 +8,7 @@ export default function App() {
   return (
     <AuthProvider>
       <RoomProvider>
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900">
+        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Home />} />

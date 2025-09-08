@@ -10,9 +10,9 @@ export default function ParticipantList() {
 
   return (
     <Card>
-      <h2 className="text-lg font-medium text-white mb-6 flex items-center">
+      <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
         Participants
-        <span className="ml-2 bg-slate-600 text-white text-sm px-2 py-1 rounded-full">
+        <span className="ml-3 bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-full">
           {participants.length}
         </span>
       </h2>
@@ -20,24 +20,21 @@ export default function ParticipantList() {
         {participants.map((p) => (
           <div
             key={p.id}
-            className="flex items-center justify-between bg-white/5 rounded-lg p-3"
+            className="flex items-center justify-between bg-gray-800/40 border border-gray-700/40 rounded-xl p-4 hover:bg-gray-800/60 transition-colors"
           >
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-slate-500 to-slate-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
-                {p.name.charAt(0).toUpperCase()}
-              </div>
               <span className="text-white font-medium">{p.name}</span>
               {p.id === ownerId && (
-                <span className="bg-slate-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                <span className="bg-blue-900 text-white text-xs px-2 py-1 rounded-full font-semibold">
                   OWNER
                 </span>
               )}
             </div>
             <div className="text-lg">
               {progress[p.id] ? (
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-green-500 rounded-full shadow-lg"></div>
               ) : (
-                <div className="w-3 h-3 bg-slate-600 rounded-full"></div>
+                <div className="w-3 h-3 bg-gray-600 rounded-full"></div>
               )}
             </div>
           </div>

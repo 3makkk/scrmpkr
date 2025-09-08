@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/LoginForm";
 import PageLayout from "../components/PageLayout";
 import Card from "../components/Card";
+import Button from "../components/ds/Button";
 import { getSocket } from "../socket";
 
 export default function Home() {
@@ -37,37 +38,35 @@ export default function Home() {
   return (
     <PageLayout className="flex items-center justify-center px-4">
       <Card className="max-w-lg w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-light text-white mb-2">Scrum Poker</h1>
-          <p className="text-white/70 mb-4">
+        <div className="text-center mb-10">
+          <h1 className="text-4xl font-light text-white mb-3">Scrum Poker</h1>
+          <p className="text-gray-400 mb-4">
             Welcome back,{" "}
-            <span className="font-medium text-slate-300">{account.name}</span>
+            <span className="font-semibold text-blue-400">{account.name}</span>
           </p>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-10">
           <div className="text-center">
-            <h2 className="text-lg font-medium text-white/90 mb-6">
+            <h2 className="text-xl font-medium text-gray-200 mb-6">
               Start a new session
             </h2>
-            <button type="button" onClick={createRoom} className="btn w-full">
+            <Button type="button" onClick={createRoom} className="w-full">
               Create New Room
-            </button>
+            </Button>
           </div>
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10"></div>
+              <div className="w-full border-t border-gray-700/50"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900 text-white/50">
-                or
-              </span>
+              <span className="px-6 bg-gray-900/60 text-gray-400">or</span>
             </div>
           </div>
 
           <div>
-            <h2 className="text-lg font-medium text-white/90 mb-6 text-center">
+            <h2 className="text-xl font-medium text-gray-200 mb-6 text-center">
               Join existing room
             </h2>
             <div className="space-y-4">
@@ -76,18 +75,19 @@ export default function Home() {
                 onChange={(e) => setJoiningId(e.target.value)}
                 placeholder="Enter Room ID"
                 className="input w-full text-center"
-                onKeyPress={(e) =>
+                onKeyDown={(e) =>
                   e.key === "Enter" && joiningId.trim() && joinRoom()
                 }
               />
-              <button
+              <Button
                 type="button"
                 onClick={joinRoom}
                 disabled={!joiningId.trim()}
-                className="btn-secondary w-full"
+                variant="secondary"
+                className="w-full"
               >
                 Join Room
-              </button>
+              </Button>
             </div>
           </div>
         </div>

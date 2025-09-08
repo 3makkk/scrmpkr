@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 export type VoteValue = number | "?";
 
@@ -40,7 +40,7 @@ export default function BarVoteChart({
   minBarPct = 6,
   className = "",
   valueLabel,
-  nameBadgeClassName = "bg-slate-900/30",
+  nameBadgeClassName = "bg-gray-800/60 border border-gray-700/40",
   showCount = true,
 }: BarVoteChartProps) {
   const grouped = groupByValue(items);
@@ -74,24 +74,27 @@ export default function BarVoteChart({
     return (
       <div
         key={String(label)}
-        className="w-full grid grid-cols-[3.5rem_1fr] gap-x-3 gap-y-2 items-center"
+        className="w-full grid grid-cols-[4rem_1fr] gap-x-4 gap-y-3 items-center"
       >
-        <div className="text-right text-white text-sm font-medium">
+        <div className="text-right text-white text-base font-semibold">
           {valueLabel ? valueLabel(label) : label}
         </div>
-        <div className="relative h-9 rounded bg-slate-500/20 overflow-hidden">
-          <div className={`absolute inset-y-0 left-0 ${color}`} style={{ width: `${pct}%` }} />
+        <div className="relative h-10 rounded-xl bg-gray-800/40 border border-gray-700/40 overflow-hidden shadow-inner">
+          <div
+            className={`absolute inset-y-0 left-0 ${color} rounded-xl`}
+            style={{ width: `${pct}%` }}
+          />
           {showCount && (
-            <div className="absolute inset-y-0 right-2 z-10 flex items-center text-white/90 text-xs font-medium">
+            <div className="absolute inset-y-0 right-3 z-10 flex items-center text-white/90 text-sm font-semibold">
               {names.length}
             </div>
           )}
         </div>
         <div className="col-start-2 flex items-center gap-2 flex-wrap text-white text-sm">
-          {names.map((n, i) => (
+          {names.map((n) => (
             <span
-              key={`${n}-${i}`}
-              className={`${nameBadgeClassName} rounded px-2 py-0.5 whitespace-nowrap`}
+              key={n}
+              className={`${nameBadgeClassName} rounded-lg px-3 py-1 whitespace-nowrap`}
             >
               {n}
             </span>
@@ -102,9 +105,16 @@ export default function BarVoteChart({
   };
 
   return (
-    <div className={`space-y-3 ${className}`}>
-      {sortedNumeric.map(([val, names]) => renderRow(val, names, "bg-sky-600/80"))}
-      {unknown.length > 0 && renderRow("?", unknown, "bg-purple-600/70")}
+    <div className={`space-y-4 ${className}`}>
+      {sortedNumeric.map(([val, names]) =>
+        renderRow(val, names, "bg-gradient-to-r from-blue-500 to-blue-600"),
+      )}
+      {unknown.length > 0 &&
+        renderRow(
+          "?",
+          unknown,
+          "bg-gradient-to-r from-purple-500 to-purple-600",
+        )}
     </div>
   );
 }

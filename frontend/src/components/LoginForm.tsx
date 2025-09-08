@@ -1,12 +1,12 @@
 import { useState } from "react";
+import Button from "./ds/Button";
 
 type Props = {
-  title: string;
-  subtitle?: string;
-  onLogin: (name: string) => void;
-  primaryButtonText?: string;
-  secondaryButton?: React.ReactNode;
-  autoFocus?: boolean;
+  readonly title: string;
+  readonly subtitle?: string;
+  readonly onLogin: (name: string) => void;
+  readonly primaryButtonText?: string;
+  readonly secondaryButton?: React.ReactNode;
 };
 
 export default function LoginForm({
@@ -24,7 +24,7 @@ export default function LoginForm({
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && name.trim()) {
       handleLogin();
     }
@@ -33,16 +33,16 @@ export default function LoginForm({
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="card max-w-md w-full text-center">
-        <div className="mb-10">
-          <h1 className="text-4xl font-light text-white mb-3">{title}</h1>
-          <p className="text-white/70 text-lg">{subtitle}</p>
+        <div className="mb-12">
+          <h1 className="text-4xl font-light text-white mb-4">{title}</h1>
+          <p className="text-gray-400 text-lg">{subtitle}</p>
         </div>
 
         <div className="space-y-8">
           <div>
             <label
               htmlFor="name"
-              className="block text-white/70 text-sm font-medium mb-3 text-left"
+              className="block text-gray-300 text-sm font-medium mb-4 text-left"
             >
               Your name
             </label>
@@ -52,19 +52,19 @@ export default function LoginForm({
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your name"
               className="input w-full"
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
             />
           </div>
 
           <div className="space-y-4">
-            <button
+            <Button
               type="button"
               onClick={handleLogin}
               disabled={!name.trim()}
-              className="btn w-full"
+              className="w-full"
             >
               {primaryButtonText}
-            </button>
+            </Button>
 
             {secondaryButton}
           </div>

@@ -45,28 +45,40 @@ export default function VotingResults() {
 
   return (
     <Card className="animate-fade-in">
-      <h2 className="text-2xl font-light text-white mb-6 text-center">
+      <h2 className="text-2xl font-medium text-white mb-8 text-center">
         Voting Results
       </h2>
 
       <BarVoteChart items={items} sortBy="value" order="desc" showCount />
 
       {/* Statistics */}
-      <div className="mt-6 pt-6 border-t border-slate-500/30">
-        <div className="grid grid-cols-3 gap-4 text-center">
+      <div className="mt-8 pt-6 border-t border-gray-700/50">
+        <div className="grid grid-cols-3 gap-6 text-center">
           <div>
-            <div className="text-slate-300 text-sm font-light">Average</div>
-            <div className="text-lg font-medium text-white">{average}</div>
+            <div className="text-gray-400 text-sm font-medium mb-1">
+              Average
+            </div>
+            <div className="text-2xl font-semibold text-white">{average}</div>
           </div>
           {showMostCommon && (
             <div>
-              <div className="text-slate-300 text-sm font-light">Most Common</div>
-              <div className="text-lg font-medium text-white">{mostCommon}</div>
+              <div className="text-gray-400 text-sm font-medium mb-1">
+                Most Common
+              </div>
+              <div className="text-2xl font-semibold text-white">
+                {mostCommon}
+              </div>
             </div>
           )}
           <div>
-            <div className="text-slate-300 text-sm font-light">Consensus</div>
-            <div className="text-lg font-medium text-white">
+            <div className="text-gray-400 text-sm font-medium mb-1">
+              Consensus
+            </div>
+            <div
+              className={`text-2xl font-semibold ${
+                hasConsensus ? "text-green-400" : "text-red-400"
+              }`}
+            >
               {hasConsensus ? "Yes" : "No"}
             </div>
           </div>

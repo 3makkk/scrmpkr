@@ -11,6 +11,7 @@ import VotingResults from "../components/VotingResults";
 import VotingDeck from "../components/VotingDeck";
 import RoomControls from "../components/RoomControls";
 import ConfettiOverlay from "../components/ConfettiOverlay";
+import Button from "../components/ds/Button";
 
 export default function Room() {
   const { roomId } = useParams();
@@ -46,13 +47,13 @@ export default function Room() {
         <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6">
           <div className="text-red-600 text-lg font-medium">{error}</div>
           <div className="space-y-4">
-            <button
+            <Button
               type="button"
               onClick={() => navigate("/")}
-              className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors ml-4"
+              variant="secondary"
             >
               Back to Home
-            </button>
+            </Button>
           </div>
         </div>
       </PageLayout>
@@ -98,13 +99,9 @@ export default function Room() {
           {/* Clear votes button when revealed */}
           {revealed && isOwner && (
             <div className="flex justify-center">
-              <button
-                type="button"
-                onClick={clearVotes}
-                className="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-              >
+              <Button type="button" onClick={clearVotes} variant="danger">
                 Clear Votes
-              </button>
+              </Button>
             </div>
           )}
         </div>

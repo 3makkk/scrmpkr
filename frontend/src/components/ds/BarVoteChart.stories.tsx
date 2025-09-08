@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import BarVoteChart, { type BarVoteItem } from "./BarVoteChart";
 import "../../index.css";
 
@@ -65,10 +65,23 @@ export const WithUnknownsOnly: Story = {
 export const DenseNames: Story = {
   args: {
     items: sample([
-      [8, [
-        "Alex", "Bailey", "Casey", "Dakota", "Emerson", "Finley",
-        "Gray", "Harper", "Indy", "Jules", "Kai", "Logan",
-      ]],
+      [
+        8,
+        [
+          "Alex",
+          "Bailey",
+          "Casey",
+          "Dakota",
+          "Emerson",
+          "Finley",
+          "Gray",
+          "Harper",
+          "Indy",
+          "Jules",
+          "Kai",
+          "Logan",
+        ],
+      ],
       [5, ["Morgan", "Nico"]],
       [3, ["Quinn"]],
     ]),

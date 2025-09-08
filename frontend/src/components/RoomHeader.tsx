@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useRoom } from "../hooks/useRoom";
 import Card from "./Card";
+import Button from "./ds/Button";
 
 export default function RoomHeader() {
   const { roomId } = useParams();
@@ -18,16 +19,16 @@ export default function RoomHeader() {
       <Card>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-light text-white mb-2">
+            <h1 className="text-3xl font-medium text-white mb-2">
               Room {roomId}
             </h1>
-            <p className="text-white/70">
+            <p className="text-gray-400">
               {votedCount} of {roomState.participants.length} participants voted
             </p>
           </div>
-          <button type="button" onClick={handleLeave} className="btn-secondary">
+          <Button type="button" onClick={handleLeave} variant="secondary">
             Leave Room
-          </button>
+          </Button>
         </div>
       </Card>
     </div>
