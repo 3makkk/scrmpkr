@@ -1,7 +1,7 @@
 import { useRoom } from "../hooks/useRoom";
 import Card from "./Card";
 import { useVotingStats } from "../hooks/useVotingStats";
-import BarVoteChart, { type BarVoteItem } from "./ds/BarVoteChart";
+import BarVoteChart from "./ds/BarVoteChart/BarVoteChart";
 
 export default function VotingResults() {
   const { revealed, roomState } = useRoom();
@@ -28,28 +28,30 @@ export default function VotingResults() {
     }
   }
 
-  const items: BarVoteItem[] = [
-    ...Array.from(numericGroups.entries()).map(([value, names]) => ({
-      value,
-      names,
-    })),
-    ...(unknownGroup.length > 0
-      ? [
-          {
-            value: "?",
-            names: unknownGroup,
-          } as BarVoteItem,
-        ]
-      : []),
-  ];
-
   return (
     <Card className="animate-fade-in">
       <h2 className="text-2xl font-medium text-white mb-8 text-center">
         Voting Results
       </h2>
 
-      <BarVoteChart items={items} sortBy="value" order="desc" showCount />
+      <BarVoteChart numberOfVoters={revealed.length}>
+        {Array.from(numericGroups.keys())
+          .sort((a, b) => b - a)
+          .map((value) => (
+            <BarVoteChart.Row key={value} value={value}>
+              {(numericGroups.get(value) ?? []).map((n) => (
+                <BarVoteChart.Name key={n}>{n}</BarVoteChart.Name>
+              ))}
+            </BarVoteChart.Row>
+          ))}
+        {unknownGroup.length > 0 && (
+          <BarVoteChart.Row value="?">
+            {unknownGroup.map((n) => (
+              <BarVoteChart.Name key={n}>{n}</BarVoteChart.Name>
+            ))}
+          </BarVoteChart.Row>
+        )}
+      </BarVoteChart>
 
       {/* Statistics */}
       <div className="mt-8 pt-6 border-t border-gray-700/50">

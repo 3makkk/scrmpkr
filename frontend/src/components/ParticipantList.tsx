@@ -1,5 +1,6 @@
 import { useRoom } from "../hooks/useRoom";
 import Card from "./Card";
+import Badge from "./ds/Badge/Badge";
 
 export default function ParticipantList() {
   const { roomState, progress } = useRoom();
@@ -12,9 +13,13 @@ export default function ParticipantList() {
     <Card>
       <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
         Participants
-        <span className="ml-3 bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-full">
+        <Badge
+          bgClass="bg-blue-600"
+          rounded="full"
+          className="ml-3 text-sm font-medium"
+        >
           {participants.length}
-        </span>
+        </Badge>
       </h2>
       <div className="space-y-3">
         {participants.map((p) => (
@@ -25,9 +30,13 @@ export default function ParticipantList() {
             <div className="flex items-center space-x-3">
               <span className="text-white font-medium">{p.name}</span>
               {p.id === ownerId && (
-                <span className="bg-blue-900 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                <Badge
+                  bgClass="bg-blue-900"
+                  rounded="full"
+                  className="text-xs font-semibold px-2 py-1"
+                >
                   OWNER
-                </span>
+                </Badge>
               )}
             </div>
             <div className="text-lg">

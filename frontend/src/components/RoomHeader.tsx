@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useRoom } from "../hooks/useRoom";
 import Card from "./Card";
-import Button from "./ds/Button";
+import Button from "./ds/Button/Button";
 
 export default function RoomHeader() {
   const { roomId } = useParams();

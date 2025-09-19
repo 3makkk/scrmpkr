@@ -11,7 +11,7 @@ import VotingResults from "../components/VotingResults";
 import VotingDeck from "../components/VotingDeck";
 import RoomControls from "../components/RoomControls";
 import ConfettiOverlay from "../components/ConfettiOverlay";
-import Button from "../components/ds/Button";
+import Button from "../components/ds/Button/Button";
 
 export default function Room() {
   const { roomId } = useParams();

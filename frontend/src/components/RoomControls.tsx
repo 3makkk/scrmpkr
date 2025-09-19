@@ -1,6 +1,6 @@
 import { useRoom } from "../hooks/useRoom";
 import { useAuth } from "../AuthProvider";
-import Button from "./ds/Button";
+import Button from "./ds/Button/Button";
 
 export default function RoomControls() {
   const { roomState, votedCount, allVoted, revealed, revealVotes, clearVotes } =

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Button from "./ds/Button";
+import Button from "./ds/Button/Button";
 
 type Props = {
   readonly title: string;
