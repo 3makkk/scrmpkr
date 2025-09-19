@@ -37,3 +37,13 @@
 - Required frontend vars: `VITE_AZURE_TENANT_ID`, `VITE_AZURE_CLIENT_ID`, `VITE_REDIRECT_URI`, `VITE_API_URL`.
 - Ensure `CORS_ORIGIN` and frontend URLs match when running locally.
 
+## UI Component Patterns
+- Props typing: All DS components must support every prop of their underlying HTML element. Use `UIProps<Tag, Extra>` from `frontend/src/components/ds/uiTypes.ts` to compose your props. Example: `type ButtonProps = UIProps<'button', { variant?: 'primary' | 'secondary' }>`.
+- Composition only: Prefer children composition over complex props. Avoid nested config objects, render props, or bespoke APIs. Keep extras to simple flags or strings when necessary.
+- Pass-through: Always spread unhandled props onto the underlying element to enable attributes like `id`, `title`, `onClick`, `data-*`, and `aria-*`.
+- Class control: Accept `className` and merge it with component defaults. Do not hide styling behind opaque props; expose via `className` and simple variant flags.
+- Children first: Components should render `children` in their natural slot and avoid hardcoded content when possible.
+
+Shared types
+- File: `frontend/src/components/ds/uiTypes.ts`
+- Export: `UIProps<Tag, Extra>` ensures consistent typing across DS components.

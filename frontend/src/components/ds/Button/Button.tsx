@@ -1,10 +1,8 @@
-import type React from "react";
+import type { UIProps } from "../uiTypes";
 
 type Variant = "primary" | "secondary" | "danger";
 
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: Variant;
-};
+type ButtonProps = UIProps<"button", { variant?: Variant }>;
 
 export default function Button({
   variant = "primary",

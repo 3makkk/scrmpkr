@@ -1,5 +1,5 @@
-export { default as Card } from "./ds/Card";
-export { default as Button } from "./ds/Button";
+export { default as Card } from "./ds/Card/Card";
+export { default as Button } from "./ds/Button/Button";
 export { default as ConfettiOverlay } from "./ConfettiOverlay";
 export { default as LoadingSpinner } from "./LoadingSpinner";
 export { default as LoginForm } from "./LoginForm";

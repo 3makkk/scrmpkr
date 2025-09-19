@@ -1,0 +1,11 @@
+/* Ensure the entire Storybook canvas and docs have slate-900 background */
+
+.sb-show-main,
+.docs-story {
+  background-color: #0f172a; /* Tailwind's slate-900 */
+}
+
+html,
+body {
+  min-height: 100vh;
+}

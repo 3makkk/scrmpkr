@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/LoginForm";
 import PageLayout from "../components/PageLayout";
 import Card from "../components/Card";
-import Button from "../components/ds/Button";
+import Button from "../components/ds/Button/Button";
 import { getSocket } from "../socket";
 
 export default function Home() {
