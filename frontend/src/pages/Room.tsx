@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthProvider";
 import { useRoom } from "../hooks/useRoom";
@@ -12,11 +12,15 @@ import VotingDeck from "../components/VotingDeck";
 import RoomControls from "../components/RoomControls";
 import ConfettiOverlay from "../components/ConfettiOverlay";
 import Button from "../components/ds/Button/Button";
+import { getSocket } from "../socket";
 
 export default function Room() {
   const { roomId } = useParams();
   const { account, login } = useAuth();
   const navigate = useNavigate();
+  const normalizedRoomId = roomId ? roomId.trim().toLowerCase() : "";
+  const [isReopening, setIsReopening] = useState(false);
+  const [reopenError, setReopenError] = useState<string | null>(null);
 
   // Use the room hook instead of managing state locally
   const { roomState, error, isLoading, revealed, clearVotes, joinRoom } =
@@ -24,16 +28,32 @@ export default function Room() {
 
   // Join room when account and roomId are available
   useEffect(() => {
-    if (!account || !roomId) return;
+    if (!account || !normalizedRoomId) return;
 
-    const cleanup = joinRoom(roomId, account);
+    const cleanup = joinRoom(normalizedRoomId, account);
 
     // Return cleanup function
     return cleanup;
-  }, [roomId, account, joinRoom]);
+  }, [normalizedRoomId, account, joinRoom]);
 
   // Check if user is owner for the clear votes button
   const isOwner = roomState?.ownerId === account?.id;
+
+  const handleReopen = () => {
+    if (!account || !normalizedRoomId) return;
+    setIsReopening(true);
+    setReopenError(null);
+
+    const s = getSocket({ name: account.name, userId: account.id });
+    s.emit("room:create", { roomName: normalizedRoomId }, (response) => {
+      setIsReopening(false);
+      if ("error" in response) {
+        setReopenError(response.error);
+        return;
+      }
+      joinRoom(normalizedRoomId, account);
+    });
+  };
 
   // Don't render if no account
   if (!account) {
@@ -42,11 +62,25 @@ export default function Room() {
 
   // Show error state with retry option
   if (error) {
+    const canReopen =
+      !!normalizedRoomId && error.includes("reopen") && !!account;
     return (
       <PageLayout>
         <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6">
           <div className="text-red-600 text-lg font-medium">{error}</div>
-          <div className="space-y-4">
+          {reopenError && (
+            <div className="text-sm text-red-400">{reopenError}</div>
+          )}
+          <div className="space-y-4 w-full max-w-xs">
+            {canReopen && (
+              <Button
+                type="button"
+                onClick={handleReopen}
+                disabled={isReopening}
+              >
+                {isReopening ? "Reopening..." : "Reopen Room"}
+              </Button>
+            )}
             <Button
               type="button"
               onClick={() => navigate("/")}

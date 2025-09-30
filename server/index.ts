@@ -30,8 +30,8 @@ interface ServerToClientEvents {
 
 interface ClientToServerEvents {
   "room:create": (
-    data: { name: string },
-    cb: (resp: { roomId: string }) => void,
+    data: { roomName: string },
+    cb: (resp: { roomId: string } | { error: string }) => void,
   ) => void;
   "room:join": (
     data: { roomId: string },
@@ -105,7 +105,7 @@ namespace.on("connection", (socket) => {
     "User connected",
   );
 
-  socket.on("room:create", ({ name }, cb) => {
+  socket.on("room:create", ({ roomName }, cb) => {
     logger.info(
       {
         userId: socket.data.user.id,
@@ -113,21 +113,39 @@ namespace.on("connection", (socket) => {
       },
       "Room creation was requested",
     );
-    const room = rooms.createRoom(socket.data.user.id, name);
-    socket.join(room.id);
-    logger.info(
-      { userId: socket.data.user.id, roomId: room.id },
-      "User joined socket room",
-    );
-    cb({ roomId: room.id });
-    {
-      const state = rooms.getState(room.id);
-      if (state) namespace.to(room.id).emit("room:state", state);
-    }
-    {
-      const progress = rooms.getProgress(room.id);
-      if (progress)
-        namespace.to(room.id).emit("vote:progress", progress as VoteProgress);
+    try {
+      const room = rooms.createRoom(
+        socket.data.user.id,
+        socket.data.user.name,
+        roomName,
+      );
+      socket.join(room.id);
+      logger.info(
+        { userId: socket.data.user.id, roomId: room.id },
+        "User joined socket room",
+      );
+      cb({ roomId: room.id });
+      {
+        const state = rooms.getState(room.id);
+        if (state) namespace.to(room.id).emit("room:state", state);
+      }
+      {
+        const progress = rooms.getProgress(room.id);
+        if (progress)
+          namespace.to(room.id).emit("vote:progress", progress as VoteProgress);
+      }
+    } catch (error) {
+      const e = error as Error;
+      logger.warn(
+        {
+          userId: socket.data.user.id,
+          userName: socket.data.user.name,
+          roomName,
+          error: e.message,
+        },
+        "Room creation failed",
+      );
+      cb({ error: e.message });
     }
   });
 
@@ -141,19 +159,22 @@ namespace.on("connection", (socket) => {
       "Room join was requested",
     );
     try {
-      const _room = rooms.joinRoom(roomId, socket.data.user);
-      socket.join(roomId);
+      const room = rooms.joinRoom(roomId, socket.data.user);
+      socket.join(room.id);
       logger.info(
-        { userId: socket.data.user.id, roomId },
+        { userId: socket.data.user.id, roomId: room.id },
         "User joined socket room",
       );
-      const state = rooms.getState(roomId);
+      const state = rooms.getState(room.id);
       if (state) {
         cb({ state });
-        namespace.to(roomId).emit("room:state", state);
+        namespace.to(room.id).emit("room:state", state);
       } else {
         cb({ error: "Room not found" });
       }
+      const progress = rooms.getProgress(room.id);
+      if (progress)
+        namespace.to(room.id).emit("vote:progress", progress as VoteProgress);
     } catch (error) {
       const e = error as Error;
       logger.warn(
@@ -161,11 +182,6 @@ namespace.on("connection", (socket) => {
         "Room join failed",
       );
       cb({ error: e.message });
-    }
-    {
-      const progress = rooms.getProgress(roomId);
-      if (progress)
-        namespace.to(roomId).emit("vote:progress", progress as VoteProgress);
     }
   });
 
@@ -180,20 +196,23 @@ namespace.on("connection", (socket) => {
     );
     const result = rooms.leaveRoom(roomId, socket.data.user.id);
     if (result !== false && result.wasInRoom) {
-      socket.leave(roomId);
+      const normalizedRoomId = roomId.trim().toLowerCase();
+      socket.leave(normalizedRoomId);
       logger.info(
-        { userId: socket.data.user.id, roomId },
+        { userId: socket.data.user.id, roomId: normalizedRoomId },
         "User left socket room",
       );
       // Notify other participants about the updated room state
       {
         const state = rooms.getState(roomId);
-        if (state) namespace.to(roomId).emit("room:state", state);
-      }
-      {
+        if (state) namespace.to(state.id).emit("room:state", state);
         const progress = rooms.getProgress(roomId);
+        const targetRoomId = state?.id ?? normalizedRoomId;
         if (progress)
-          namespace.to(roomId).emit("vote:progress", progress as VoteProgress);
+          namespace.to(targetRoomId).emit(
+            "vote:progress",
+            progress as VoteProgress,
+          );
       }
       if (cb) cb({ success: true });
     } else {
@@ -217,9 +236,13 @@ namespace.on("connection", (socket) => {
     );
     rooms.castVote(roomId, socket.data.user.id, value);
     {
-      const progress = rooms.getProgress(roomId);
+      const normalizedRoomId = roomId.trim().toLowerCase();
+      const progress = rooms.getProgress(normalizedRoomId);
       if (progress)
-        namespace.to(roomId).emit("vote:progress", progress as VoteProgress);
+        namespace.to(normalizedRoomId).emit(
+          "vote:progress",
+          progress as VoteProgress,
+        );
     }
   });
 
@@ -266,15 +289,18 @@ namespace.on("connection", (socket) => {
     }
     rooms.clearVotes(roomId);
     // Notify clients that votes were cleared, and broadcast fresh state + progress
-    namespace.to(roomId).emit("votes:cleared");
+    const normalizedRoomId = roomId.trim().toLowerCase();
+    namespace.to(normalizedRoomId).emit("votes:cleared");
     {
       const state = rooms.getState(roomId);
-      if (state) namespace.to(roomId).emit("room:state", state);
-    }
-    {
+      if (state) namespace.to(state.id).emit("room:state", state);
       const progress = rooms.getProgress(roomId);
+      const targetRoomId = state?.id ?? normalizedRoomId;
       if (progress)
-        namespace.to(roomId).emit("vote:progress", progress as VoteProgress);
+        namespace.to(targetRoomId).emit(
+          "vote:progress",
+          progress as VoteProgress,
+        );
     }
   });
 

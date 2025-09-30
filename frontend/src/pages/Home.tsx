@@ -11,17 +11,35 @@ export default function Home() {
   const { account, login } = useAuth();
   const navigate = useNavigate();
   const [joiningId, setJoiningId] = useState("");
+  const [roomName, setRoomName] = useState("");
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  const sanitizeRoomName = (value: string) =>
+    value.toLowerCase().replace(/[^a-z_-]/g, "").slice(0, 50);
 
   const createRoom = () => {
     if (!account) return;
+    const sanitized = sanitizeRoomName(roomName);
+    if (!sanitized) {
+      setCreateError("Room name is required");
+      return;
+    }
     const s = getSocket({ name: account.name, userId: account.id });
-    s.emit("room:create", { name: account.name }, ({ roomId }) => {
-      navigate(`/r/${roomId}`);
+    s.emit("room:create", { roomName: sanitized }, (response) => {
+      if ("error" in response) {
+        setCreateError(response.error);
+        return;
+      }
+      setCreateError(null);
+      setRoomName("");
+      navigate(`/r/${response.roomId}`);
     });
   };
 
   const joinRoom = () => {
-    navigate(`/r/${joiningId}`);
+    const target = sanitizeRoomName(joiningId);
+    if (!target) return;
+    navigate(`/r/${target}`);
   };
 
   if (!account) {
@@ -51,9 +69,38 @@ export default function Home() {
             <h2 className="text-xl font-medium text-gray-200 mb-6">
               Start a new session
             </h2>
-            <Button type="button" onClick={createRoom} className="w-full">
-              Create New Room
-            </Button>
+            <div className="space-y-4">
+              <input
+                value={roomName}
+                onChange={(e) => {
+                  const value = sanitizeRoomName(e.target.value);
+                  setRoomName(value);
+                  if (createError) setCreateError(null);
+                }}
+                placeholder="Enter room name"
+                className="input w-full text-center"
+                maxLength={50}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") createRoom();
+                }}
+              />
+              <p className="text-xs text-gray-500">
+                Allowed characters: a-z, hyphen (-), underscore (_). Max 50 characters.
+              </p>
+              {createError && (
+                <p className="text-sm text-red-500" role="alert">
+                  {createError}
+                </p>
+              )}
+              <Button
+                type="button"
+                onClick={createRoom}
+                className="w-full"
+                disabled={!roomName}
+              >
+                Create New Room
+              </Button>
+            </div>
           </div>
 
           <div className="relative">
@@ -72,12 +119,13 @@ export default function Home() {
             <div className="space-y-4">
               <input
                 value={joiningId}
-                onChange={(e) => setJoiningId(e.target.value)}
-                placeholder="Enter Room ID"
+                onChange={(e) => setJoiningId(sanitizeRoomName(e.target.value))}
+                placeholder="Enter room name"
                 className="input w-full text-center"
                 onKeyDown={(e) =>
                   e.key === "Enter" && joiningId.trim() && joinRoom()
                 }
+                maxLength={50}
               />
               <Button
                 type="button"
