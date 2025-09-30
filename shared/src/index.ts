@@ -24,8 +24,8 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
   "room:create": (
-    data: { name: string },
-    cb: (resp: { roomId: string }) => void,
+    data: { roomName: string },
+    cb: (resp: { roomId: string } | { error: string }) => void,
   ) => void;
   "room:join": (
     data: { roomId: string },

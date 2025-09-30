@@ -125,6 +125,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     ServerToClientEvents,
     ClientToServerEvents
   > | null>(null);
+  const cleanupRef = useRef<(() => void) | null>(null);
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
 
   const { roomState, error, progress, revealed, selectedCard } = roomData;
@@ -139,8 +140,10 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     (roomId: string, account: { id: string; name: string }) => {
       if (!account) return () => {};
 
-      console.log(`🔄 Joining room ${roomId}, user ${account.name}`);
-      setCurrentRoomId(roomId);
+      const normalizedRoomId = roomId.trim().toLowerCase();
+
+      console.log(`🔄 Joining room ${normalizedRoomId}, user ${account.name}`);
+      setCurrentRoomId(normalizedRoomId);
 
       dispatch({ type: "RESET_ROOM" });
 
@@ -148,22 +151,30 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       const s = getSocket({ name: account.name, userId: account.id });
       socketRef.current = s;
 
+      if (cleanupRef.current) {
+        cleanupRef.current();
+        cleanupRef.current = null;
+      }
+
       let joinTimeout: NodeJS.Timeout | null = null;
       const startJoin = () => {
-        console.log(`📡 Attempting to join room ${roomId}`);
+        console.log(`📡 Attempting to join room ${normalizedRoomId}`);
         joinTimeout = setTimeout(() => {
-          console.log(`⏰ Join timeout for room ${roomId}`);
+          console.log(`⏰ Join timeout for room ${normalizedRoomId}`);
           dispatch({ type: "TIMEOUT_ERROR" });
         }, 10000);
-        s.emit("room:join", { roomId }, (response) => {
+        s.emit("room:join", { roomId: normalizedRoomId }, (response) => {
           if (joinTimeout) clearTimeout(joinTimeout);
-          console.log(`📨 Room join response for ${roomId}:`, response);
+          console.log(
+            `📨 Room join response for ${normalizedRoomId}:`,
+            response,
+          );
 
           if ("error" in response) {
             console.error("Failed to join room:", response.error);
             dispatch({ type: "SET_ERROR", payload: response.error });
           } else if ("state" in response) {
-            console.log(`✅ Successfully joined room ${roomId}`);
+            console.log(`✅ Successfully joined room ${normalizedRoomId}`);
             dispatch({ type: "SET_ROOM_STATE", payload: response.state });
           }
         });
@@ -173,11 +184,11 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       else s.once("connect", startJoin);
 
       const handleRoomState = (newState: RoomState) => {
-        console.log(`📊 Room state update for ${roomId}:`, newState);
+        console.log(`📊 Room state update for ${normalizedRoomId}:`, newState);
         dispatch({ type: "SET_ROOM_STATE", payload: newState });
       };
       const handleVoteProgress = (progress: Progress) => {
-        console.log(`🗳️  Vote progress for ${roomId}:`, progress);
+        console.log(`🗳️  Vote progress for ${normalizedRoomId}:`, progress);
         dispatch({ type: "SET_PROGRESS", payload: progress });
       };
       const handleRevealComplete = ({
@@ -186,11 +197,11 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         revealedVotes: RevealedVote[];
         unanimousValue?: number;
       }) => {
-        console.log(`🎉 Reveal complete for ${roomId}`);
+        console.log(`🎉 Reveal complete for ${normalizedRoomId}`);
         dispatch({ type: "SET_REVEALED", payload: revealedVotes });
       };
       const handleVotesCleared = () => {
-        console.log(`🧹 Votes cleared for ${roomId}`);
+        console.log(`🧹 Votes cleared for ${normalizedRoomId}`);
         dispatch({ type: "CLEAR_VOTES" });
       };
 
@@ -199,15 +210,20 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       s.on("reveal:complete", handleRevealComplete);
       s.on("votes:cleared", handleVotesCleared);
 
-      return () => {
-        console.log(`🧹 Cleaning up room ${roomId} listeners`);
+      const cleanup = () => {
+        console.log(`🧹 Cleaning up room ${normalizedRoomId} listeners`);
         if (joinTimeout) clearTimeout(joinTimeout);
         s.off("connect", startJoin);
         s.off("room:state", handleRoomState);
         s.off("vote:progress", handleVoteProgress);
         s.off("reveal:complete", handleRevealComplete);
         s.off("votes:cleared", handleVotesCleared);
+        cleanupRef.current = null;
       };
+
+      cleanupRef.current = cleanup;
+
+      return cleanup;
     },
     [],
   );
@@ -221,6 +237,10 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         });
         setCurrentRoomId(null);
         dispatch({ type: "RESET_ROOM" });
+        if (cleanupRef.current) {
+          cleanupRef.current();
+          cleanupRef.current = null;
+        }
       } else if (callback) {
         callback();
       }
