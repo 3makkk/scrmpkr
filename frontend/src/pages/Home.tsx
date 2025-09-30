@@ -107,8 +107,8 @@ export default function Home() {
                 Create Random Room
               </Button>
               <p className="text-sm text-gray-500 text-center">
-                Custom lets you pick a readable room name to share;
-                Random instantly creates a room with a generated ID.
+                Custom lets you pick a readable room name to share; Random
+                instantly creates a room with a generated ID.
               </p>
             </div>
           ) : (

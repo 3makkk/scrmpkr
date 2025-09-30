@@ -112,10 +112,7 @@ export class RoomManager {
       hasVoted: false,
     });
 
-    logger.info(
-      { roomId: id, ownerId, ownerName },
-      "Room was created",
-    );
+    logger.info({ roomId: id, ownerId, ownerName }, "Room was created");
 
     return room;
   }

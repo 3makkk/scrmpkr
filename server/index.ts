@@ -209,10 +209,9 @@ namespace.on("connection", (socket) => {
         const progress = rooms.getProgress(roomId);
         const targetRoomId = state?.id ?? normalizedRoomId;
         if (progress)
-          namespace.to(targetRoomId).emit(
-            "vote:progress",
-            progress as VoteProgress,
-          );
+          namespace
+            .to(targetRoomId)
+            .emit("vote:progress", progress as VoteProgress);
       }
       if (cb) cb({ success: true });
     } else {
@@ -239,10 +238,9 @@ namespace.on("connection", (socket) => {
       const normalizedRoomId = roomId.trim().toLowerCase();
       const progress = rooms.getProgress(normalizedRoomId);
       if (progress)
-        namespace.to(normalizedRoomId).emit(
-          "vote:progress",
-          progress as VoteProgress,
-        );
+        namespace
+          .to(normalizedRoomId)
+          .emit("vote:progress", progress as VoteProgress);
     }
   });
 
@@ -297,10 +295,9 @@ namespace.on("connection", (socket) => {
       const progress = rooms.getProgress(roomId);
       const targetRoomId = state?.id ?? normalizedRoomId;
       if (progress)
-        namespace.to(targetRoomId).emit(
-          "vote:progress",
-          progress as VoteProgress,
-        );
+        namespace
+          .to(targetRoomId)
+          .emit("vote:progress", progress as VoteProgress);
     }
   });
 
