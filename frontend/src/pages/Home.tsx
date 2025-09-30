@@ -15,7 +15,11 @@ export default function Home() {
   const [createError, setCreateError] = useState<string | null>(null);
 
   const sanitizeRoomName = (value: string) =>
-    value.toLowerCase().replace(/[^a-z_-]/g, "").slice(0, 50);
+    value
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z_-]/g, "")
+      .slice(0, 50);
 
   const createRoom = () => {
     if (!account) return;
@@ -78,7 +82,7 @@ export default function Home() {
                   if (createError) setCreateError(null);
                 }}
                 placeholder="Enter room name"
-                className="input w-full text-center"
+                className="input w-full text-center font-mono"
                 maxLength={50}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") createRoom();
@@ -121,7 +125,7 @@ export default function Home() {
                 value={joiningId}
                 onChange={(e) => setJoiningId(sanitizeRoomName(e.target.value))}
                 placeholder="Enter room name"
-                className="input w-full text-center"
+                className="input w-full text-center font-mono"
                 onKeyDown={(e) =>
                   e.key === "Enter" && joiningId.trim() && joinRoom()
                 }
