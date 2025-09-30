@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../AuthProvider";
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/LoginForm";
@@ -10,9 +10,16 @@ import { getSocket } from "../socket";
 export default function Home() {
   const { account, login } = useAuth();
   const navigate = useNavigate();
-  const [joiningId, setJoiningId] = useState("");
   const [roomName, setRoomName] = useState("");
   const [createError, setCreateError] = useState<string | null>(null);
+  const [showCustomForm, setShowCustomForm] = useState(false);
+  const customInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (showCustomForm) {
+      customInputRef.current?.focus();
+    }
+  }, [showCustomForm]);
 
   const sanitizeRoomName = (value: string) =>
     value
@@ -59,12 +66,6 @@ export default function Home() {
     createRoom(generateRandomRoomId());
   };
 
-  const joinRoom = () => {
-    const target = sanitizeRoomName(joiningId);
-    if (!target) return;
-    navigate(`/r/${target}`);
-  };
-
   if (!account) {
     return (
       <LoginForm
@@ -87,21 +88,44 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="space-y-10">
-          <div className="text-center">
-            <h2 className="text-xl font-medium text-gray-200 mb-6">
-              Start a new session
-            </h2>
+        <div className="space-y-8">
+          {!showCustomForm ? (
+            <div className="space-y-4">
+              <Button
+                type="button"
+                onClick={() => setShowCustomForm(true)}
+                className="w-full"
+              >
+                Create custom Room
+              </Button>
+              <Button
+                type="button"
+                onClick={createRandomRoom}
+                variant="secondary"
+                className="w-full"
+              >
+                Create Random Room
+              </Button>
+              <p className="text-sm text-gray-500 text-center">
+                Custom lets you pick a readable room name to share;
+                Random instantly creates a room with a generated ID.
+              </p>
+            </div>
+          ) : (
             <div className="space-y-6">
+              <h2 className="text-lg font-medium text-gray-200">
+                Choose your room name
+              </h2>
               <div className="space-y-3">
                 <label
                   htmlFor="custom-room-name"
-                  className="block text-sm font-medium text-gray-400"
+                  className="block text-sm text-gray-400 sr-only"
                 >
-                  Custom room name (optional)
+                  Custom room name
                 </label>
                 <input
                   id="custom-room-name"
+                  ref={customInputRef}
                   value={roomName}
                   onChange={(e) => {
                     const value = sanitizeRoomName(e.target.value);
@@ -109,14 +133,14 @@ export default function Home() {
                     if (createError) setCreateError(null);
                   }}
                   placeholder="e.g. sprint-planning"
-                  className="input w-full text-center font-mono"
+                  className="input w-full font-mono"
                   maxLength={50}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") createNamedRoom();
                   }}
                 />
                 <p className="text-xs text-gray-500">
-                  Allowed characters: a-z, hyphen (-), underscore (_). Max 50 characters.
+                  Allowed: a-z, hyphen (-), underscore (_). Max 50 characters.
                 </p>
               </div>
               {createError && (
@@ -130,64 +154,10 @@ export default function Home() {
                 className="w-full"
                 disabled={!roomName}
               >
-                Create room with this name
-              </Button>
-              <div className="flex items-center gap-3 text-sm text-gray-500">
-                <div className="flex-1 border-t border-gray-700/50" />
-                <span>or</span>
-                <div className="flex-1 border-t border-gray-700/50" />
-              </div>
-              <div className="rounded-lg border border-gray-700/70 bg-gray-800/40 p-5 text-left sm:text-center">
-                <p className="text-sm text-gray-300 mb-3">
-                  Skip the name and we&apos;ll generate a random room ID for you.
-                </p>
-                <Button
-                  type="button"
-                  onClick={createRandomRoom}
-                  variant="secondary"
-                  className="w-full"
-                >
-                  Create Random Room
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-700/50"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-6 bg-gray-900/60 text-gray-400">or</span>
-            </div>
-          </div>
-
-          <div>
-            <h2 className="text-xl font-medium text-gray-200 mb-6 text-center">
-              Join existing room
-            </h2>
-            <div className="space-y-4">
-              <input
-                value={joiningId}
-                onChange={(e) => setJoiningId(sanitizeRoomName(e.target.value))}
-                placeholder="Enter room name"
-                className="input w-full text-center font-mono"
-                onKeyDown={(e) =>
-                  e.key === "Enter" && joiningId.trim() && joinRoom()
-                }
-                maxLength={50}
-              />
-              <Button
-                type="button"
-                onClick={joinRoom}
-                disabled={!joiningId.trim()}
-                variant="secondary"
-                className="w-full"
-              >
-                Join Room
+                Create custom Room
               </Button>
             </div>
-          </div>
+          )}
         </div>
       </Card>
     </PageLayout>
