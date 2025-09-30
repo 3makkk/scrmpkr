@@ -21,23 +21,42 @@ export default function Home() {
       .replace(/[^a-z_-]/g, "")
       .slice(0, 50);
 
-  const createRoom = () => {
+  const generateRandomRoomId = () => {
+    const chars = "abcdefghijklmnopqrstuvwxyz_-";
+    const length = 12;
+    let value = "";
+    for (let i = 0; i < length; i += 1) {
+      value += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return value;
+  };
+
+  const createRoom = (name: string) => {
     if (!account) return;
-    const sanitized = sanitizeRoomName(roomName);
+    const sanitized = sanitizeRoomName(name);
     if (!sanitized) {
       setCreateError("Room name is required");
       return;
     }
+    setCreateError(null);
     const s = getSocket({ name: account.name, userId: account.id });
     s.emit("room:create", { roomName: sanitized }, (response) => {
       if ("error" in response) {
         setCreateError(response.error);
         return;
       }
-      setCreateError(null);
       setRoomName("");
       navigate(`/r/${response.roomId}`);
     });
+  };
+
+  const createNamedRoom = () => {
+    createRoom(roomName);
+  };
+
+  const createRandomRoom = () => {
+    setCreateError(null);
+    createRoom(generateRandomRoomId());
   };
 
   const joinRoom = () => {
@@ -85,7 +104,7 @@ export default function Home() {
                 className="input w-full text-center font-mono"
                 maxLength={50}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") createRoom();
+                  if (e.key === "Enter") createNamedRoom();
                 }}
               />
               <p className="text-xs text-gray-500">
@@ -96,14 +115,24 @@ export default function Home() {
                   {createError}
                 </p>
               )}
-              <Button
-                type="button"
-                onClick={createRoom}
-                className="w-full"
-                disabled={!roomName}
-              >
-                Create New Room
-              </Button>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Button
+                  type="button"
+                  onClick={createNamedRoom}
+                  className="w-full"
+                  disabled={!roomName}
+                >
+                  Create New Room
+                </Button>
+                <Button
+                  type="button"
+                  onClick={createRandomRoom}
+                  variant="secondary"
+                  className="w-full"
+                >
+                  Create Random Room
+                </Button>
+              </div>
             </div>
           </div>
 
