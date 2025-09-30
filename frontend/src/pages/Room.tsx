@@ -12,6 +12,7 @@ import VotingDeck from "../components/VotingDeck";
 import RoomControls from "../components/RoomControls";
 import ConfettiOverlay from "../components/ConfettiOverlay";
 import Button from "../components/ds/Button/Button";
+import Card from "../components/ds/Card/Card";
 import { getSocket } from "../socket";
 
 export default function Room() {
@@ -66,29 +67,35 @@ export default function Room() {
       !!normalizedRoomId && error.includes("reopen") && !!account;
     return (
       <PageLayout>
-        <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6">
-          <div className="text-red-600 text-lg font-medium">{error}</div>
-          {reopenError && (
-            <div className="text-sm text-red-400">{reopenError}</div>
-          )}
-          <div className="space-y-4 w-full max-w-xs">
-            {canReopen && (
+        <div className="flex items-center justify-center min-h-[400px] px-4">
+          <Card className="w-full max-w-md text-center space-y-6">
+            <div className="space-y-2">
+              <div className="text-lg font-semibold text-red-400">{error}</div>
+              {reopenError && (
+                <div className="text-sm text-red-300">{reopenError}</div>
+              )}
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+              {canReopen && (
+                <Button
+                  type="button"
+                  onClick={handleReopen}
+                  disabled={isReopening}
+                  className="sm:min-w-[150px]"
+                >
+                  {isReopening ? "Reopening..." : "Reopen Room"}
+                </Button>
+              )}
               <Button
                 type="button"
-                onClick={handleReopen}
-                disabled={isReopening}
+                onClick={() => navigate("/")}
+                variant="secondary"
+                className="sm:min-w-[150px]"
               >
-                {isReopening ? "Reopening..." : "Reopen Room"}
+                Back to Home
               </Button>
-            )}
-            <Button
-              type="button"
-              onClick={() => navigate("/")}
-              variant="secondary"
-            >
-              Back to Home
-            </Button>
-          </div>
+            </div>
+          </Card>
         </div>
       </PageLayout>
     );
