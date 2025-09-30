@@ -92,38 +92,55 @@ export default function Home() {
             <h2 className="text-xl font-medium text-gray-200 mb-6">
               Start a new session
             </h2>
-            <div className="space-y-4">
-              <input
-                value={roomName}
-                onChange={(e) => {
-                  const value = sanitizeRoomName(e.target.value);
-                  setRoomName(value);
-                  if (createError) setCreateError(null);
-                }}
-                placeholder="Enter room name"
-                className="input w-full text-center font-mono"
-                maxLength={50}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") createNamedRoom();
-                }}
-              />
-              <p className="text-xs text-gray-500">
-                Allowed characters: a-z, hyphen (-), underscore (_). Max 50 characters.
-              </p>
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <label
+                  htmlFor="custom-room-name"
+                  className="block text-sm font-medium text-gray-400"
+                >
+                  Custom room name (optional)
+                </label>
+                <input
+                  id="custom-room-name"
+                  value={roomName}
+                  onChange={(e) => {
+                    const value = sanitizeRoomName(e.target.value);
+                    setRoomName(value);
+                    if (createError) setCreateError(null);
+                  }}
+                  placeholder="e.g. sprint-planning"
+                  className="input w-full text-center font-mono"
+                  maxLength={50}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") createNamedRoom();
+                  }}
+                />
+                <p className="text-xs text-gray-500">
+                  Allowed characters: a-z, hyphen (-), underscore (_). Max 50 characters.
+                </p>
+              </div>
               {createError && (
                 <p className="text-sm text-red-500" role="alert">
                   {createError}
                 </p>
               )}
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Button
-                  type="button"
-                  onClick={createNamedRoom}
-                  className="w-full"
-                  disabled={!roomName}
-                >
-                  Create New Room
-                </Button>
+              <Button
+                type="button"
+                onClick={createNamedRoom}
+                className="w-full"
+                disabled={!roomName}
+              >
+                Create room with this name
+              </Button>
+              <div className="flex items-center gap-3 text-sm text-gray-500">
+                <div className="flex-1 border-t border-gray-700/50" />
+                <span>or</span>
+                <div className="flex-1 border-t border-gray-700/50" />
+              </div>
+              <div className="rounded-lg border border-gray-700/70 bg-gray-800/40 p-5 text-left sm:text-center">
+                <p className="text-sm text-gray-300 mb-3">
+                  Skip the name and we&apos;ll generate a random room ID for you.
+                </p>
                 <Button
                   type="button"
                   onClick={createRandomRoom}
