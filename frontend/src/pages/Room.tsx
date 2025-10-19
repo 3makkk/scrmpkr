@@ -70,7 +70,7 @@ export default function Room() {
         <div className="flex items-center justify-center min-h-[400px] px-4">
           <Card className="w-full max-w-md text-center space-y-6">
             <div className="space-y-2">
-              <div className="text-lg font-semibold">{error}</div>
+              <div className="text-lg text-gray-400">{error}</div>
               {reopenError && (
                 <div className="text-sm text-red-300">{reopenError}</div>
               )}
