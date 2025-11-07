@@ -61,10 +61,11 @@ jobs:
           file: frontend/Dockerfile
           push: true
           platforms: linux/amd64
+          secrets: |
+            sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
           build-args: |
             VITE_API_URL=https://scrmpkr.friedemann.dev
             VITE_SOCKET_PATH=/api/socket.io/
-            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: |
             ghcr.io/${{ github.repository_owner }}/scrmpkr-frontend:${{ env.SHORT_SHA }}
 
