@@ -8,6 +8,7 @@
     "dev": "vite --host",
     "build": "vite build",
     "test": "vitest run",
+    "start": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "typecheck": "tsc -p tsconfig.json --noEmit"
@@ -16,6 +17,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sentry/react": "^10.23.0",
+    "@sentry/vite-plugin": "^4.6.0",
     "canvas-confetti": "^1.9.3",
     "react": "19.2.0",
     "react-canvas-confetti": "^2.0.7",
