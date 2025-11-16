@@ -3,7 +3,7 @@ import Card from "./Card";
 import Badge from "./ds/Badge/Badge";
 
 export default function ParticipantList() {
-  const { roomState, progress } = useRoom();
+  const { roomState } = useRoom();
 
   if (!roomState) return null;
 
@@ -22,14 +22,14 @@ export default function ParticipantList() {
         </Badge>
       </h2>
       <div className="space-y-3">
-        {participants.map((p) => (
+        {participants.map((participant) => (
           <div
-            key={p.id}
+            key={participant.id}
             className="flex items-center justify-between bg-gray-800/40 border border-gray-700/40 rounded-xl p-4 hover:bg-gray-800/60 transition-colors"
           >
             <div className="flex items-center space-x-3">
-              <span className="text-white font-medium">{p.name}</span>
-              {p.id === ownerId && (
+              <span className="text-white font-medium">{participant.name}</span>
+              {participant.id === ownerId && (
                 <Badge
                   bgClass="bg-blue-900"
                   rounded="full"
@@ -40,7 +40,7 @@ export default function ParticipantList() {
               )}
             </div>
             <div className="text-lg">
-              {progress[p.id] ? (
+              {participant.hasVoted ? (
                 <div className="w-3 h-3 bg-green-500 rounded-full shadow-lg"></div>
               ) : (
                 <div className="w-3 h-3 bg-gray-600 rounded-full"></div>

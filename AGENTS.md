@@ -18,6 +18,7 @@
 - Server: modules and identifiers `camelCase`; exported types/interfaces `PascalCase`.
 - Imports: prefer relative paths within a package; avoid deep cross-package imports.
 - Linters/formatters: ESLint/Prettier not configured—keep style consistent with existing files.
+- Naming: avoid single-letter or cryptic identifiers (e.g., `p`, `r`) except for trivial indexes; prefer descriptive variable names everywhere.
 
 ## Testing Guidelines
 - Framework: Jest. Test files live under `__tests__/` and use `*.test.js`.

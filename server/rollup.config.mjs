@@ -5,7 +5,10 @@ import typescript from "@rollup/plugin-typescript";
 import { builtinModules } from "node:module";
 
 // Externalize only Node built-ins; bundle all npm deps
-const external = [...builtinModules, ...builtinModules.map((m) => `node:${m}`)];
+const external = [
+  ...builtinModules,
+  ...builtinModules.map((moduleName) => `node:${moduleName}`),
+];
 
 export default {
   input: "index.ts",

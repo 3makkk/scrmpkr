@@ -24,8 +24,7 @@ export default function Room() {
   const [reopenError, setReopenError] = useState<string | null>(null);
 
   // Use the room hook instead of managing state locally
-  const { roomState, error, isLoading, revealed, clearVotes, joinRoom } =
-    useRoom();
+  const { roomState, error, isLoading, clearVotes, joinRoom } = useRoom();
 
   // Join room when account and roomId are available
   useEffect(() => {
@@ -39,14 +38,17 @@ export default function Room() {
 
   // Check if user is owner for the clear votes button
   const isOwner = roomState?.ownerId === account?.id;
+  const isRoundRevealed =
+    roomState?.currentRoundState?.status === "revealed" &&
+    (roomState?.currentRoundState?.votes.length ?? 0) > 0;
 
   const handleReopen = () => {
     if (!account || !normalizedRoomId) return;
     setIsReopening(true);
     setReopenError(null);
 
-    const s = getSocket({ name: account.name, userId: account.id });
-    s.emit("room:create", { roomName: normalizedRoomId }, (response) => {
+    const socket = getSocket({ name: account.name, userId: account.id });
+    socket.emit("room:create", { roomName: normalizedRoomId }, (response) => {
       setIsReopening(false);
       if ("error" in response) {
         setReopenError(response.error);
@@ -130,7 +132,7 @@ export default function Room() {
           <VotingResults />
 
           {/* Voting Controls */}
-          {!revealed && (
+          {!isRoundRevealed && (
             <div className="space-y-6">
               <VotingDeck />
               <RoomControls />
@@ -138,7 +140,7 @@ export default function Room() {
           )}
 
           {/* Clear votes button when revealed */}
-          {revealed && isOwner && (
+          {isRoundRevealed && isOwner && (
             <div className="flex justify-center">
               <Button type="button" onClick={clearVotes} variant="danger">
                 Clear Votes

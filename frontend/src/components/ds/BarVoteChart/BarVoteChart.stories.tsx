@@ -106,8 +106,10 @@ export const DenseNames: Story = {
           "Jules",
           "Kai",
           "Logan",
-        ].map((n) => (
-          <BarVoteChart.Name key={n}>{n}</BarVoteChart.Name>
+        ].map((participantName) => (
+          <BarVoteChart.Name key={participantName}>
+            {participantName}
+          </BarVoteChart.Name>
         ))}
       </BarVoteChart.Row>
       <BarVoteChart.Row value={5}>

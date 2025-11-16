@@ -2,23 +2,33 @@
 
 export type Participant = { id: string; name: string; hasVoted: boolean };
 
+export type RoundStatus = "voting" | "revealed";
+export type RoundVote = { id: string; name: string; value?: number | "?" };
+export type RoundStats = {
+  average: string;
+  hasConsensus: boolean;
+  mostCommon: number | "?" | null;
+  showMostCommon: boolean;
+};
+export type RoundState = {
+  round: number;
+  status: RoundStatus;
+  votes: RoundVote[];
+  stats: RoundStats;
+};
+export type RevealedVote = RoundVote;
+
 export type RoomState = {
   id: string;
   ownerId: string;
   participants: Participant[];
   status: "voting";
+  currentRound: number;
+  currentRoundState: RoundState;
 };
-
-export type VoteProgress = Record<string, boolean>;
-export type RevealedVote = { id: string; value?: number | "?" };
 
 export interface ServerToClientEvents {
   "room:state": (state: RoomState) => void;
-  "vote:progress": (progress: VoteProgress) => void;
-  "reveal:complete": (payload: {
-    revealedVotes: RevealedVote[];
-    unanimousValue?: number;
-  }) => void;
   "votes:cleared": () => void;
 }
 

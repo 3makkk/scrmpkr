@@ -12,25 +12,19 @@ import type {
   ServerToClientEvents,
   ClientToServerEvents,
   RoomState,
-  VoteProgress as Progress,
-  RevealedVote,
 } from "@scrmpkr/shared";
 
 type RoomAction =
   | { type: "RESET_ROOM" }
   | { type: "SET_ROOM_STATE"; payload: RoomState }
   | { type: "SET_ERROR"; payload: string }
-  | { type: "SET_PROGRESS"; payload: Progress }
-  | { type: "SET_REVEALED"; payload: RevealedVote[] | null }
   | { type: "SET_SELECTED_CARD"; payload: number | "?" | null }
-  | { type: "CLEAR_VOTES" }
+  | { type: "CLEAR_SELECTED_CARD" }
   | { type: "TIMEOUT_ERROR" };
 
 type RoomData = {
   roomState: RoomState | null;
   error: string | null;
-  progress: Progress;
-  revealed: RevealedVote[] | null;
   selectedCard: number | "?" | null;
 };
 
@@ -40,8 +34,6 @@ const roomReducer = (state: RoomData, action: RoomAction): RoomData => {
       return {
         roomState: null,
         error: null,
-        progress: {},
-        revealed: null,
         selectedCard: null,
       };
     case "SET_ROOM_STATE":
@@ -56,27 +48,15 @@ const roomReducer = (state: RoomData, action: RoomAction): RoomData => {
         error: action.payload,
         roomState: null,
       };
-    case "SET_PROGRESS":
-      return {
-        ...state,
-        progress: action.payload,
-      };
-    case "SET_REVEALED":
-      return {
-        ...state,
-        revealed: action.payload,
-      };
     case "SET_SELECTED_CARD":
       return {
         ...state,
         selectedCard: action.payload,
       };
-    case "CLEAR_VOTES":
+    case "CLEAR_SELECTED_CARD":
       return {
         ...state,
-        revealed: null,
         selectedCard: null,
-        progress: {},
       };
     case "TIMEOUT_ERROR":
       return {
@@ -92,16 +72,12 @@ const roomReducer = (state: RoomData, action: RoomAction): RoomData => {
 const initialRoomState: RoomData = {
   roomState: null,
   error: null,
-  progress: {},
-  revealed: null,
   selectedCard: null,
 };
 
 type RoomContextValue = {
   roomState: RoomState | null;
   error: string | null;
-  progress: Progress;
-  revealed: RevealedVote[] | null;
   selectedCard: number | "?" | null;
   isLoading: boolean;
   votedCount: number;
@@ -128,12 +104,16 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   const cleanupRef = useRef<(() => void) | null>(null);
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
 
-  const { roomState, error, progress, revealed, selectedCard } = roomData;
+  const { roomState, error, selectedCard } = roomData;
 
   const isLoading = !roomState && !error;
-  const votedCount = Object.values(progress).filter(Boolean).length;
+  const votedCount = roomState
+    ? roomState.participants.filter((participant) => participant.hasVoted)
+        .length
+    : 0;
   const allVoted = roomState
-    ? roomState.participants.every((p) => progress[p.id])
+    ? roomState.participants.length > 0 &&
+      roomState.participants.every((participant) => participant.hasVoted)
     : false;
 
   const joinRoom = useCallback(
@@ -148,8 +128,8 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "RESET_ROOM" });
 
       // Use a persistent user socket
-      const s = getSocket({ name: account.name, userId: account.id });
-      socketRef.current = s;
+      const socket = getSocket({ name: account.name, userId: account.id });
+      socketRef.current = socket;
 
       if (cleanupRef.current) {
         cleanupRef.current();
@@ -163,7 +143,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
           console.log(`⏰ Join timeout for room ${normalizedRoomId}`);
           dispatch({ type: "TIMEOUT_ERROR" });
         }, 10000);
-        s.emit("room:join", { roomId: normalizedRoomId }, (response) => {
+        socket.emit("room:join", { roomId: normalizedRoomId }, (response) => {
           if (joinTimeout) clearTimeout(joinTimeout);
           console.log(
             `📨 Room join response for ${normalizedRoomId}:`,
@@ -180,44 +160,27 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         });
       };
 
-      if (s.connected) startJoin();
-      else s.once("connect", startJoin);
+      if (socket.connected) startJoin();
+      else socket.once("connect", startJoin);
 
       const handleRoomState = (newState: RoomState) => {
         console.log(`📊 Room state update for ${normalizedRoomId}:`, newState);
         dispatch({ type: "SET_ROOM_STATE", payload: newState });
       };
-      const handleVoteProgress = (progress: Progress) => {
-        console.log(`🗳️  Vote progress for ${normalizedRoomId}:`, progress);
-        dispatch({ type: "SET_PROGRESS", payload: progress });
-      };
-      const handleRevealComplete = ({
-        revealedVotes,
-      }: {
-        revealedVotes: RevealedVote[];
-        unanimousValue?: number;
-      }) => {
-        console.log(`🎉 Reveal complete for ${normalizedRoomId}`);
-        dispatch({ type: "SET_REVEALED", payload: revealedVotes });
-      };
       const handleVotesCleared = () => {
         console.log(`🧹 Votes cleared for ${normalizedRoomId}`);
-        dispatch({ type: "CLEAR_VOTES" });
+        dispatch({ type: "CLEAR_SELECTED_CARD" });
       };
 
-      s.on("room:state", handleRoomState);
-      s.on("vote:progress", handleVoteProgress);
-      s.on("reveal:complete", handleRevealComplete);
-      s.on("votes:cleared", handleVotesCleared);
+      socket.on("room:state", handleRoomState);
+      socket.on("votes:cleared", handleVotesCleared);
 
       const cleanup = () => {
         console.log(`🧹 Cleaning up room ${normalizedRoomId} listeners`);
         if (joinTimeout) clearTimeout(joinTimeout);
-        s.off("connect", startJoin);
-        s.off("room:state", handleRoomState);
-        s.off("vote:progress", handleVoteProgress);
-        s.off("reveal:complete", handleRevealComplete);
-        s.off("votes:cleared", handleVotesCleared);
+        socket.off("connect", startJoin);
+        socket.off("room:state", handleRoomState);
+        socket.off("votes:cleared", handleVotesCleared);
         cleanupRef.current = null;
       };
 
@@ -230,9 +193,9 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
 
   const leaveRoom = useCallback(
     (callback?: () => void) => {
-      const s = socketRef.current;
-      if (s && currentRoomId) {
-        s.emit("room:leave", { roomId: currentRoomId }, () => {
+      const socket = socketRef.current;
+      if (socket && currentRoomId) {
+        socket.emit("room:leave", { roomId: currentRoomId }, () => {
           if (callback) callback();
         });
         setCurrentRoomId(null);
@@ -250,34 +213,32 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
 
   const castVote = useCallback(
     (value: number | "?") => {
-      const s = socketRef.current;
-      if (s && currentRoomId) {
+      const socket = socketRef.current;
+      if (socket && currentRoomId) {
         dispatch({ type: "SET_SELECTED_CARD", payload: value });
-        s.emit("vote:cast", { roomId: currentRoomId, value });
+        socket.emit("vote:cast", { roomId: currentRoomId, value });
       }
     },
     [currentRoomId],
   );
 
   const revealVotes = useCallback(() => {
-    const s = socketRef.current;
-    if (s && currentRoomId) {
-      s.emit("reveal:start", { roomId: currentRoomId });
+    const socket = socketRef.current;
+    if (socket && currentRoomId) {
+      socket.emit("reveal:start", { roomId: currentRoomId });
     }
   }, [currentRoomId]);
 
   const clearVotes = useCallback(() => {
-    const s = socketRef.current;
-    if (s && currentRoomId) {
-      s.emit("vote:clear", { roomId: currentRoomId });
+    const socket = socketRef.current;
+    if (socket && currentRoomId) {
+      socket.emit("vote:clear", { roomId: currentRoomId });
     }
   }, [currentRoomId]);
 
   const contextValue: RoomContextValue = {
     roomState,
     error,
-    progress,
-    revealed,
     selectedCard,
     isLoading,
     votedCount,

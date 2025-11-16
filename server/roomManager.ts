@@ -1,62 +1,16 @@
 import logger from "./logger";
+import Room from "./room";
+import { FIB_DECK, type User } from "./types";
+import type {
+  RoomState,
+  RoundState,
+  RoundStatus,
+  RoundVote,
+} from "@scrmpkr/shared";
+import type { PokerNamespace } from "./roomManagerTypes";
 
-export const FIB_DECK: Array<number | "?"> = [
-  0,
-  1,
-  2,
-  3,
-  5,
-  8,
-  13,
-  21,
-  34,
-  55,
-  "?",
-];
-
-type Participant = {
-  id: string;
-  name: string;
-  hasVoted: boolean;
-  value?: number | "?";
-};
-
-type Room = {
-  id: string;
-  ownerId: string;
-  name: string;
-  participants: Map<string, Participant>;
-  status: "voting";
-};
-
-export type User = {
-  id: string;
-  name: string;
-};
-
-export type RoomState = {
-  id: string;
-  ownerId: string;
-  participants: Array<{ id: string; name: string; hasVoted: boolean }>;
-  status: "voting";
-};
-
-export type VoteProgress = Record<string, boolean>;
-export type RevealedVote = { id: string; value?: number | "?" };
-
-export type PokerNamespace = {
-  to(roomId: string): {
-    emit: {
-      (
-        ev: "reveal:complete",
-        payload: { revealedVotes: RevealedVote[]; unanimousValue?: number },
-      ): boolean;
-      (ev: "room:state", state: RoomState): boolean;
-      (ev: "vote:progress", progress: VoteProgress): boolean;
-      (ev: "votes:cleared"): boolean;
-    };
-  };
-};
+export type RevealedVote = RoundVote;
+export type { RoomState, RoundState, RoundStatus, User };
 
 export class RoomManager {
   constructor() {
@@ -96,21 +50,9 @@ export class RoomManager {
       throw new Error("Room already exists");
     }
 
-    const room: Room = {
-      id,
-      ownerId,
-      name: id,
-      participants: new Map<string, Participant>(),
-      status: "voting",
-    };
+    const room = new Room(id, ownerId, ownerName);
     this.rooms.set(id, room);
     this.archivedRooms.add(id);
-
-    room.participants.set(ownerId, {
-      id: ownerId,
-      name: ownerName,
-      hasVoted: false,
-    });
 
     logger.info({ roomId: id, ownerId, ownerName }, "Room was created");
 
@@ -132,11 +74,7 @@ export class RoomManager {
     }
 
     const wasAlreadyInRoom = room.participants.has(user.id);
-    room.participants.set(user.id, {
-      id: user.id,
-      name: user.name,
-      hasVoted: false,
-    });
+    room.addParticipant(user);
 
     logger.info(
       {
@@ -173,17 +111,14 @@ export class RoomManager {
       return;
     }
 
-    const p = room.participants.get(userId);
-    if (p) {
-      const previousVote = p.value;
-      p.hasVoted = true;
-      p.value = value;
-
+    const participant = room.recordVote(userId, value);
+    if (participant) {
+      const previousVote = participant.value;
       logger.info(
         {
           roomId,
           userId,
-          userName: p.name,
+          userName: participant.name,
           value,
           previousVote,
         },
@@ -191,7 +126,7 @@ export class RoomManager {
       );
 
       const votedCount = Array.from(room.participants.values()).filter(
-        (p) => p.hasVoted,
+        (participantItem) => participantItem.hasVoted,
       ).length;
       logger.info(
         {
@@ -215,12 +150,10 @@ export class RoomManager {
     }
 
     const votedCount = Array.from(room.participants.values()).filter(
-      (p) => p.hasVoted,
+      (participant) => participant.hasVoted,
     ).length;
-    for (const p of room.participants.values()) {
-      p.hasVoted = false;
-      delete p.value;
-    }
+
+    room.resetForNewRound();
 
     logger.info({ roomId, removedVotes: votedCount }, "Votes were cleared");
   }
@@ -242,9 +175,7 @@ export class RoomManager {
     const roomId = this.normalizeRoomId(id);
     const room = this.rooms.get(roomId);
     if (!room) return false;
-    const hasVotes = Array.from(room.participants.values()).some(
-      (p) => p.hasVoted,
-    );
+    const hasVotes = room.hasAnyVotes();
     logger.info({ roomId, hasVotes }, "Room votes were checked");
     return hasVotes;
   }
@@ -253,25 +184,7 @@ export class RoomManager {
     const roomId = this.normalizeRoomId(id);
     const room = this.rooms.get(roomId);
     if (!room) return null;
-    return {
-      id: room.id,
-      ownerId: room.ownerId,
-      participants: Array.from(room.participants.values()).map((p) => ({
-        id: p.id,
-        name: p.name,
-        hasVoted: p.hasVoted,
-      })),
-      status: room.status,
-    };
-  }
-
-  getProgress(id: string): VoteProgress | null {
-    const roomId = this.normalizeRoomId(id);
-    const room = this.rooms.get(roomId);
-    if (!room) return null;
-    const result: VoteProgress = {};
-    for (const [id, p] of room.participants) result[id] = p.hasVoted;
-    return result;
+    return room.toState();
   }
 
   startReveal(id: string, namespace: PokerNamespace): void {
@@ -282,17 +195,13 @@ export class RoomManager {
       return;
     }
 
-    // Check if anyone has voted before allowing reveal
-    const hasAnyVotes = Array.from(room.participants.values()).some(
-      (p) => p.hasVoted,
-    );
-    if (!hasAnyVotes) {
+    if (!this.hasAnyVotes(roomId)) {
       logger.warn({ roomId }, "Reveal was blocked, no votes");
-      return; // Don't start reveal if no one has voted
+      return;
     }
 
     const votedCount = Array.from(room.participants.values()).filter(
-      (p) => p.hasVoted,
+      (participant) => participant.hasVoted,
     ).length;
     logger.info(
       {
@@ -303,29 +212,19 @@ export class RoomManager {
       "Reveal was started",
     );
 
-    const revealed = Array.from(room.participants.values()).map((p) => ({
-      id: p.id,
-      value: p.value,
-    }));
-    const vals = revealed
-      .filter((v) => v.value !== "?" && v.value !== undefined)
-      .map((v) => v.value as number);
-    const unique = [...new Set(vals)];
-    const unanimousValue: number | undefined =
-      unique.length === 1 && vals.length > 0 ? unique[0] : undefined;
+    const unanimousValue = room.revealCurrentRound();
 
     logger.info(
       {
         roomId,
-        votesRevealed: revealed.length,
-        unanimousValue: unanimousValue || "none",
+        votesRevealed: room.getCurrentRoundState().votes.length,
+        unanimousValue: unanimousValue ?? "none",
       },
       "Reveal was completed",
     );
 
-    namespace
-      .to(roomId)
-      .emit("reveal:complete", { revealedVotes: revealed, unanimousValue });
+    const updatedState = this.getState(roomId);
+    if (updatedState) namespace.to(roomId).emit("room:state", updatedState);
   }
 
   leaveRoom(
@@ -343,8 +242,7 @@ export class RoomManager {
     }
 
     const participant = room.participants.get(userId);
-    const wasInRoom = room.participants.has(userId);
-    room.participants.delete(userId);
+    const wasInRoom = room.removeParticipant(userId);
 
     if (wasInRoom) {
       logger.info(
@@ -379,7 +277,7 @@ export class RoomManager {
     for (const [roomId, room] of this.rooms.entries()) {
       if (room.participants.has(userId)) {
         const participant = room.participants.get(userId);
-        room.participants.delete(userId);
+        room.removeParticipant(userId);
         roomsLeft++;
 
         logger.info(
@@ -406,7 +304,7 @@ export class RoomManager {
     }
 
     logger.info({ userId, roomsLeft }, "User leave summary was recorded");
-    return roomsToUpdate; // Return room IDs that need state updates
+    return roomsToUpdate;
   }
 }
 

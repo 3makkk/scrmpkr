@@ -1,30 +1,31 @@
 import { useRoom } from "../hooks/useRoom";
 import Card from "./Card";
-import { useVotingStats } from "../hooks/useVotingStats";
 import BarVoteChart from "./ds/BarVoteChart/BarVoteChart";
 
 export default function VotingResults() {
-  const { revealed, roomState } = useRoom();
+  const { roomState } = useRoom();
+  const revealedVotes =
+    roomState?.currentRoundState?.status === "revealed"
+      ? roomState.currentRoundState?.votes
+      : null;
+  const stats =
+    roomState?.currentRoundState?.status === "revealed"
+      ? roomState.currentRoundState.stats
+      : null;
 
-  const { average, hasConsensus, showMostCommon, mostCommon } =
-    useVotingStats(revealed);
-
-  if (!revealed || !roomState) return null;
-
-  // Group votes by value -> list of names
-  const nameOf = (id: string) =>
-    roomState.participants.find((p) => p.id === id)?.name || id;
+  if (!revealedVotes || !stats) return null;
 
   const numericGroups = new Map<number, string[]>();
   const unknownGroup: string[] = [];
 
-  for (const r of revealed) {
-    if (typeof r.value === "number") {
-      const arr = numericGroups.get(r.value) ?? [];
-      arr.push(nameOf(r.id));
-      numericGroups.set(r.value, arr);
+  for (const revealedVote of revealedVotes) {
+    const voterName = revealedVote.name ?? revealedVote.id;
+    if (typeof revealedVote.value === "number") {
+      const voteList = numericGroups.get(revealedVote.value) ?? [];
+      voteList.push(voterName);
+      numericGroups.set(revealedVote.value, voteList);
     } else {
-      unknownGroup.push(nameOf(r.id));
+      unknownGroup.push(voterName);
     }
   }
 
@@ -34,20 +35,22 @@ export default function VotingResults() {
         Voting Results
       </h2>
 
-      <BarVoteChart numberOfVoters={revealed.length}>
+      <BarVoteChart numberOfVoters={revealedVotes.length}>
         {Array.from(numericGroups.keys())
           .sort((a, b) => b - a)
           .map((value) => (
             <BarVoteChart.Row key={value} value={value}>
-              {(numericGroups.get(value) ?? []).map((n) => (
-                <BarVoteChart.Name key={n}>{n}</BarVoteChart.Name>
+              {(numericGroups.get(value) ?? []).map((voterName) => (
+                <BarVoteChart.Name key={voterName}>
+                  {voterName}
+                </BarVoteChart.Name>
               ))}
             </BarVoteChart.Row>
           ))}
         {unknownGroup.length > 0 && (
           <BarVoteChart.Row value="?">
-            {unknownGroup.map((n) => (
-              <BarVoteChart.Name key={n}>{n}</BarVoteChart.Name>
+            {unknownGroup.map((voterName) => (
+              <BarVoteChart.Name key={voterName}>{voterName}</BarVoteChart.Name>
             ))}
           </BarVoteChart.Row>
         )}
@@ -60,15 +63,17 @@ export default function VotingResults() {
             <div className="text-gray-400 text-sm font-medium mb-1">
               Average
             </div>
-            <div className="text-2xl font-semibold text-white">{average}</div>
+            <div className="text-2xl font-semibold text-white">
+              {stats.average}
+            </div>
           </div>
-          {showMostCommon && (
+          {stats.showMostCommon && (
             <div>
               <div className="text-gray-400 text-sm font-medium mb-1">
                 Most Common
               </div>
               <div className="text-2xl font-semibold text-white">
-                {mostCommon}
+                {stats.mostCommon}
               </div>
             </div>
           )}
@@ -78,10 +83,10 @@ export default function VotingResults() {
             </div>
             <div
               className={`text-2xl font-semibold ${
-                hasConsensus ? "text-green-400" : "text-red-400"
+                stats.hasConsensus ? "text-green-400" : "text-red-400"
               }`}
             >
-              {hasConsensus ? "Yes" : "No"}
+              {stats.hasConsensus ? "Yes" : "No"}
             </div>
           </div>
         </div>

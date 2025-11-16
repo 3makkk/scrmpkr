@@ -2,12 +2,13 @@ import Fireworks from "react-canvas-confetti/dist/presets/fireworks";
 import { useRoom } from "../hooks/useRoom";
 
 export default function ConfettiOverlay() {
-  const { revealed } = useRoom();
+  const { roomState } = useRoom();
 
-  if (!revealed) return null;
+  const hasConsensus =
+    roomState?.currentRoundState?.status === "revealed" &&
+    roomState.currentRoundState?.stats?.hasConsensus;
 
-  // Compute consensus
-  const hasConsensus = new Set(revealed.map((r) => r.value)).size === 1;
+  if (!hasConsensus) return null;
 
   return (
     hasConsensus && (

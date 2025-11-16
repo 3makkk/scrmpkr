@@ -6,10 +6,12 @@ import PokerCard from "./PokerCard";
 const DECK: Array<number | "?"> = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, "?"];
 
 export default function VotingDeck() {
-  const { selectedCard, castVote, roomState, revealed } = useRoom();
+  const { selectedCard, castVote, roomState } = useRoom();
   const { account } = useAuth();
 
   if (!roomState || !account) return null;
+
+  const isRoundRevealed = roomState.currentRoundState?.status === "revealed";
 
   return (
     <Card>
@@ -23,7 +25,7 @@ export default function VotingDeck() {
             value={value}
             isSelected={selectedCard === value}
             onClick={castVote}
-            disabled={revealed !== null}
+            disabled={isRoundRevealed}
           />
         ))}
       </div>

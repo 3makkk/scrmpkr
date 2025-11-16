@@ -3,13 +3,7 @@ import express from "express";
 import http from "node:http";
 import cors from "cors";
 import { Server } from "socket.io";
-import {
-  RoomManager,
-  type User,
-  type RoomState,
-  type VoteProgress,
-  type RevealedVote,
-} from "./roomManager";
+import { RoomManager, type User, type RoomState } from "./roomManager";
 import logger from "./logger";
 
 const app = express();
@@ -20,11 +14,6 @@ const server = http.createServer(app);
 
 interface ServerToClientEvents {
   "room:state": (state: RoomState) => void;
-  "vote:progress": (progress: VoteProgress) => void;
-  "reveal:complete": (payload: {
-    revealedVotes: RevealedVote[];
-    unanimousValue?: number;
-  }) => void;
   "votes:cleared": () => void;
 }
 
@@ -125,15 +114,8 @@ namespace.on("connection", (socket) => {
         "User joined socket room",
       );
       cb({ roomId: room.id });
-      {
-        const state = rooms.getState(room.id);
-        if (state) namespace.to(room.id).emit("room:state", state);
-      }
-      {
-        const progress = rooms.getProgress(room.id);
-        if (progress)
-          namespace.to(room.id).emit("vote:progress", progress as VoteProgress);
-      }
+      const state = rooms.getState(room.id);
+      if (state) namespace.to(room.id).emit("room:state", state);
     } catch (error) {
       const e = error as Error;
       logger.warn(
@@ -172,9 +154,6 @@ namespace.on("connection", (socket) => {
       } else {
         cb({ error: "Room not found" });
       }
-      const progress = rooms.getProgress(room.id);
-      if (progress)
-        namespace.to(room.id).emit("vote:progress", progress as VoteProgress);
     } catch (error) {
       const e = error as Error;
       logger.warn(
@@ -206,12 +185,6 @@ namespace.on("connection", (socket) => {
       {
         const state = rooms.getState(roomId);
         if (state) namespace.to(state.id).emit("room:state", state);
-        const progress = rooms.getProgress(roomId);
-        const targetRoomId = state?.id ?? normalizedRoomId;
-        if (progress)
-          namespace
-            .to(targetRoomId)
-            .emit("vote:progress", progress as VoteProgress);
       }
       if (cb) cb({ success: true });
     } else {
@@ -234,14 +207,8 @@ namespace.on("connection", (socket) => {
       "Vote was cast",
     );
     rooms.castVote(roomId, socket.data.user.id, value);
-    {
-      const normalizedRoomId = roomId.trim().toLowerCase();
-      const progress = rooms.getProgress(normalizedRoomId);
-      if (progress)
-        namespace
-          .to(normalizedRoomId)
-          .emit("vote:progress", progress as VoteProgress);
-    }
+    const state = rooms.getState(roomId);
+    if (state) namespace.to(state.id).emit("room:state", state);
   });
 
   socket.on("reveal:start", ({ roomId }) => {
@@ -286,18 +253,12 @@ namespace.on("connection", (socket) => {
       return;
     }
     rooms.clearVotes(roomId);
-    // Notify clients that votes were cleared, and broadcast fresh state + progress
+    // Notify clients that votes were cleared, and broadcast fresh state
     const normalizedRoomId = roomId.trim().toLowerCase();
     namespace.to(normalizedRoomId).emit("votes:cleared");
     {
       const state = rooms.getState(roomId);
       if (state) namespace.to(state.id).emit("room:state", state);
-      const progress = rooms.getProgress(roomId);
-      const targetRoomId = state?.id ?? normalizedRoomId;
-      if (progress)
-        namespace
-          .to(targetRoomId)
-          .emit("vote:progress", progress as VoteProgress);
     }
   });
 
@@ -317,9 +278,6 @@ namespace.on("connection", (socket) => {
       logger.info({ roomId }, "Room state update was sent");
       const state = rooms.getState(roomId);
       if (state) namespace.to(roomId).emit("room:state", state);
-      const progress = rooms.getProgress(roomId);
-      if (progress)
-        namespace.to(roomId).emit("vote:progress", progress as VoteProgress);
     });
   });
 });
