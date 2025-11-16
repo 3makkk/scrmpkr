@@ -15,12 +15,10 @@ export type { RoomState, RoundState, RoundStatus, User };
 export class RoomManager {
   constructor() {
     this.rooms = new Map<string, Room>();
-    this.archivedRooms = new Set<string>();
     logger.info("RoomManager was initialized");
   }
 
   private rooms: Map<string, Room>;
-  private archivedRooms: Set<string>;
 
   private normalizeRoomId(roomId: string): string {
     return roomId.trim().toLowerCase();
@@ -52,7 +50,6 @@ export class RoomManager {
 
     const room = new Room(id, ownerId, ownerName);
     this.rooms.set(id, room);
-    this.archivedRooms.add(id);
 
     logger.info({ roomId: id, ownerId, ownerName }, "Room was created");
 
@@ -67,10 +64,7 @@ export class RoomManager {
         { roomId, userId: user.id, userName: user.name },
         "Room join was rejected",
       );
-      if (this.archivedRooms.has(roomId)) {
-        throw new Error("Room does not exist anymore, you want to reopen it?");
-      }
-      throw new Error("Room not found");
+      throw new Error("Room does not exist anymore, you want to reopen it?");
     }
 
     const wasAlreadyInRoom = room.participants.has(user.id);
@@ -257,7 +251,6 @@ export class RoomManager {
 
     if (room.participants.size === 0) {
       this.rooms.delete(normalizedId);
-      this.archivedRooms.add(normalizedId);
       logger.info({ roomId: normalizedId }, "Room was deleted");
       return { roomDeleted: true, wasInRoom };
     }
@@ -291,7 +284,6 @@ export class RoomManager {
 
         if (room.participants.size === 0) {
           this.rooms.delete(roomId);
-          this.archivedRooms.add(roomId);
           logger.info({ roomId }, "Room was deleted");
         } else {
           roomsToUpdate.push(roomId);
