@@ -171,9 +171,22 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         console.log(`🧹 Votes cleared for ${normalizedRoomId}`);
         dispatch({ type: "CLEAR_SELECTED_CARD" });
       };
+      const handleForceDisconnect = ({ reason }: { reason?: string }) => {
+        console.warn(`⚠️ Disconnected: ${reason || "unknown reason"}`);
+        dispatch({
+          type: "SET_ERROR",
+          payload: reason || "You were disconnected",
+        });
+        if (cleanupRef.current) {
+          cleanupRef.current();
+          cleanupRef.current = null;
+        }
+        socket.disconnect();
+      };
 
       socket.on("room:state", handleRoomState);
       socket.on("votes:cleared", handleVotesCleared);
+      socket.on("force:disconnect", handleForceDisconnect);
 
       const cleanup = () => {
         console.log(`🧹 Cleaning up room ${normalizedRoomId} listeners`);
@@ -181,6 +194,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         socket.off("connect", startJoin);
         socket.off("room:state", handleRoomState);
         socket.off("votes:cleared", handleVotesCleared);
+        socket.off("force:disconnect", handleForceDisconnect);
         cleanupRef.current = null;
       };
 

@@ -30,6 +30,7 @@ export type RoomState = {
 export interface ServerToClientEvents {
   "room:state": (state: RoomState) => void;
   "votes:cleared": () => void;
+  "force:disconnect": (payload: { reason?: string }) => void;
 }
 
 export interface ClientToServerEvents {

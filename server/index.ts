@@ -41,6 +41,9 @@ interface SocketData {
   user: User;
 }
 
+// Track active sockets per user to enforce single connection per userId
+const activeSockets = new Map<string, string>();
+
 const io = new Server<
   ClientToServerEvents,
   ServerToClientEvents,
@@ -79,6 +82,25 @@ namespace.use(async (socket, next) => {
 namespace.on("connection", (socket) => {
   const transport = socket.conn.transport.name; // in most cases, "polling"
   logger.info(`Socket connected using transport: ${transport}`);
+
+  const { id: userId, name: userName } = socket.data.user;
+
+  // Enforce single active connection per userId by disconnecting the previous one
+  const existingSocketId = activeSockets.get(userId);
+  if (existingSocketId && existingSocketId !== socket.id) {
+    const existingSocket = namespace.sockets.get(existingSocketId);
+    if (existingSocket) {
+      existingSocket.emit("force:disconnect", {
+        reason: "Another session connected with your account",
+      });
+      existingSocket.disconnect(true);
+      logger.info(
+        { userId, userName, kickedSocketId: existingSocketId },
+        "Disconnected previous socket for user",
+      );
+    }
+  }
+  activeSockets.set(userId, socket.id);
 
   socket.conn.on("upgrade", () => {
     const upgradedTransport = socket.conn.transport.name; // in most cases, "websocket"
@@ -271,6 +293,11 @@ namespace.on("connection", (socket) => {
       },
       "User disconnected",
     );
+    // Clear active socket tracking if this was the registered one for the user
+    if (activeSockets.get(socket.data.user.id) === socket.id) {
+      activeSockets.delete(socket.data.user.id);
+    }
+
     // Remove user from all rooms and update affected rooms
     const updatedRoomIds = rooms.leaveAll(socket.data.user.id);
     // Emit updated state to all affected rooms
