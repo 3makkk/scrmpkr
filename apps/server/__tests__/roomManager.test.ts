@@ -57,7 +57,7 @@ describe("RoomManager", () => {
         if (name === "TEST") {
           // This should work due to normalization
           expect(() =>
-            manager.createRoom("owner", "Owner", name)
+            manager.createRoom("owner", "Owner", name),
           ).not.toThrow();
         } else {
           expect(() => manager.createRoom("owner", "Owner", name)).toThrow();
@@ -69,7 +69,7 @@ describe("RoomManager", () => {
       manager.createRoom("owner-1", "Owner", "test-room");
 
       expect(() =>
-        manager.createRoom("owner-2", "Owner 2", "test-room")
+        manager.createRoom("owner-2", "Owner 2", "test-room"),
       ).toThrow("Room already exists");
     });
 
@@ -93,7 +93,7 @@ describe("RoomManager", () => {
   describe("Room Joining", () => {
     it("throws a reopen hint when joining a missing room", () => {
       expect(() =>
-        manager.joinRoom("missing-room", { id: "x", name: "Missing" })
+        manager.joinRoom("missing-room", { id: "x", name: "Missing" }),
       ).toThrow(/reopen/i);
     });
 
@@ -105,7 +105,7 @@ describe("RoomManager", () => {
 
       expect(room.participants.size).toBe(3);
       expect(Array.from(room.participants.keys())).toEqual(
-        expect.arrayContaining(["owner", "user1", "user2"])
+        expect.arrayContaining(["owner", "user1", "user2"]),
       );
     });
 
@@ -124,13 +124,13 @@ describe("RoomManager", () => {
 
     it("validates room id when joining", () => {
       expect(() => manager.joinRoom("", { id: "user", name: "User" })).toThrow(
-        "Room name is required"
+        "Room name is required",
       );
 
       expect(() =>
-        manager.joinRoom("invalid@room", { id: "user", name: "User" })
+        manager.joinRoom("invalid@room", { id: "user", name: "User" }),
       ).toThrow(
-        "Room name can only contain lowercase letters, hyphens, and underscores"
+        "Room name can only contain lowercase letters, hyphens, and underscores",
       );
     });
   });
@@ -263,7 +263,7 @@ describe("RoomManager", () => {
       expect(state?.currentRound).toBe(2);
       expect(state?.currentRoundState.votes.length).toBe(0);
       expect(
-        state?.participants.every((p) => p.hasVoted === false)
+        state?.participants.every((p) => p.hasVoted === false),
       ).toBeTruthy();
     });
 
@@ -409,18 +409,18 @@ describe("RoomManager", () => {
 
       // user2 leaves room-one (still has owner + user1) and room-two (still has user1 as owner)
       expect(roomsToUpdate).toEqual(
-        expect.arrayContaining(["room-one", "room-two"])
+        expect.arrayContaining(["room-one", "room-two"]),
       );
       expect(roomsToUpdate).toHaveLength(2);
 
       const roomOneState = manager.getState("room-one");
       expect(roomOneState?.participants.map((p) => p.id)).not.toContain(
-        "user2"
+        "user2",
       );
 
       const roomTwoState = manager.getState("room-two");
       expect(roomTwoState?.participants.map((p) => p.id)).not.toContain(
-        "user2"
+        "user2",
       );
     });
 
@@ -429,7 +429,7 @@ describe("RoomManager", () => {
 
       // user1 leaves room-one (still has owner + user2) and room-two (still has user2)
       expect(roomsToUpdate).toEqual(
-        expect.arrayContaining(["room-one", "room-two"])
+        expect.arrayContaining(["room-one", "room-two"]),
       );
       expect(roomsToUpdate).toHaveLength(2);
 
@@ -461,7 +461,7 @@ describe("RoomManager", () => {
       expect(roomsToUpdate).toEqual(["room-one"]);
       const roomOneState = manager.getState("room-one");
       expect(roomOneState?.participants.map((p) => p.id)).not.toContain(
-        "owner"
+        "owner",
       );
       expect(roomOneState?.ownerId).toBe("owner"); // Owner ID doesn't change
     });
@@ -577,7 +577,7 @@ describe("RoomManager", () => {
       state = manager.getState("test-room");
       expect(state?.currentRoundState.status).toBe("voting"); // Status resets when new vote comes in
       expect(
-        state?.currentRoundState.votes.find((v) => v.id === "user1")?.value
+        state?.currentRoundState.votes.find((v) => v.id === "user1")?.value,
       ).toBe(8);
     });
 

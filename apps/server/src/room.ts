@@ -59,7 +59,7 @@ export default class Room {
     participant.value = value;
     this.currentRoundTracker.addOrUpdateVote(
       { id: participant.id, name: participant.name },
-      value
+      value,
     );
     return participant;
   }
@@ -89,7 +89,7 @@ export default class Room {
     return (
       this.currentRoundTracker.toState().votes.length > 0 ||
       Array.from(this.participants.values()).some(
-        (participant) => participant.hasVoted
+        (participant) => participant.hasVoted,
       )
     );
   }
@@ -111,7 +111,7 @@ export default class Room {
           id: participant.id,
           name: participant.name,
           hasVoted: participant.hasVoted,
-        })
+        }),
       ),
       status: this.status,
       currentRound: this.currentRound,
