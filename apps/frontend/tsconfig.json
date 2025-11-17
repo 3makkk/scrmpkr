@@ -4,7 +4,6 @@
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "allowJs": false,
-    "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
@@ -15,11 +14,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
-    "paths": {
-      "@scrmpkr/shared": ["../shared/src"],
-      "@scrmpkr/shared/*": ["../shared/src/*"]
-    }
+    "baseUrl": "."
   },
   "include": ["src", "vite-env.d.ts"]
 }

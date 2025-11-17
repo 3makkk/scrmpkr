@@ -1,5 +1,5 @@
 # Frontend Dockerfile (build with pnpm, serve via nginx)
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 WORKDIR /app
 RUN corepack enable
 
@@ -12,8 +12,8 @@ ENV VITE_SOCKET_PATH=${VITE_SOCKET_PATH}
 
 # Install only manifest files first for better caching
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY frontend/package.json frontend/
-COPY shared/package.json shared/
+COPY apps/frontend/package.json apps/frontend/
+COPY packages/shared/package.json packages/shared/
 
 FROM base AS deps
 RUN pnpm install -r --frozen-lockfile
@@ -23,10 +23,10 @@ ENV NODE_ENV='production'
 COPY . .
 RUN --mount=type=secret,id=sentry_auth_token \
     SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token)" \
-    pnpm --filter frontend build
+    pnpm --filter ./apps/frontend build
 
 FROM nginx:1.27-alpine AS runner
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/frontend/dist /usr/share/nginx/html
+COPY apps/frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/apps/frontend/dist /usr/share/nginx/html
 EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s CMD wget -qO- http://127.0.0.1/ || exit 1

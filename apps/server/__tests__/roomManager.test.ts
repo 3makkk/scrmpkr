@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import RoomManager from "../roomManager";
-import type { PokerNamespace } from "../roomManagerTypes";
-import { FIB_DECK } from "../types";
+import RoomManager from "../src/roomManager";
+import type { PokerNamespace } from "../src/roomManagerTypes";
+import { FIB_DECK } from "../src/types";
 
 describe("RoomManager", () => {
   let manager: RoomManager;

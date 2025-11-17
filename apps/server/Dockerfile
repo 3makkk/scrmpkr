@@ -1,24 +1,24 @@
 # Server Dockerfile (multi-stage, pnpm workspaces)
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 WORKDIR /app
 RUN corepack enable
 
 # Install only manifest files first for better caching
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY server/package.json server/
-COPY shared/package.json shared/
+COPY apps/server/package.json apps/server/
+COPY packages/shared/package.json packages/shared/
 
 FROM base AS deps
 RUN pnpm install -r --frozen-lockfile
 
 FROM deps AS build
 COPY . .
-RUN pnpm --filter server build
+RUN pnpm --filter ./apps/server build
 
 # Create a pruned, production-only deploy directory for the server
-RUN pnpm --filter server deploy --prod /app/server-deploy
+RUN pnpm --filter ./apps/server deploy --prod /app/server-deploy
 
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 # The deploy directory contains server package files and pruned node_modules
