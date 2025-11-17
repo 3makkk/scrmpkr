@@ -21,7 +21,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
       - run: pnpm lint
-      # - run: pnpm test
+      - run: pnpm test
 
   build:
     name: Build and Push Images
