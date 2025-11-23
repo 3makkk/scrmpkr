@@ -48,6 +48,7 @@ export default function LoginForm({
             </label>
             <input
               id="name"
+              data-testid="user-name-input"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your name"
@@ -62,6 +63,7 @@ export default function LoginForm({
               onClick={handleLogin}
               disabled={!name.trim()}
               className="w-full"
+              data-testid="login-button"
             >
               {primaryButtonText}
             </Button>

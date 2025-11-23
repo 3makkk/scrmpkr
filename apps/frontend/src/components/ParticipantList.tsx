@@ -10,13 +10,14 @@ export default function ParticipantList() {
   const { participants, ownerId } = roomState;
 
   return (
-    <Card>
+    <Card data-testid="participant-list">
       <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
         Participants
         <Badge
           bgClass="bg-blue-600"
           rounded="full"
           className="ml-3 text-sm font-medium"
+          data-testid="participant-count"
         >
           {participants.length}
         </Badge>
@@ -26,14 +27,21 @@ export default function ParticipantList() {
           <div
             key={participant.id}
             className="flex items-center justify-between bg-gray-800/40 border border-gray-700/40 rounded-xl p-4 hover:bg-gray-800/60 transition-colors"
+            data-testid={`participant-${participant.name}`}
           >
             <div className="flex items-center space-x-3">
-              <span className="text-white font-medium">{participant.name}</span>
+              <span
+                className="text-white font-medium"
+                data-testid={`participant-name-${participant.name}`}
+              >
+                {participant.name}
+              </span>
               {participant.id === ownerId && (
                 <Badge
                   bgClass="bg-blue-900"
                   rounded="full"
                   className="text-xs font-semibold px-2 py-1"
+                  data-testid={`participant-owner-${participant.name}`}
                 >
                   OWNER
                 </Badge>

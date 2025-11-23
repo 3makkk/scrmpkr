@@ -18,14 +18,22 @@ export default function RoomHeader() {
       <Card>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-medium text-white mb-2">
+            <h1
+              className="text-3xl font-medium text-white mb-2"
+              data-testid="room-title"
+            >
               Room {roomState.id}
             </h1>
-            <p className="text-gray-400">
+            <p className="text-gray-400" data-testid="voting-progress">
               {votedCount} of {roomState.participants.length} participants voted
             </p>
           </div>
-          <Button type="button" onClick={handleLeave} variant="secondary">
+          <Button
+            type="button"
+            onClick={handleLeave}
+            variant="secondary"
+            data-testid="leave-room-button"
+          >
             Leave Room
           </Button>
         </div>

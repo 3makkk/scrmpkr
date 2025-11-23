@@ -36,6 +36,7 @@ export default function PokerCard({
       className={`poker-card ${isSelected ? "selected" : ""} ${
         disabled ? "disabled" : ""
       }`}
+      data-testid={`vote-card-${value}`}
     >
       <div className="inner-frame" />
       {/* ornaments */}

@@ -30,7 +30,7 @@ export default function VotingResults() {
   }
 
   return (
-    <Card className="animate-fade-in">
+    <Card className="animate-fade-in" data-testid="voting-results">
       <h2 className="text-2xl font-medium text-white mb-8 text-center">
         Voting Results
       </h2>
@@ -59,7 +59,7 @@ export default function VotingResults() {
       {/* Statistics */}
       <div className="mt-8 pt-6 border-t border-gray-700/50">
         <div className="grid grid-cols-3 gap-6 text-center">
-          <div>
+          <div data-testid="vote-average">
             <div className="text-gray-400 text-sm font-medium mb-1">
               Average
             </div>
@@ -68,7 +68,7 @@ export default function VotingResults() {
             </div>
           </div>
           {stats.showMostCommon && (
-            <div>
+            <div data-testid="vote-most-common">
               <div className="text-gray-400 text-sm font-medium mb-1">
                 Most Common
               </div>
@@ -77,7 +77,7 @@ export default function VotingResults() {
               </div>
             </div>
           )}
-          <div>
+          <div data-testid="vote-consensus">
             <div className="text-gray-400 text-sm font-medium mb-1">
               Consensus
             </div>

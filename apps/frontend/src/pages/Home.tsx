@@ -82,7 +82,7 @@ export default function Home() {
       <Card className="max-w-lg w-full">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-light text-white mb-3">Scrum Poker</h1>
-          <p className="text-gray-400 mb-4">
+          <p className="text-gray-400 mb-4" data-testid="welcome-message">
             Welcome back,{" "}
             <span className="font-semibold text-blue-400">{account.name}</span>
           </p>
@@ -95,6 +95,7 @@ export default function Home() {
                 type="button"
                 onClick={() => setShowCustomForm(true)}
                 className="w-full"
+                data-testid="create-custom-room-button"
               >
                 Create custom Room
               </Button>
@@ -103,6 +104,7 @@ export default function Home() {
                 onClick={createRandomRoom}
                 variant="secondary"
                 className="w-full"
+                data-testid="create-random-room-button"
               >
                 Create Random Room
               </Button>
@@ -125,6 +127,7 @@ export default function Home() {
                 </label>
                 <input
                   id="custom-room-name"
+                  data-testid="room-name-input"
                   ref={customInputRef}
                   value={roomName}
                   onChange={(e) => {
@@ -153,6 +156,7 @@ export default function Home() {
                 onClick={createNamedRoom}
                 className="w-full"
                 disabled={!roomName}
+                data-testid="create-room-submit-button"
               >
                 Create custom Room
               </Button>
