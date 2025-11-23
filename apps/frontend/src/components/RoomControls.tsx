@@ -9,12 +9,9 @@ export default function RoomControls() {
 
   if (!roomState || !account) return null;
 
-  const isOwner = roomState.ownerId === account.id;
   const isRoundRevealed =
     roomState.currentRoundState?.status === "revealed" &&
     (roomState.currentRoundState?.votes.length ?? 0) > 0;
-
-  if (!isOwner) return null;
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -24,6 +21,7 @@ export default function RoomControls() {
           onClick={revealVotes}
           disabled={votedCount === 0}
           className="flex-1 max-w-xs"
+          data-testid="reveal-votes-button"
         >
           Reveal Votes{" "}
           {allVoted
@@ -36,6 +34,7 @@ export default function RoomControls() {
         onClick={clearVotes}
         variant="danger"
         className={`${isRoundRevealed ? "flex-1 max-w-md" : "flex-1 max-w-xs"}`}
+        data-testid="clear-votes-button"
       >
         Clear Votes
       </Button>

@@ -243,14 +243,7 @@ namespace.on("connection", (socket) => {
       },
       "Reveal was requested",
     );
-    // Ensure user is owner of this specific room and there are votes to reveal
-    if (!rooms.isOwner(roomId, socket.data.user.id)) {
-      logger.warn(
-        { userId: socket.data.user.id, roomId },
-        "Reveal was denied, user not owner",
-      );
-      return;
-    }
+    // Check if there are votes to reveal
     if (!rooms.hasAnyVotes(roomId)) {
       logger.warn({ roomId }, "Reveal was denied, no votes");
       return; // Don't allow reveal if no votes
@@ -267,14 +260,6 @@ namespace.on("connection", (socket) => {
       },
       "Clear votes was requested",
     );
-    // Ensure user is owner of this specific room
-    if (!rooms.isOwner(roomId, socket.data.user.id)) {
-      logger.warn(
-        { userId: socket.data.user.id, roomId },
-        "Clear votes was denied, user not owner",
-      );
-      return;
-    }
     rooms.clearVotes(roomId);
     // Notify clients that votes were cleared, and broadcast fresh state
     const normalizedRoomId = roomId.trim().toLowerCase();
