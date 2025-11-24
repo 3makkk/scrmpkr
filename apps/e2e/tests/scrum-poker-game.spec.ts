@@ -39,7 +39,6 @@ test.describe("Scrum Poker Game Simulation", () => {
         roomOwner,
         `test-room-${Date.now()}-${Math.random().toString(36).substring(7)}`,
       );
-      console.log(`Created room: ${roomId}`);
     });
 
     // Define a stable player for room controls (since ownership is removed)
@@ -219,7 +218,6 @@ test.describe("Scrum Poker Game Simulation", () => {
     await test.step("Cleanup new player sessions", async () => {
       await newPlayer1.context.close();
       await newPlayer2.context.close();
-      console.log("Scrum poker game simulation completed successfully!");
     });
   });
 
