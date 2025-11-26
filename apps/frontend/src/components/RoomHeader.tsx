@@ -15,7 +15,7 @@ export default function RoomHeader() {
 
   return (
     <div className="max-w-6xl mx-auto mb-8">
-      <Card>
+      <Card className="animation-delay-150">
         <div className="flex items-center justify-between">
           <div>
             <h1

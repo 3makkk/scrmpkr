@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { useAuth } from "../AuthProvider";
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/LoginForm";
@@ -6,6 +7,7 @@ import PageLayout from "../components/PageLayout";
 import Card from "../components/Card";
 import Button from "../components/ds/Button/Button";
 import { getSocket } from "../socket";
+import { Input } from "../components";
 
 export default function Home() {
   const { account, login } = useAuth();
@@ -53,7 +55,7 @@ export default function Home() {
         return;
       }
       setRoomName("");
-      navigate(`/r/${response.roomId}`);
+      navigate(`/r/${response.roomId}`, { viewTransition: true });
     });
   };
 
@@ -80,52 +82,142 @@ export default function Home() {
   return (
     <PageLayout className="flex items-center justify-center px-4">
       <Card className="max-w-lg w-full">
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-light text-white mb-3">Scrum Poker</h1>
-          <p className="text-gray-400 mb-4" data-testid="welcome-message">
+        <motion.div
+          className="text-center mb-10"
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.6,
+            ease: "easeOut",
+            delay: 0.1,
+          }}
+        >
+          <motion.h1
+            className="text-4xl font-light text-white mb-3"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{
+              duration: 0.5,
+              ease: "easeOut",
+              delay: 0.2,
+            }}
+          >
+            Scrum Poker
+          </motion.h1>
+          <motion.p
+            className="text-gray-400 mb-4"
+            data-testid="welcome-message"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{
+              duration: 0.4,
+              delay: 0.3,
+            }}
+          >
             Welcome back,{" "}
             <span className="font-semibold text-blue-400">{account.name}</span>
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
-        <div className="space-y-8">
+        <motion.div
+          className="space-y-8"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.5,
+            ease: "easeOut",
+            delay: 0.4,
+          }}
+        >
           {!showCustomForm ? (
-            <div className="space-y-4">
-              <Button
-                type="button"
-                onClick={() => setShowCustomForm(true)}
-                className="w-full"
-                data-testid="create-custom-room-button"
+            <motion.div
+              className="space-y-4"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.1,
+                    delayChildren: 0.1,
+                  },
+                },
+              }}
+            >
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, x: -20 },
+                  visible: { opacity: 1, x: 0 },
+                }}
               >
-                Create custom Room
-              </Button>
-              <Button
-                type="button"
-                onClick={createRandomRoom}
-                variant="secondary"
-                className="w-full"
-                data-testid="create-random-room-button"
+                <Button
+                  type="button"
+                  onClick={() => setShowCustomForm(true)}
+                  className="w-full"
+                  data-testid="create-custom-room-button"
+                >
+                  Create custom Room
+                </Button>
+              </motion.div>
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, x: 20 },
+                  visible: { opacity: 1, x: 0 },
+                }}
               >
-                Create Random Room
-              </Button>
-              <p className="text-sm text-gray-500 text-center">
+                <Button
+                  type="button"
+                  onClick={createRandomRoom}
+                  variant="secondary"
+                  className="w-full"
+                  data-testid="create-random-room-button"
+                >
+                  Create Random Room
+                </Button>
+              </motion.div>
+              <motion.p
+                className="text-sm text-gray-500 text-center"
+                variants={{
+                  hidden: { opacity: 0, y: 10 },
+                  visible: { opacity: 1, y: 0 },
+                }}
+              >
                 Custom lets you pick a readable room name to share; Random
                 instantly creates a room with a generated ID.
-              </p>
-            </div>
+              </motion.p>
+            </motion.div>
           ) : (
-            <div className="space-y-6">
-              <h2 className="text-lg font-medium text-gray-200">
+            <motion.div
+              className="space-y-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{
+                duration: 0.3,
+                ease: "easeOut",
+              }}
+            >
+              <motion.h2
+                className="text-lg font-medium text-gray-200"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+              >
                 Choose your room name
-              </h2>
-              <div className="space-y-3">
+              </motion.h2>
+              <motion.div
+                className="space-y-3"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
                 <label
                   htmlFor="custom-room-name"
                   className="block text-sm text-gray-400 sr-only"
                 >
                   Custom room name
                 </label>
-                <input
+                <Input
                   id="custom-room-name"
                   data-testid="room-name-input"
                   ref={customInputRef}
@@ -145,24 +237,39 @@ export default function Home() {
                 <p className="text-xs text-gray-500">
                   Allowed: a-z, hyphen (-), underscore (_). Max 50 characters.
                 </p>
-              </div>
+              </motion.div>
               {createError && (
-                <p className="text-sm text-red-500" role="alert">
+                <motion.p
+                  className="text-sm text-red-500"
+                  role="alert"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    duration: 0.3,
+                    ease: "easeOut",
+                  }}
+                >
                   {createError}
-                </p>
+                </motion.p>
               )}
-              <Button
-                type="button"
-                onClick={createNamedRoom}
-                className="w-full"
-                disabled={!roomName}
-                data-testid="create-room-submit-button"
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
               >
-                Create custom Room
-              </Button>
-            </div>
+                <Button
+                  type="button"
+                  onClick={createNamedRoom}
+                  className="w-full"
+                  disabled={!roomName}
+                  data-testid="create-room-submit-button"
+                >
+                  Create custom Room
+                </Button>
+              </motion.div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       </Card>
     </PageLayout>
   );

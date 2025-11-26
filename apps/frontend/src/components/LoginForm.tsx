@@ -1,5 +1,7 @@
 import { useState } from "react";
 import Button from "./ds/Button/Button";
+import Input from "./ds/Input/Input";
+import Card from "./ds/Card/Card";
 
 type Props = {
   readonly title: string;
@@ -32,7 +34,7 @@ export default function LoginForm({
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="card max-w-md w-full text-center">
+      <Card className="max-w-md w-full text-center">
         <div className="mb-12">
           <h1 className="text-4xl font-light text-white mb-4">{title}</h1>
           <p className="text-gray-400 text-lg">{subtitle}</p>
@@ -46,13 +48,13 @@ export default function LoginForm({
             >
               Your name
             </label>
-            <input
+            <Input
               id="name"
               data-testid="user-name-input"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your name"
-              className="input w-full"
+              className="w-full"
               onKeyDown={handleKeyDown}
             />
           </div>
@@ -71,7 +73,7 @@ export default function LoginForm({
             {secondaryButton}
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

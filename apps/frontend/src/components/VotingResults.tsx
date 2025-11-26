@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+import { motionVariants } from "./ds/Motion/Motion";
 import { useRoom } from "../hooks/useRoom";
 import Card from "./Card";
 import BarVoteChart from "./ds/BarVoteChart/BarVoteChart";
@@ -30,34 +32,69 @@ export default function VotingResults() {
   }
 
   return (
-    <Card className="animate-fade-in" data-testid="voting-results">
-      <h2 className="text-2xl font-medium text-white mb-8 text-center">
+    <Card data-testid="voting-results">
+      <motion.h2
+        className="text-2xl font-medium text-white mb-8 text-center"
+        variants={motionVariants.fadeIn}
+        initial="hidden"
+        animate="visible"
+      >
         Voting Results
-      </h2>
+      </motion.h2>
 
-      <BarVoteChart numberOfVoters={revealedVotes.length}>
-        {Array.from(numericGroups.keys())
-          .sort((a, b) => b - a)
-          .map((value) => (
-            <BarVoteChart.Row key={value} value={value}>
-              {(numericGroups.get(value) ?? []).map((voterName) => (
-                <BarVoteChart.Name key={voterName}>
-                  {voterName}
-                </BarVoteChart.Name>
-              ))}
-            </BarVoteChart.Row>
-          ))}
-        {unknownGroup.length > 0 && (
-          <BarVoteChart.Row value="?">
-            {unknownGroup.map((voterName) => (
-              <BarVoteChart.Name key={voterName}>{voterName}</BarVoteChart.Name>
+      <motion.div
+        variants={motionVariants.slideInFromBottom}
+        initial="hidden"
+        animate="visible"
+        transition={{ delay: 0.1 }}
+      >
+        <BarVoteChart numberOfVoters={revealedVotes.length}>
+          {Array.from(numericGroups.keys())
+            .sort((a, b) => b - a)
+            .map((value, index) => (
+              <motion.div
+                key={value}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{
+                  delay: 0.2 + index * 0.05,
+                }}
+              >
+                <BarVoteChart.Row value={value}>
+                  {(numericGroups.get(value) ?? []).map((voterName) => (
+                    <BarVoteChart.Name key={voterName}>
+                      {voterName}
+                    </BarVoteChart.Name>
+                  ))}
+                </BarVoteChart.Row>
+              </motion.div>
             ))}
-          </BarVoteChart.Row>
-        )}
-      </BarVoteChart>
+          {unknownGroup.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 + numericGroups.size * 0.05 }}
+            >
+              <BarVoteChart.Row value="?">
+                {unknownGroup.map((voterName) => (
+                  <BarVoteChart.Name key={voterName}>
+                    {voterName}
+                  </BarVoteChart.Name>
+                ))}
+              </BarVoteChart.Row>
+            </motion.div>
+          )}
+        </BarVoteChart>
+      </motion.div>
 
       {/* Statistics */}
-      <div className="mt-8 pt-6 border-t border-gray-700/50">
+      <motion.div
+        className="mt-8 pt-6 border-t border-gray-700/50"
+        variants={motionVariants.fadeIn}
+        initial="hidden"
+        animate="visible"
+        transition={{ delay: 0.4 }}
+      >
         <div className="grid grid-cols-3 gap-6 text-center">
           <div data-testid="vote-average">
             <div className="text-gray-400 text-sm font-medium mb-1">
@@ -90,7 +127,7 @@ export default function VotingResults() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </Card>
   );
 }

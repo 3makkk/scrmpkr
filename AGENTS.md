@@ -55,7 +55,8 @@
 - Class control: Accept `className` and merge it with component defaults. Do not hide styling behind opaque props; expose via `className` and simple variant flags.
 - Children first: Components should render `children` in their natural slot and avoid hardcoded content when possible.
 
-Shared types
+### CSS and Styling Guidelines
 
-- File: `frontend/src/components/ds/uiTypes.ts`
-- Export: `UIProps<Tag, Extra>` ensures consistent typing across DS components.
+- **Prohibit component-specific CSS classes**: Do NOT create new CSS classes in `index.css` for individual components (e.g., `.my-component`, `.special-button`, `.custom-input`).
+- **No @apply directive usage**: Do NOT use the `@apply` directive anywhere in the codebase. All styling should use inline Tailwind utility classes directly within components.
+- **Inline styles for all components**: All components, including DS components, should use inline Tailwind classes exclusively for styling.

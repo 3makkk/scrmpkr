@@ -1,148 +1,153 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer components {
-  .btn {
-    @apply bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 
-           text-white font-semibold px-6 py-3 rounded-lg shadow-lg 
-           transition-all duration-200 hover:shadow-xl hover:scale-[1.02]
-           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
-           focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900;
+@theme {
+  --animate-fade-in-scale: fade-in-scale 0.3s ease-out;
+  --animate-fade-in-down: fade-in-down 0.3s ease-out;
+  --animate-bounce-in: bounce-in 0.5s ease-out;
+  --animate-slide-in-left: slide-in-left 0.4s ease-out;
+  --animate-slide-in-right: slide-in-right 0.4s ease-out;
+  --animate-rotate-in: rotate-in 0.6s ease-out;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-glow-pulse: glow-pulse 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.5s linear infinite;
+
+  @keyframes fade-in-scale {
+    0% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 
-  .btn-secondary {
-    @apply bg-gray-800/80 backdrop-blur-sm border border-gray-700/60 text-gray-200 font-medium 
-           px-6 py-3 rounded-lg shadow-md hover:bg-gray-700/80 hover:border-gray-600/60
-           transition-all duration-200 hover:shadow-lg hover:scale-[1.02]
-           focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:ring-offset-gray-900;
+  @keyframes fade-in-down {
+    0% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
-  .btn-danger {
-    @apply bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 
-           text-white font-semibold px-6 py-3 rounded-lg shadow-lg 
-           transition-all duration-200 hover:shadow-xl hover:scale-[1.02]
-           focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-gray-900;
+  @keyframes bounce-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+    70% {
+      transform: scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 
-  .card {
-    @apply bg-gray-900/60 backdrop-blur-xl border border-gray-800/80 rounded-2xl p-6 shadow-2xl
-           animate-fade-in;
+  @keyframes slide-in-left {
+    0% {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
-  .input {
-    @apply bg-gray-800/50 backdrop-blur-sm border border-gray-700/60 rounded-xl px-4 py-3 
-           text-white placeholder-gray-400 focus:outline-none focus:ring-2 
-           focus:ring-blue-400 focus:border-gray-600 transition-all duration-200
-           focus:bg-gray-800/70 shadow-inner;
+  @keyframes slide-in-right {
+    0% {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
-  .poker-card {
-    @apply relative bg-gradient-to-br from-gray-800 to-gray-900 text-gray-200 font-semibold overflow-hidden
-           border border-gray-700/80 rounded-2xl shadow-lg cursor-pointer
-           transition-all duration-200 ease-out hover:shadow-xl hover:border-gray-600/80
-           focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-0
-           w-full flex items-center justify-center select-none
-           will-change-transform z-0 hover:scale-105;
-    transform-origin: center;
-    aspect-ratio: 5 / 7; /* maintain 5:7 ratio; height derives from width */
+  @keyframes rotate-in {
+    0% {
+      opacity: 0;
+      transform: rotate(-180deg) scale(0.5);
+    }
+    100% {
+      opacity: 1;
+      transform: rotate(0deg) scale(1);
+    }
   }
 
-  .poker-card:hover {
-    transform: translateY(-8px) rotate(-2deg) scale(1.05);
-    z-index: 10;
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
   }
 
-  .poker-card.selected {
-    @apply shadow-2xl scale-110 border-blue-500/80;
-    transform: translateY(-14px) rotate(-4deg) scale(1.1);
-    z-index: 20;
+  @keyframes glow-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.6),
+        0 0 30px rgba(59, 130, 246, 0.3);
+    }
   }
 
-  .poker-card.disabled {
-    @apply opacity-50 cursor-not-allowed;
-  }
-
-  /* subtle ornament pattern overlay */
-  .poker-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image:
-      radial-gradient(
-        circle at 20% 20%,
-        rgba(255, 255, 255, 0.04) 0 2px,
-        transparent 3px
-      ),
-      radial-gradient(
-        circle at 80% 80%,
-        rgba(255, 255, 255, 0.035) 0 2px,
-        transparent 3px
-      );
-    background-size:
-      48px 48px,
-      72px 72px;
-    opacity: 0.4;
-    pointer-events: none;
-  }
-
-  /* inner frame */
-  .poker-card .inner-frame {
-    @apply absolute inset-2 rounded-xl border border-gray-600/70;
-  }
-
-  /* ornamental glyphs */
-  .poker-card .ornament {
-    @apply absolute text-xs md:text-sm opacity-40 select-none pointer-events-none text-gray-300;
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
 }
 
-/* removed stack styles; using grid to prevent overflow */
+@utility animation-delay-* {
+  animation-delay: calc(--value(integer) * 1ms);
+}
 
-@layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-in-out;
-  }
-
-  .animate-bounce-in {
-    animation: bounceIn 0.4s ease-out;
-  }
-
-  .animate-pulse-glow {
-    animation: pulseGlow 3s ease-in-out infinite;
+/* Framer Motion optimization */
+.motion-safe {
+  @media (prefers-reduced-motion: no-preference) {
+    --motion-duration: 0.3s;
   }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe {
+    --motion-duration: 0s;
   }
 }
 
-@keyframes bounceIn {
-  0% {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+/* Custom utility classes for enhanced animations */
+.animate-float {
+  animation: var(--animate-float);
 }
 
-@keyframes pulseGlow {
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
-    transform: scale(1);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
-    transform: scale(1.02);
-  }
+.animate-glow-pulse {
+  animation: var(--animate-glow-pulse);
+}
+
+.animate-shimmer {
+  animation: var(--animate-shimmer);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  background-size: 200% 100%;
 }

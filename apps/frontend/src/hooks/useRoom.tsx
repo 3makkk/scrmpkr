@@ -121,8 +121,6 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       if (!account) return () => {};
 
       const normalizedRoomId = roomId.trim().toLowerCase();
-
-      console.log(`🔄 Joining room ${normalizedRoomId}, user ${account.name}`);
       setCurrentRoomId(normalizedRoomId);
 
       dispatch({ type: "RESET_ROOM" });
@@ -138,23 +136,15 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
 
       let joinTimeout: NodeJS.Timeout | null = null;
       const startJoin = () => {
-        console.log(`📡 Attempting to join room ${normalizedRoomId}`);
         joinTimeout = setTimeout(() => {
-          console.log(`⏰ Join timeout for room ${normalizedRoomId}`);
           dispatch({ type: "TIMEOUT_ERROR" });
         }, 10000);
         socket.emit("room:join", { roomId: normalizedRoomId }, (response) => {
           if (joinTimeout) clearTimeout(joinTimeout);
-          console.log(
-            `📨 Room join response for ${normalizedRoomId}:`,
-            response,
-          );
 
           if ("error" in response) {
-            console.error("Failed to join room:", response.error);
             dispatch({ type: "SET_ERROR", payload: response.error });
           } else if ("state" in response) {
-            console.log(`✅ Successfully joined room ${normalizedRoomId}`);
             dispatch({ type: "SET_ROOM_STATE", payload: response.state });
           }
         });
@@ -164,15 +154,12 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       else socket.once("connect", startJoin);
 
       const handleRoomState = (newState: RoomState) => {
-        console.log(`📊 Room state update for ${normalizedRoomId}:`, newState);
         dispatch({ type: "SET_ROOM_STATE", payload: newState });
       };
       const handleVotesCleared = () => {
-        console.log(`🧹 Votes cleared for ${normalizedRoomId}`);
         dispatch({ type: "CLEAR_SELECTED_CARD" });
       };
       const handleForceDisconnect = ({ reason }: { reason?: string }) => {
-        console.warn(`⚠️ Disconnected: ${reason || "unknown reason"}`);
         dispatch({
           type: "SET_ERROR",
           payload: reason || "You were disconnected",
@@ -189,7 +176,6 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       socket.on("force:disconnect", handleForceDisconnect);
 
       const cleanup = () => {
-        console.log(`🧹 Cleaning up room ${normalizedRoomId} listeners`);
         if (joinTimeout) clearTimeout(joinTimeout);
         socket.off("connect", startJoin);
         socket.off("room:state", handleRoomState);

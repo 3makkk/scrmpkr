@@ -27,10 +27,6 @@ test.describe("Simple Scrum Poker Test", () => {
           player.page.locator("text=Choose your estimate"),
         ).toBeVisible();
       });
-
-      await test.step("Log successful completion", async () => {
-        console.log(`Test completed successfully with room: ${roomId}`);
-      });
     } catch (error) {
       await test.step("Handle test failure", async () => {
         console.error("Test failed:", error);
