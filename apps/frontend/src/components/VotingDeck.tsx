@@ -56,19 +56,19 @@ export default function VotingDeck() {
               isRoundRevealed
                 ? {}
                 : selectedCard === value
-                  ? {
-                      scale: 1.15,
-                      y: -15,
-                      rotate: -4,
-                      transition: { duration: 0.1, ease: "easeOut" },
-                    }
-                  : {
-                      scale: 1.05,
-                      y: -4,
-                      rotate: -1,
-                      boxShadow: "0 6px 20px rgba(0, 0, 0, 0.25)",
-                      transition: { duration: 0.1, ease: "easeOut" },
-                    }
+                ? {
+                    scale: 1.15,
+                    y: -15,
+                    rotate: -4,
+                    transition: { duration: 0.1, ease: "easeOut" },
+                  }
+                : {
+                    scale: 1.05,
+                    y: -4,
+                    rotate: -1,
+                    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.25)",
+                    transition: { duration: 0.1, ease: "easeOut" },
+                  }
             }
             whileTap={
               isRoundRevealed
@@ -100,21 +100,7 @@ export default function VotingDeck() {
               duration: 0.2,
               ease: "easeOut",
             }}
-          >
-            <motion.div
-              className="inline-flex items-center bg-slate-500/20 border border-slate-500/30 rounded-lg px-4 py-2"
-              whileHover={{ scale: 1.05, y: -2 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-3" />
-              <span className="text-white">
-                You voted:{" "}
-                <strong data-testid="voted-value" className="text-blue-400">
-                  {selectedCard}
-                </strong>
-              </span>
-            </motion.div>
-          </motion.div>
+          ></motion.div>
         )}
       </AnimatePresence>
     </Card>
