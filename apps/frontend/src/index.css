@@ -3,6 +3,13 @@
 @theme {
   --animate-fade-in-scale: fade-in-scale 0.3s ease-out;
   --animate-fade-in-down: fade-in-down 0.3s ease-out;
+  --animate-bounce-in: bounce-in 0.5s ease-out;
+  --animate-slide-in-left: slide-in-left 0.4s ease-out;
+  --animate-slide-in-right: slide-in-right 0.4s ease-out;
+  --animate-rotate-in: rotate-in 0.6s ease-out;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-glow-pulse: glow-pulse 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.5s linear infinite;
 
   @keyframes fade-in-scale {
     0% {
@@ -25,8 +32,122 @@
       transform: translateY(0);
     }
   }
+
+  @keyframes bounce-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+    70% {
+      transform: scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes slide-in-left {
+    0% {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slide-in-right {
+    0% {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes rotate-in {
+    0% {
+      opacity: 0;
+      transform: rotate(-180deg) scale(0.5);
+    }
+    100% {
+      opacity: 1;
+      transform: rotate(0deg) scale(1);
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes glow-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.6),
+        0 0 30px rgba(59, 130, 246, 0.3);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
 }
 
 @utility animation-delay-* {
   animation-delay: calc(--value(integer) * 1ms);
+}
+
+/* Framer Motion optimization */
+.motion-safe {
+  @media (prefers-reduced-motion: no-preference) {
+    --motion-duration: 0.3s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe {
+    --motion-duration: 0s;
+  }
+}
+
+/* Custom utility classes for enhanced animations */
+.animate-float {
+  animation: var(--animate-float);
+}
+
+.animate-glow-pulse {
+  animation: var(--animate-glow-pulse);
+}
+
+.animate-shimmer {
+  animation: var(--animate-shimmer);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  background-size: 200% 100%;
 }
