@@ -71,16 +71,11 @@ export default function App() {
   return (
     <AuthProvider>
       <RoomProvider>
-        <motion.div
-          className="min-h-screen bg-linear-to-br from-gray-950 via-gray-900 to-gray-950"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        >
+        <div className="min-h-screen bg-linear-to-br from-gray-950 via-gray-900 to-gray-950">
           <BrowserRouter>
             <AnimatedRoutes />
           </BrowserRouter>
-        </motion.div>
+        </div>
       </RoomProvider>
     </AuthProvider>
   );
