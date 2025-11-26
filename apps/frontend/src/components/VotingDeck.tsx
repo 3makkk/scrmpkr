@@ -27,7 +27,7 @@ export default function VotingDeck() {
             key={value}
             value={value}
             isSelected={selectedCard === value}
-            onClick={castVote}
+            onValueClick={castVote}
             disabled={isRoundRevealed}
           />
         ))}

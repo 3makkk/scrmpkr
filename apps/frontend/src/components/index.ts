@@ -1,11 +1,12 @@
 export { default as Card } from "./ds/Card/Card";
 export { default as Button } from "./ds/Button/Button";
+export { default as Input } from "./ds/Input/Input";
+export { default as PokerCard } from "./ds/PokerCard/PokerCard";
 export { default as ConfettiOverlay } from "./ConfettiOverlay";
 export { default as LoadingSpinner } from "./LoadingSpinner";
 export { default as LoginForm } from "./LoginForm";
 export { default as PageLayout } from "./PageLayout";
 export { default as ParticipantList } from "./ParticipantList";
-export { default as PokerCard } from "./PokerCard";
 export { default as RoomControls } from "./RoomControls";
 export { default as RoomHeader } from "./RoomHeader";
 export { default as VotingDeck } from "./VotingDeck";

@@ -55,6 +55,22 @@
 - Class control: Accept `className` and merge it with component defaults. Do not hide styling behind opaque props; expose via `className` and simple variant flags.
 - Children first: Components should render `children` in their natural slot and avoid hardcoded content when possible.
 
+### CSS and Styling Guidelines
+
+- **Prohibit component-specific CSS classes**: Do NOT create new CSS classes in `index.css` for individual components (e.g., `.my-component`, `.special-button`, `.custom-input`).
+- **No @apply directive usage**: Do NOT use the `@apply` directive anywhere in the codebase. All styling should use inline Tailwind utility classes directly within components.
+- **Use Tailwind built-in animations**: Use Tailwind's built-in animation utilities (e.g., `animate-in`, `fade-in`, `slide-in`, `animate-pulse`, etc.) instead of custom CSS animations.
+- **Custom animations via @theme**: When custom animations are needed, define them using Tailwind v4's `@theme` syntax in `index.css` with `--animate-*` custom properties and corresponding `@keyframes`.
+- **Inline styles for all components**: All components, including DS components, should use inline Tailwind classes exclusively for styling.
+- **No CSS class dependencies**: Components must not depend on custom CSS classes. Use Tailwind utility classes directly or import other DS components.
+
+### Enforcement
+
+- All new components must follow the DS pattern with `UIProps<Tag, Extra>`.
+- All styling must use inline Tailwind utility classes only.
+- Code reviews must reject any use of `@apply` directive or new CSS classes in `index.css`.
+- When refactoring components, convert all CSS class dependencies to inline Tailwind classes following the established patterns.
+
 Shared types
 
 - File: `frontend/src/components/ds/uiTypes.ts`
