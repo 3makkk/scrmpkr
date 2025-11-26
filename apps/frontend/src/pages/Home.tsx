@@ -6,6 +6,7 @@ import PageLayout from "../components/PageLayout";
 import Card from "../components/Card";
 import Button from "../components/ds/Button/Button";
 import { getSocket } from "../socket";
+import { Input } from "../components";
 
 export default function Home() {
   const { account, login } = useAuth();
@@ -53,7 +54,7 @@ export default function Home() {
         return;
       }
       setRoomName("");
-      navigate(`/r/${response.roomId}`);
+      navigate(`/r/${response.roomId}`, { viewTransition: true });
     });
   };
 
@@ -125,7 +126,7 @@ export default function Home() {
                 >
                   Custom room name
                 </label>
-                <input
+                <Input
                   id="custom-room-name"
                   data-testid="room-name-input"
                   ref={customInputRef}

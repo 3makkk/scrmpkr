@@ -30,7 +30,7 @@ export default function VotingResults() {
   }
 
   return (
-    <Card className="animate-fade-in" data-testid="voting-results">
+    <Card className="animate-fade-in-scale" data-testid="voting-results">
       <h2 className="text-2xl font-medium text-white mb-8 text-center">
         Voting Results
       </h2>

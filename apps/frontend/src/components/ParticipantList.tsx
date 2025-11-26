@@ -10,7 +10,7 @@ export default function ParticipantList() {
   const { participants, ownerId } = roomState;
 
   return (
-    <Card data-testid="participant-list">
+    <Card data-testid="participant-list" className="animation-delay-300">
       <h2 className="text-lg font-semibold text-white mb-6 flex items-center">
         Participants
         <Badge
