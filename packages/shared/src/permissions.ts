@@ -1,8 +1,7 @@
 // Access Control List (ACL) and Permission Matrix for Scrum Poker Application
 // Structured around RBAC core elements: Roles, Resources, Actions
 
-// ===== ROLES =====
-export type UserRole = "owner" | "participant" | "visitor";
+import type { UserRole } from "./types";
 
 // ===== RESOURCES =====
 export type Resource = "room" | "vote" | "round" | "participant" | "session";

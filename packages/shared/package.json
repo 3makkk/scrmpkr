@@ -2,12 +2,18 @@
   "name": "@scrmpkr/shared",
   "version": "1.0.0",
   "private": true,
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "src"
+    "dist"
   ],
   "scripts": {
-    "build": "echo 'no build'",
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "clean": "rm -rf dist",
     "typecheck": "tsc -p tsconfig.json --noEmit || true"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
   }
 }

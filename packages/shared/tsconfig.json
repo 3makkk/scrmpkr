@@ -4,10 +4,13 @@
     "module": "ESNext",
     "lib": ["ES2020"],
     "strict": true,
-    "declaration": false,
+    "declaration": true,
     "emitDeclarationOnly": false,
+    "outDir": "dist",
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "moduleResolution": "node"
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["dist", "**/*.test.ts", "**/__tests__/**"]
 }
