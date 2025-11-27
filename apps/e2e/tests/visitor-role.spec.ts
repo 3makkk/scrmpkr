@@ -40,7 +40,7 @@ test.describe("Visitor Role Functionality", () => {
         roomOwner,
         `visitor-test-room-${Date.now()}-${Math.random()
           .toString(36)
-          .substring(7)}`
+          .substring(7)}`,
       );
       ownerParticipation = new Participation(roomOwner, room, "OWNER");
     });
@@ -51,7 +51,7 @@ test.describe("Visitor Role Functionality", () => {
       participantParticipation = await TestActions.joinRoom(
         participant,
         room,
-        "PARTICIPANT"
+        "PARTICIPANT",
       );
 
       // Verify we have 2 total participants
@@ -87,9 +87,7 @@ test.describe("Visitor Role Functionality", () => {
       // Simply wait for reveal button to become available (indicating all have voted)
       await roomOwner.page.waitForSelector(
         '[data-testid="reveal-votes-button"]',
-        {
-          timeout: 10000,
-        }
+        {},
       );
     });
 
@@ -97,17 +95,17 @@ test.describe("Visitor Role Functionality", () => {
     await test.step("Owners and participants can reveal votes", async () => {
       // Owner should see reveal button
       await expect(
-        roomOwner.page.locator('[data-testid="reveal-votes-button"]')
+        roomOwner.page.locator('[data-testid="reveal-votes-button"]'),
       ).toBeVisible();
 
       // Participant should also see reveal button (participants can now control sessions)
       await expect(
-        participant.page.locator('[data-testid="reveal-votes-button"]')
+        participant.page.locator('[data-testid="reveal-votes-button"]'),
       ).toBeVisible();
 
       // Visitor should NOT see reveal button
       await expect(
-        visitor.page.locator('[data-testid="reveal-votes-button"]')
+        visitor.page.locator('[data-testid="reveal-votes-button"]'),
       ).not.toBeVisible();
     });
 
@@ -125,17 +123,17 @@ test.describe("Visitor Role Functionality", () => {
     await test.step("Owners and participants can clear votes", async () => {
       // Owner should see clear button
       await expect(
-        roomOwner.page.locator('[data-testid="clear-votes-button"]')
+        roomOwner.page.locator('[data-testid="clear-votes-button"]'),
       ).toBeVisible();
 
       // Participant should also see clear button (participants can now control sessions)
       await expect(
-        participant.page.locator('[data-testid="clear-votes-button"]')
+        participant.page.locator('[data-testid="clear-votes-button"]'),
       ).toBeVisible();
 
       // Visitor should NOT see clear button
       await expect(
-        visitor.page.locator('[data-testid="clear-votes-button"]')
+        visitor.page.locator('[data-testid="clear-votes-button"]'),
       ).not.toBeVisible();
     });
 
@@ -143,17 +141,17 @@ test.describe("Visitor Role Functionality", () => {
     await test.step("Verify visitor is shown separately in team status", async () => {
       // Should see visitor in visitors section
       await expect(
-        roomOwner.page.locator(`[data-testid="visitor-${visitor.name}"]`)
+        roomOwner.page.locator(`[data-testid="visitor-${visitor.name}"]`),
       ).toBeVisible();
 
       // Should see active participants (owner and participant)
       await expect(
-        roomOwner.page.locator(`[data-testid="participant-${roomOwner.name}"]`)
+        roomOwner.page.locator(`[data-testid="participant-${roomOwner.name}"]`),
       ).toBeVisible();
       await expect(
         roomOwner.page.locator(
-          `[data-testid="participant-${participant.name}"]`
-        )
+          `[data-testid="participant-${participant.name}"]`,
+        ),
       ).toBeVisible();
     });
   });

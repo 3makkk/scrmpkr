@@ -170,7 +170,6 @@ test.describe("Username Change Functionality", () => {
           '[data-testid="username-edit-overlay"]',
           {
             state: "hidden",
-            timeout: 5000,
           },
         );
 

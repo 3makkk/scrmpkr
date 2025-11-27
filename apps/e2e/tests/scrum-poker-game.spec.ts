@@ -89,9 +89,7 @@ test.describe("Scrum Poker Game Simulation", () => {
       // Wait for reveal button to appear (indicating all have voted)
       await remainingUser.page.waitForSelector(
         '[data-testid="reveal-votes-button"]',
-        {
-          timeout: 10000,
-        },
+        {},
       );
     });
 

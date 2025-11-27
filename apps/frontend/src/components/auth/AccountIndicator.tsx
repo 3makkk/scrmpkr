@@ -103,15 +103,15 @@ export default function AccountIndicator() {
               newName,
             },
             (
-              response: { success: boolean } | { error: string } | undefined
+              response: { success: boolean } | { error: string } | undefined,
             ) => {
               if (response && "error" in response) {
                 console.error(
                   "Failed to update username in room:",
-                  response.error
+                  response.error,
                 );
               }
-            }
+            },
           );
         }
       });
@@ -131,11 +131,11 @@ export default function AccountIndicator() {
           type="button"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 ${getAvatarColor(
-            userRole
+            userRole,
           )}`}
           data-testid="account-indicator"
           title={`Logged in as ${account.name} (${getRoleDisplayText(
-            userRole
+            userRole,
           )})`}
         >
           {getInitials(account.name)}

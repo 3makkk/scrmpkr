@@ -57,7 +57,7 @@ export default function Room() {
 
   const handleLoginWithRole = (
     name: string,
-    role: UserRole = "participant"
+    role: UserRole = "participant",
   ) => {
     login(name);
     setSelectedRole(role);

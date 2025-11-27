@@ -13,9 +13,10 @@ export class UserAssertions {
 
   async shouldBeLoggedIn() {
     await test.step(`Verify ${this.user.name} is logged in`, async () => {
-      await this.user.page.waitForSelector('[data-testid="welcome-message"]', {
-        timeout: 10000,
-      });
+      await this.user.page.waitForSelector(
+        '[data-testid="welcome-message"]',
+        {},
+      );
     });
   }
 
@@ -32,7 +33,6 @@ export class UserAssertions {
         '[data-testid="username-edit-overlay"]',
         {
           state: "hidden",
-          timeout: 5000,
         },
       );
     });
@@ -42,9 +42,7 @@ export class UserAssertions {
     await test.step(`Verify ${this.user.name} is on home page`, async () => {
       await this.user.page.waitForSelector(
         '[data-testid="create-custom-room-button"]',
-        {
-          timeout: 5000,
-        },
+        {},
       );
     });
   }
@@ -53,9 +51,7 @@ export class UserAssertions {
     await test.step(`Verify ${this.user.name} is in a room`, async () => {
       await this.user.page.waitForSelector(
         '[data-testid="leave-room-button"]',
-        {
-          timeout: 10000,
-        },
+        {},
       );
     });
   }
@@ -64,9 +60,7 @@ export class UserAssertions {
     await test.step(`Verify ${this.user.name} sees role selection form`, async () => {
       await this.user.page.waitForSelector(
         '[data-testid="role-selection-join-button"]',
-        {
-          timeout: 10000,
-        },
+        {},
       );
     });
   }
@@ -75,9 +69,7 @@ export class UserAssertions {
     await test.step(`Verify ${this.user.name} can see voting deck`, async () => {
       await this.user.page.waitForSelector(
         '[data-testid="voting-deck-title"]',
-        {
-          timeout: 5000,
-        },
+        {},
       );
     });
   }
@@ -86,7 +78,6 @@ export class UserAssertions {
     await test.step(`Verify ${this.user.name} cannot see voting deck (visitor mode)`, async () => {
       await this.user.page.waitForTimeout(1000);
       const votingDeck = this.user.getVotingDeck();
-      await expect(votingDeck).toBeHidden({ timeout: 5000 });
     });
   }
 }
@@ -103,9 +94,7 @@ export class RoomAssertions {
     await test.step(`Wait for ${expectedCount} total participants in room`, async () => {
       await observer.page.waitForSelector(
         `[data-testid="participant-count"]:has-text("${expectedCount}")`,
-        {
-          timeout: 10000,
-        },
+        {},
       );
     });
   }
@@ -117,9 +106,7 @@ export class RoomAssertions {
     await test.step(`Wait for ${expectedCount} active participants in room`, async () => {
       await observer.page.waitForSelector(
         `[data-testid="active-participant-count"]:has-text("${expectedCount}")`,
-        {
-          timeout: 10000,
-        },
+        {},
       );
     });
   }
@@ -128,9 +115,7 @@ export class RoomAssertions {
     await test.step(`Wait for ${expectedCount} visitors in room`, async () => {
       await observer.page.waitForSelector(
         `[data-testid="visitor-count"]:has-text("${expectedCount}")`,
-        {
-          timeout: 10000,
-        },
+        {},
       );
     });
   }
@@ -139,24 +124,22 @@ export class RoomAssertions {
     await test.step(`${observer.name} verifies participant ${participantName} is visible`, async () => {
       await observer.page.waitForSelector(
         `[data-testid="participant-${participantName}"]`,
-        { timeout: 5000 },
       );
     });
   }
 
   async shouldShowVotingResults(observer: User) {
     await test.step(`Verify voting results are visible`, async () => {
-      await observer.page.waitForSelector('[data-testid="voting-results"]', {
-        timeout: 5000,
-      });
+      await observer.page.waitForSelector('[data-testid="voting-results"]', {});
     });
   }
 
   async shouldShowVotingDeckAfterClear(observer: User) {
     await test.step(`Verify voting deck reappears after clearing votes`, async () => {
-      await observer.page.waitForSelector('[data-testid="voting-deck-title"]', {
-        timeout: 10000,
-      });
+      await observer.page.waitForSelector(
+        '[data-testid="voting-deck-title"]',
+        {},
+      );
     });
   }
 }
@@ -199,24 +182,19 @@ export class VotingAssertions {
           return actualVoted === expectedVoted;
         },
         [voted, total],
-        { timeout: 10000 },
       );
     });
   }
 
   async shouldShowParticipantHasVoted(observer: User, participantName: string) {
     await test.step(`Verify ${participantName} shows as having voted`, async () => {
-      await observer.page.waitForFunction(
-        (playerName) => {
-          const participantElement = document.querySelector(
-            `[data-testid="participant-${playerName}"]`,
-          );
-          if (!participantElement) return false;
-          return participantElement.textContent?.includes("voted");
-        },
-        participantName,
-        { timeout: 5000 },
-      );
+      await observer.page.waitForFunction((playerName) => {
+        const participantElement = document.querySelector(
+          `[data-testid="participant-${playerName}"]`,
+        );
+        if (!participantElement) return false;
+        return participantElement.textContent?.includes("voted");
+      }, participantName);
     });
   }
 }

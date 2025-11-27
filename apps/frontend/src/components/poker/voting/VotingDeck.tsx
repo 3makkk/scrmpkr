@@ -82,19 +82,19 @@ export default function VotingDeck() {
               isRoundRevealed
                 ? {}
                 : selectedCard === value
-                ? {
-                    scale: 1.15,
-                    y: -15,
-                    rotate: -4,
-                    transition: { duration: 0.1, ease: "easeOut" },
-                  }
-                : {
-                    scale: 1.05,
-                    y: -4,
-                    rotate: -1,
-                    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.25)",
-                    transition: { duration: 0.1, ease: "easeOut" },
-                  }
+                  ? {
+                      scale: 1.15,
+                      y: -15,
+                      rotate: -4,
+                      transition: { duration: 0.1, ease: "easeOut" },
+                    }
+                  : {
+                      scale: 1.05,
+                      y: -4,
+                      rotate: -1,
+                      boxShadow: "0 6px 20px rgba(0, 0, 0, 0.25)",
+                      transition: { duration: 0.1, ease: "easeOut" },
+                    }
             }
             whileTap={
               isRoundRevealed

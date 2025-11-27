@@ -51,25 +51,22 @@ export class User {
   }
 
   async fillLoginForm() {
-    await this.page.waitForSelector('[data-testid="user-name-input"]', {
-      timeout: 10000,
-    });
+    await this.page.waitForSelector('[data-testid="user-name-input"]', {});
     await this.page.fill('[data-testid="user-name-input"]', this.name);
     await this.page.click('[data-testid="login-button"]');
   }
 
   async openAccountMenu() {
     await this.page.click('[data-testid="account-indicator"]');
-    await this.page.waitForSelector('[data-testid="account-menu"]', {
-      timeout: 5000,
-    });
+    await this.page.waitForSelector('[data-testid="account-menu"]', {});
   }
 
   async clickChangeUsername() {
     await this.page.click('[data-testid="change-username-button"]');
-    await this.page.waitForSelector('[data-testid="username-edit-overlay"]', {
-      timeout: 5000,
-    });
+    await this.page.waitForSelector(
+      '[data-testid="username-edit-overlay"]',
+      {},
+    );
   }
 
   async fillNewUsername(newName: string) {
@@ -95,9 +92,7 @@ export class User {
     // Wait for role selection form to appear first
     await this.page.waitForSelector(
       '[data-testid="role-selection-join-button"]',
-      {
-        timeout: 10000,
-      },
+      {},
     );
 
     if (role === "VISITOR") {
@@ -114,7 +109,7 @@ export class User {
 
   async clickVoteCard(value: string) {
     const votingCard = this.page.locator(`[data-testid="vote-card-${value}"]`);
-    await votingCard.waitFor({ timeout: 5000 });
+    await votingCard.waitFor({});
     await votingCard.click();
   }
 
@@ -174,9 +169,7 @@ export class Room {
     await user.fillRoomName(roomName);
 
     // Wait for the room to be fully created and user to be in it
-    await user.page.waitForSelector('[data-testid="leave-room-button"]', {
-      timeout: 10000,
-    });
+    await user.page.waitForSelector('[data-testid="leave-room-button"]', {});
 
     const roomId = await user.getCurrentRoomId();
     return new Room(roomId, roomName, user);
@@ -187,9 +180,7 @@ export class Room {
     await user.selectRole(role);
 
     // Wait for the user to be fully added to the room
-    await user.page.waitForSelector('[data-testid="leave-room-button"]', {
-      timeout: 10000,
-    });
+    await user.page.waitForSelector('[data-testid="leave-room-button"]', {});
   }
 
   getParticipantCountElement(observer: User) {
