@@ -21,6 +21,9 @@ RUN pnpm install -r --frozen-lockfile
 FROM deps AS build
 ENV NODE_ENV='production'
 COPY . .
+# First build the shared package
+RUN pnpm --filter ./packages/shared build
+# Then build the frontend
 RUN --mount=type=secret,id=sentry_auth_token \
     SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token)" \
     pnpm --filter ./apps/frontend build
