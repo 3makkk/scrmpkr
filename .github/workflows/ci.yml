@@ -21,7 +21,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
       - run: pnpm lint
-      - run: pnpm run build --filter shared
+      - run: pnpm --filter ./packages/shared build
       - run: pnpm --filter frontend test
       - run: pnpm --filter server test
 
