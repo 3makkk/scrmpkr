@@ -298,6 +298,46 @@ export class RoomManager {
     logger.info({ userId, roomsLeft }, "User leave summary was recorded");
     return roomsToUpdate;
   }
+
+  updateParticipantName(
+    roomId: string,
+    userId: string,
+    newName: string,
+  ): boolean {
+    const normalizedId = this.normalizeRoomId(roomId);
+    const room = this.rooms.get(normalizedId);
+    if (!room) {
+      logger.warn(
+        { roomId: normalizedId, userId },
+        "Update participant name was rejected, room not found",
+      );
+      return false;
+    }
+
+    const participant = room.participants.get(userId);
+    if (!participant) {
+      logger.warn(
+        { roomId: normalizedId, userId },
+        "Update participant name was rejected, participant not found",
+      );
+      return false;
+    }
+
+    const oldName = participant.name;
+    room.updateParticipantName(userId, newName);
+
+    logger.info(
+      {
+        roomId: normalizedId,
+        userId,
+        oldName,
+        newName,
+      },
+      "Participant name was updated",
+    );
+
+    return true;
+  }
 }
 
 export default RoomManager;

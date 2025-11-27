@@ -52,6 +52,20 @@ export default class Room {
     return wasPresent;
   }
 
+  updateParticipantName(userId: string, newName: string): boolean {
+    const participant = this.participants.get(userId);
+    if (!participant) return false;
+
+    participant.name = newName;
+
+    // Also update the name in the current round tracker if they have voted
+    if (participant.hasVoted) {
+      this.currentRoundTracker.updateParticipantName(userId, newName);
+    }
+
+    return true;
+  }
+
   recordVote(userId: string, value: number | "?"): Participant | undefined {
     const participant = this.participants.get(userId);
     if (!participant) return undefined;

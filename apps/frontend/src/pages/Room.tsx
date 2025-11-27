@@ -2,15 +2,14 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthProvider";
 import { useRoom } from "../hooks/useRoom";
-import LoginForm from "../components/LoginForm";
-import LoadingSpinner from "../components/LoadingSpinner";
-import PageLayout from "../components/PageLayout";
-import RoomHeader from "../components/RoomHeader";
-import ParticipantList from "../components/ParticipantList";
-import VotingResults from "../components/VotingResults";
-import VotingDeck from "../components/VotingDeck";
-import RoomControls from "../components/RoomControls";
-import ConfettiOverlay from "../components/ConfettiOverlay";
+import LoginForm from "../components/auth/LoginForm";
+import LoadingSpinner from "../components/core/layout/LoadingSpinner";
+import PageLayout from "../components/core/layout/PageLayout";
+import RoomContextBar from "../components/room/header/RoomContextBar";
+import ContextualTeamStatus from "../components/room/status/ContextualTeamStatus";
+import PrimaryActionZone from "../components/poker/voting/PrimaryActionZone";
+import StateAwareSessionControls from "../components/room/controls/StateAwareSessionControls";
+import ConfettiOverlay from "../components/core/effects/ConfettiOverlay";
 import Button from "../components/ds/Button/Button";
 import Card from "../components/ds/Card/Card";
 import { getSocket } from "../socket";
@@ -25,7 +24,6 @@ export default function Room() {
 
   // Use the room hook instead of managing state locally
   const { roomState, error, isLoading, clearVotes, joinRoom } = useRoom();
-
   // Join room when account and roomId are available
   useEffect(() => {
     if (!account || !normalizedRoomId) return;
@@ -35,12 +33,6 @@ export default function Room() {
     // Return cleanup function
     return cleanup;
   }, [normalizedRoomId, account, joinRoom]);
-
-  // Check if user is owner for the clear votes button
-  const isOwner = roomState?.ownerId === account?.id;
-  const isRoundRevealed =
-    roomState?.currentRoundState?.status === "revealed" &&
-    (roomState?.currentRoundState?.votes.length ?? 0) > 0;
 
   const handleReopen = () => {
     if (!account || !normalizedRoomId) return;
@@ -116,39 +108,30 @@ export default function Room() {
   }
 
   return (
-    <PageLayout className="p-4">
+    <PageLayout className="flex flex-col min-h-screen">
       <ConfettiOverlay />
-      <RoomHeader />
 
-      <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
-        {/* Participants Panel */}
-        <div className="lg:col-span-1">
-          <ParticipantList />
-        </div>
+      {/* Main content area - scrollable */}
+      <div className="flex flex-col flex-1 min-h-0">
+        {/* Room Context Bar - Always visible at top */}
+        <RoomContextBar />
 
-        {/* Main Voting Area */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Voting Results */}
-          <VotingResults />
+        {/* Main content area with sidebar */}
+        <div className="flex flex-col lg:flex-row flex-1 min-h-0">
+          {/* Left sidebar - Contextual Team Status */}
+          <div className="lg:w-80 lg:shrink-0 border-r border-gray-700/30 bg-gray-900/20">
+            <ContextualTeamStatus />
+          </div>
 
-          {/* Voting Controls */}
-          {!isRoundRevealed && (
-            <div className="space-y-6">
-              <VotingDeck />
-              <RoomControls />
-            </div>
-          )}
-
-          {/* Clear votes button when revealed */}
-          {isRoundRevealed && isOwner && (
-            <div className="flex justify-center">
-              <Button type="button" onClick={clearVotes} variant="danger">
-                Clear Votes
-              </Button>
-            </div>
-          )}
+          {/* Right content - Primary Action Zone */}
+          <div className="flex-1 overflow-y-auto">
+            <PrimaryActionZone />
+          </div>
         </div>
       </div>
+
+      {/* State-Aware Session Controls - Sticky footer, always visible */}
+      <StateAwareSessionControls />
     </PageLayout>
   );
 }

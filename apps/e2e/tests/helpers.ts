@@ -1,4 +1,4 @@
-import { Page, BrowserContext, test } from "@playwright/test";
+import { Page, BrowserContext, test, expect } from "@playwright/test";
 
 export type Player = {
   page: Page;
@@ -88,17 +88,23 @@ export class ScrumPokerTestHelpers {
       // Click on the poker card using the data-testid
       await player.page.click(`[data-testid="vote-card-${value}"]`);
 
-      // Wait for vote confirmation using data-testid
-      await player.page.waitForSelector('[data-testid="vote-confirmation"]', {
-        timeout: 5000,
-      });
+      // Wait for the voting progress to update (indicating the vote was registered)
+      await player.page.waitForFunction(
+        (playerName) => {
+          // Look for the participant status to show as "voted"
+          const participantElement = document.querySelector(
+            `[data-testid="participant-${playerName}"]`,
+          );
+          if (!participantElement) return false;
 
-      // Verify the voted value
-      await player.page.waitForSelector(
-        `[data-testid="voted-value"]:has-text("${value}")`,
-        {
-          timeout: 5000,
+          // Check if the participant shows as having voted
+          return (
+            participantElement.textContent &&
+            participantElement.textContent.includes("voted")
+          );
         },
+        player.name,
+        { timeout: 5000 },
       );
     });
   }
@@ -163,10 +169,92 @@ export class ScrumPokerTestHelpers {
     total: number,
   ) {
     return await test.step(`Wait for voting progress: ${voted} of ${total} voted`, async () => {
-      await player.page.waitForSelector(
-        `[data-testid="voting-progress"]:has-text("${voted} of ${total} participants voted")`,
+      await player.page.waitForFunction(
+        ([expectedVoted, expectedTotal]) => {
+          const votingProgress = document.querySelector(
+            '[data-testid="voting-progress"]',
+          );
+          if (!votingProgress || !votingProgress.textContent) return false;
+
+          // Extract the numbers from text like "X of Y participants have voted"
+          const match = votingProgress.textContent.match(
+            /(\d+)\s+of\s+(\d+)\s+participants/,
+          );
+          if (!match) return false;
+
+          const actualVoted = parseInt(match[1]);
+          const actualTotal = parseInt(match[2]);
+
+          return actualVoted === expectedVoted && actualTotal === expectedTotal;
+        },
+        [voted, total],
         { timeout: 5000 },
       );
+    });
+  }
+
+  static async changeUsername(player: Player, newName: string) {
+    return await test.step(`${player.name} changes username to: ${newName}`, async () => {
+      // Click on the account indicator
+      await player.page.click('[data-testid="account-indicator"]');
+
+      // Wait for the context menu to appear
+      await player.page.waitForSelector('[data-testid="account-menu"]', {
+        timeout: 5000,
+      });
+
+      // Click on "Change username" option
+      await player.page.click('[data-testid="change-username-button"]');
+
+      // Wait for the username edit overlay
+      await player.page.waitForSelector(
+        '[data-testid="username-edit-overlay"]',
+        {
+          timeout: 5000,
+        },
+      );
+
+      // Clear current name and enter new name
+      await player.page.fill('[data-testid="user-name-input"]', newName);
+
+      // Click save/change name button
+      await player.page.click('[data-testid="login-button"]');
+
+      // Wait for overlay to close
+      await player.page.waitForSelector(
+        '[data-testid="username-edit-overlay"]',
+        {
+          state: "hidden",
+          timeout: 5000,
+        },
+      );
+
+      // Update player name for future references
+      player.name = newName;
+    });
+  }
+
+  static async verifyParticipantNameVisible(
+    player: Player,
+    participantName: string,
+  ) {
+    return await test.step(`${player.name} verifies participant ${participantName} is visible`, async () => {
+      await player.page.waitForSelector(
+        `[data-testid="participant-${participantName}"]`,
+        { timeout: 5000 },
+      );
+    });
+  }
+
+  static async verifyAccountIndicatorName(
+    player: Player,
+    expectedInitials: string,
+  ) {
+    return await test.step(`Verify ${player.name} account indicator shows initials: ${expectedInitials}`, async () => {
+      const accountIndicator = player.page.locator(
+        '[data-testid="account-indicator"]',
+      );
+      await expect(accountIndicator).toHaveText(expectedInitials);
     });
   }
 }

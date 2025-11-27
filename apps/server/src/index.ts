@@ -31,6 +31,10 @@ interface ClientToServerEvents {
     data: { roomId: string },
     cb?: (resp: { success: boolean }) => void,
   ) => void;
+  "user:updateName": (
+    data: { roomId: string; newName: string },
+    cb?: (resp: { success: boolean } | { error: string }) => void,
+  ) => void;
   "vote:cast": (data: { roomId: string; value: number | "?" }) => void;
   "reveal:start": (data: { roomId: string }) => void;
   "vote:clear": (data: { roomId: string }) => void;
@@ -216,6 +220,49 @@ namespace.on("connection", (socket) => {
         "Leave failed, user not in room",
       );
       if (cb) cb({ success: false });
+    }
+  });
+
+  socket.on("user:updateName", ({ roomId, newName }, cb) => {
+    logger.info(
+      {
+        userId: socket.data.user.id,
+        oldName: socket.data.user.name,
+        newName,
+        roomId,
+      },
+      "Username update was requested",
+    );
+    try {
+      // Update the socket's user data
+      socket.data.user.name = newName;
+
+      // Update the room participant with new name
+      const success = rooms.updateParticipantName(
+        roomId,
+        socket.data.user.id,
+        newName,
+      );
+      if (success) {
+        // Broadcast updated room state to all participants
+        const state = rooms.getState(roomId);
+        if (state) namespace.to(state.id).emit("room:state", state);
+
+        if (cb) cb({ success: true });
+      } else {
+        logger.warn(
+          { userId: socket.data.user.id, roomId },
+          "Username update failed - user not in room",
+        );
+        if (cb) cb({ error: "User not found in room" });
+      }
+    } catch (error) {
+      const e = error as Error;
+      logger.error(
+        { userId: socket.data.user.id, roomId, error: e.message },
+        "Username update failed",
+      );
+      if (cb) cb({ error: e.message });
     }
   });
 

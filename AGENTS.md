@@ -8,6 +8,18 @@
 - `packages/`: shared utilities and types (e.g., `packages/types/` for shared TypeScript types).
 - Workspace: root `package.json` (pnpm scripts), `pnpm-workspace.yaml`, shared lockfile. Env examples: `apps/frontend/.env.example`, `apps/server/.env.example`.
 
+### Frontend Component Organization
+
+The `apps/frontend/src/components/` directory follows a **hybrid domain + type organization** structure:
+
+**Organization Principles:**
+
+- **Domain-first grouping**: Components are primarily organized by functional domain (auth, room, poker)
+- **Type-based sub-organization**: Within domains, components are grouped by responsibility (header, status, controls)
+- **Clear separation**: Core infrastructure, design system, and business logic are clearly separated
+- **Consistent imports**: All exports are centralized through `components/index.ts`
+- **Feature cohesion**: Related components are co-located for easier maintenance and understanding
+
 ## Build, Test, and Development Commands
 
 - `pnpm install`: install dependencies for all packages.

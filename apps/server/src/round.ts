@@ -32,6 +32,15 @@ export default class Round {
     this.status = "revealed";
   }
 
+  updateParticipantName(userId: string, newName: string): boolean {
+    const voteIndex = this.votes.findIndex((vote) => vote.id === userId);
+    if (voteIndex >= 0) {
+      this.votes[voteIndex].name = newName;
+      return true;
+    }
+    return false;
+  }
+
   clear(): void {
     this.votes = [];
     this.status = "voting";

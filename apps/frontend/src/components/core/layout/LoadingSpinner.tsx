@@ -1,4 +1,4 @@
-import Card from "./Card";
+import Card from "../../poker/shared/Card";
 
 export default function LoadingSpinner({
   message = "Loading...",

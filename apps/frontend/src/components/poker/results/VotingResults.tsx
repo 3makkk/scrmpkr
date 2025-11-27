@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
-import { motionVariants } from "./ds/Motion/Motion";
-import { useRoom } from "../hooks/useRoom";
-import Card from "./Card";
-import BarVoteChart from "./ds/BarVoteChart/BarVoteChart";
+import { motionVariants } from "../../ds/Motion/Motion";
+import { useRoom } from "../../../hooks/useRoom";
+import Card from "../shared/Card";
+import BarVoteChart from "../../ds/BarVoteChart/BarVoteChart";
 
 export default function VotingResults() {
   const { roomState } = useRoom();

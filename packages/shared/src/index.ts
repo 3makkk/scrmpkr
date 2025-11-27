@@ -46,6 +46,10 @@ export interface ClientToServerEvents {
     data: { roomId: string },
     cb?: (resp: { success: boolean }) => void,
   ) => void;
+  "user:updateName": (
+    data: { roomId: string; newName: string },
+    cb?: (resp: { success: boolean } | { error: string }) => void,
+  ) => void;
   "vote:cast": (data: { roomId: string; value: number | "?" }) => void;
   "reveal:start": (data: { roomId: string }) => void;
   "vote:clear": (data: { roomId: string }) => void;

@@ -32,3 +32,9 @@ export function getSocket(
 
   return socket;
 }
+
+export function getCurrentSocket():
+  | Socket<ServerToClientEvents, ClientToServerEvents>
+  | undefined {
+  return socket;
+}

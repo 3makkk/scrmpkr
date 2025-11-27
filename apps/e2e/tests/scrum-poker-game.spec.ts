@@ -244,12 +244,13 @@ test.describe("Scrum Poker Game Simulation", () => {
     await test.step("Test question mark vote", async () => {
       // Cast a question mark vote
       await ScrumPokerTestHelpers.castVote(testPlayer, "?");
+
+      // Verify the participant shows as having voted
       await expect(
-        testPlayer.page.locator('[data-testid="vote-confirmation"]'),
-      ).toBeVisible();
-      await expect(
-        testPlayer.page.locator('[data-testid="voted-value"]'),
-      ).toContainText("?");
+        testPlayer.page.locator(
+          `[data-testid="participant-${testPlayer.name}"]`,
+        ),
+      ).toContainText("voted");
     });
 
     await test.step("Reveal question mark vote", async () => {
