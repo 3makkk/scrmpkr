@@ -1,30 +1,28 @@
 import { test, expect } from "@playwright/test";
-import { ScrumPokerTestHelpers } from "./helpers";
+import { TestActions, UserAssertions } from "./test-assertions";
 
 test.describe("Simple Scrum Poker Test", () => {
   test("basic login and room creation", async ({ browser }) => {
-    let player: any;
-
-    await test.step("Setup test player", async () => {
-      player = await ScrumPokerTestHelpers.createPlayer(browser, "TestUser");
-    });
+    const user = await TestActions.createUser(browser, "TestUser");
 
     try {
       // Step 1: Login
-      await ScrumPokerTestHelpers.loginPlayer(player);
+      await TestActions.loginUser(user);
+      await UserAssertions.for(user).shouldBeLoggedIn();
 
       // Step 2: Create room
-      const roomId = await ScrumPokerTestHelpers.createRoom(
-        player,
+      await TestActions.createRoom(
+        user,
         `simple-test-room-${Date.now()}-${Math.random()
           .toString(36)
           .substring(7)}`,
       );
 
-      // Step 3: Verify we're in the room
+      // Step 3: Verify we're in the room and can see voting interface
+      await UserAssertions.for(user).shouldBeInRoom();
       await test.step("Verify room interface is loaded", async () => {
         await expect(
-          player.page.locator("text=Choose your estimate"),
+          user.page.locator("text=Choose your estimate"),
         ).toBeVisible();
       });
     } catch (error) {
@@ -34,7 +32,7 @@ test.describe("Simple Scrum Poker Test", () => {
       });
     } finally {
       await test.step("Cleanup test resources", async () => {
-        await player.context.close();
+        await user.context.close();
       });
     }
   });

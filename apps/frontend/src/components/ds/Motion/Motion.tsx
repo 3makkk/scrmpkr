@@ -1,4 +1,4 @@
-import { motion, type HTMLMotionProps, type Variants } from "framer-motion";
+import { motion, type HTMLMotionProps } from "framer-motion";
 import { forwardRef, type ReactNode } from "react";
 
 // Common animation variants for consistent motion across the app

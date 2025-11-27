@@ -1,18 +1,30 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useRoom } from "../../../hooks/useRoom";
 import { useAuth } from "../../../AuthProvider";
+import { type Participant, UserRole } from "@scrmpkr/shared";
 
 export default function ContextualTeamStatus() {
-  const { roomState, votedCount } = useRoom();
+  const { roomState } = useRoom();
   const { account } = useAuth();
 
   if (!roomState || !account) return null;
 
   const { participants, currentRoundState, ownerId } = roomState;
   const isRoundRevealed = currentRoundState?.status === "revealed";
-  const currentUser = participants.find((p) => p.id === account.id);
 
-  const getParticipantStatus = (participant: any) => {
+  // Filter out visitors from participant counting and display
+  const activeParticipants = participants.filter(
+    (p) => p.role !== UserRole.VISITOR,
+  );
+  const visitors = participants.filter((p) => p.role === UserRole.VISITOR);
+  const votedActiveParticipants = activeParticipants.filter(
+    (p) => p.hasVoted,
+  ).length;
+
+  const getParticipantStatus = (participant: Participant) => {
+    if (participant.role === UserRole.VISITOR) {
+      return "observing";
+    }
     if (isRoundRevealed) {
       const vote = currentRoundState?.votes.find(
         (v) => v.id === participant.id,
@@ -25,7 +37,10 @@ export default function ContextualTeamStatus() {
     }
   };
 
-  const getParticipantIndicator = (participant: any) => {
+  const getParticipantIndicator = (participant: Participant) => {
+    if (participant.role === UserRole.VISITOR) {
+      return <div className="w-3 h-3 bg-purple-500 rounded-full"></div>;
+    }
     if (isRoundRevealed) {
       const vote = currentRoundState?.votes.find(
         (v) => v.id === participant.id,
@@ -45,17 +60,33 @@ export default function ContextualTeamStatus() {
     }
   };
 
+  const getRoleDisplay = (participant: Participant) => {
+    switch (participant.role) {
+      case UserRole.VISITOR:
+        return "👁 Visitor";
+      default:
+        return "";
+    }
+  };
+
   return (
     <div className="h-full p-4 lg:max-h-none max-h-64 overflow-y-auto">
       <div className="space-y-6">
-        {/* Team Status - Vertical layout for sidebar, horizontal on mobile */}
+        {/* Active Participants - Only those who can vote */}
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
-            Team Status ({votedCount}/{participants.length})
+            Active Participants (
+            <span data-testid="active-participant-count">
+              {votedActiveParticipants}/{activeParticipants.length}
+            </span>
+            )
+            <span data-testid="participant-count" className="sr-only">
+              {participants.length}
+            </span>
           </h3>
           <div className="lg:space-y-3 lg:block flex flex-wrap gap-2">
             <AnimatePresence>
-              {participants.map((participant, index) => (
+              {activeParticipants.map((participant, index) => (
                 <motion.div
                   key={participant.id}
                   className="flex items-center justify-between bg-gray-800/40 border border-gray-700/40 rounded-lg p-3 lg:w-full w-auto"
@@ -80,7 +111,14 @@ export default function ContextualTeamStatus() {
                           ? "You"
                           : participant.name}
                         {participant.id === ownerId && (
-                          <span className="ml-1 text-xs text-blue-500">★</span>
+                          <span className="ml-1 text-xs text-yellow-500">
+                            ★
+                          </span>
+                        )}
+                        {getRoleDisplay(participant) && (
+                          <span className="ml-1 text-xs text-gray-400">
+                            {getRoleDisplay(participant)}
+                          </span>
                         )}
                       </span>
                       {!isRoundRevealed && (
@@ -100,6 +138,55 @@ export default function ContextualTeamStatus() {
             </AnimatePresence>
           </div>
         </div>
+
+        {/* Visitors - Separate section */}
+        {visitors.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+              Visitors (
+              <span data-testid="visitor-count">{visitors.length}</span>)
+            </h3>
+            <div className="lg:space-y-3 lg:block flex flex-wrap gap-2">
+              <AnimatePresence>
+                {visitors.map((participant, index) => (
+                  <motion.div
+                    key={participant.id}
+                    className="flex items-center justify-between bg-purple-900/20 border border-purple-700/40 rounded-lg p-3 lg:w-full w-auto"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ delay: index * 0.05 }}
+                    data-testid={`visitor-${participant.name}`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      {getParticipantIndicator(participant)}
+                      <div className="flex flex-col">
+                        <span
+                          className={`text-sm font-medium ${
+                            participant.id === account.id
+                              ? "text-purple-400"
+                              : "text-gray-300"
+                          }`}
+                          data-testid={`visitor-name-${participant.name}`}
+                        >
+                          {participant.id === account.id
+                            ? "You"
+                            : participant.name}
+                          <span className="ml-1 text-xs text-purple-500">
+                            👁
+                          </span>
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {getParticipantStatus(participant)}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

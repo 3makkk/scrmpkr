@@ -43,6 +43,8 @@ export default function UsernameForm({
           Your name
         </label>
         <Input
+          data-1p-ignore
+          autoComplete="false"
           id="username"
           data-testid="user-name-input"
           value={name}

@@ -4,6 +4,7 @@ import http from "node:http";
 import cors from "cors";
 import { Server } from "socket.io";
 import { RoomManager, type User, type RoomState } from "./roomManager";
+import { UserRole } from "@scrmpkr/shared";
 import logger from "./logger";
 
 const app = express();
@@ -24,7 +25,7 @@ interface ClientToServerEvents {
     cb: (resp: { roomId: string } | { error: string }) => void,
   ) => void;
   "room:join": (
-    data: { roomId: string },
+    data: { roomId: string; role?: UserRole },
     cb: (resp: { state: RoomState } | { error: string }) => void,
   ) => void;
   "room:leave": (
@@ -158,17 +159,22 @@ namespace.on("connection", (socket) => {
     }
   });
 
-  socket.on("room:join", ({ roomId }, cb) => {
+  socket.on("room:join", ({ roomId, role }, cb) => {
     logger.info(
       {
         userId: socket.data.user.id,
         userName: socket.data.user.name,
         roomId,
+        role: role || UserRole.PARTICIPANT,
       },
       "Room join was requested",
     );
     try {
-      const room = rooms.joinRoom(roomId, socket.data.user);
+      const room = rooms.joinRoom(
+        roomId,
+        socket.data.user,
+        role || UserRole.PARTICIPANT,
+      );
       socket.join(room.id);
       logger.info(
         { userId: socket.data.user.id, roomId: room.id },
@@ -295,7 +301,7 @@ namespace.on("connection", (socket) => {
       logger.warn({ roomId }, "Reveal was denied, no votes");
       return; // Don't allow reveal if no votes
     }
-    rooms.startReveal(roomId, namespace);
+    rooms.startReveal(roomId, socket.data.user.id, namespace);
   });
 
   socket.on("vote:clear", ({ roomId }) => {
@@ -307,7 +313,7 @@ namespace.on("connection", (socket) => {
       },
       "Clear votes was requested",
     );
-    rooms.clearVotes(roomId);
+    rooms.clearVotes(roomId, socket.data.user.id);
     // Notify clients that votes were cleared, and broadcast fresh state
     const normalizedRoomId = roomId.trim().toLowerCase();
     namespace.to(normalizedRoomId).emit("votes:cleared");

@@ -7,6 +7,7 @@ import type {
   RoundStatus,
   RoundVote,
 } from "@scrmpkr/shared";
+import type { UserRole } from "@scrmpkr/shared";
 import type { PokerNamespace } from "./roomManagerTypes";
 
 export type RevealedVote = RoundVote;
@@ -56,7 +57,7 @@ export class RoomManager {
     return room;
   }
 
-  joinRoom(id: string, user: User): Room {
+  joinRoom(id: string, user: User, role: UserRole = "participant"): Room {
     const roomId = this.validateRoomId(id);
     const room = this.rooms.get(roomId);
     if (!room) {
@@ -68,13 +69,14 @@ export class RoomManager {
     }
 
     const wasAlreadyInRoom = room.participants.has(user.id);
-    room.addParticipant(user);
+    room.addParticipant(user, role);
 
     logger.info(
       {
         roomId,
         userId: user.id,
         userName: user.name,
+        role,
         rejoined: wasAlreadyInRoom,
       },
       "User joined room",
@@ -97,6 +99,16 @@ export class RoomManager {
       );
       return;
     }
+
+    // Check if user can vote (only owners and participants, not visitors)
+    if (!room.canVote(userId)) {
+      logger.warn(
+        { roomId, userId, value },
+        "Vote was rejected, insufficient permissions",
+      );
+      return;
+    }
+
     if (!FIB_DECK.includes(value)) {
       logger.warn(
         { roomId, userId, value },
@@ -135,11 +147,23 @@ export class RoomManager {
     }
   }
 
-  clearVotes(id: string): void {
+  clearVotes(id: string, userId: string): void {
     const roomId = this.normalizeRoomId(id);
     const room = this.rooms.get(roomId);
     if (!room) {
-      logger.warn({ roomId }, "Clear votes was rejected, room not found");
+      logger.warn(
+        { roomId, userId },
+        "Clear votes was rejected, room not found",
+      );
+      return;
+    }
+
+    // Check if user can clear votes (only owners)
+    if (!room.canClearVotes(userId)) {
+      logger.warn(
+        { roomId, userId },
+        "Clear votes was rejected, insufficient permissions",
+      );
       return;
     }
 
@@ -181,11 +205,20 @@ export class RoomManager {
     return room.toState();
   }
 
-  startReveal(id: string, namespace: PokerNamespace): void {
+  startReveal(id: string, userId: string, namespace: PokerNamespace): void {
     const roomId = this.normalizeRoomId(id);
     const room = this.rooms.get(roomId);
     if (!room) {
-      logger.warn({ roomId }, "Reveal was rejected, room not found");
+      logger.warn({ roomId, userId }, "Reveal was rejected, room not found");
+      return;
+    }
+
+    // Check if user can reveal votes (only owners)
+    if (!room.canRevealVotes(userId)) {
+      logger.warn(
+        { roomId, userId },
+        "Reveal was rejected, insufficient permissions",
+      );
       return;
     }
 

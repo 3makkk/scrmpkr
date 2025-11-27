@@ -2,17 +2,16 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../AuthProvider";
 import { useRoom } from "../../hooks/useRoom";
+import { UserRole } from "@scrmpkr/shared";
 import UsernameForm from "./UsernameForm";
 import Card from "../ds/Card/Card";
 
 export default function AccountIndicator() {
-  const { account, login } = useAuth();
-  const { currentRoomId, joinRoom } = useRoom();
+  const { account, updateName } = useAuth();
+  const { currentRoomId, roomState } = useRoom();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  if (!account) return null;
 
   // Get user initials
   const getInitials = (name: string) => {
@@ -22,6 +21,34 @@ export default function AccountIndicator() {
       .join("")
       .substring(0, 2)
       .toUpperCase();
+  };
+
+  // Get user avatar color based on role
+  const getAvatarColor = (role: UserRole) => {
+    switch (role) {
+      case UserRole.OWNER:
+        return "bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500";
+      case UserRole.PARTICIPANT:
+        return "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500";
+      case UserRole.VISITOR:
+        return "bg-purple-600 hover:bg-purple-700 focus:ring-purple-500";
+      default:
+        return "bg-gray-600 hover:bg-gray-700 focus:ring-gray-500";
+    }
+  };
+
+  // Get role display text
+  const getRoleDisplayText = (role: UserRole) => {
+    switch (role) {
+      case UserRole.OWNER:
+        return "Room Owner";
+      case UserRole.PARTICIPANT:
+        return "Participant";
+      case UserRole.VISITOR:
+        return "Visitor";
+      default:
+        return "Unknown Role";
+    }
   };
 
   // Close menu when clicking outside
@@ -52,8 +79,14 @@ export default function AccountIndicator() {
     return () => document.removeEventListener("keydown", handleEscape);
   }, []);
 
+  if (!account || !roomState) return null;
+
+  // Find current user in room participants to get their role
+  const currentUser = roomState.participants.find((p) => p.id === account.id);
+  const userRole = currentUser?.role || UserRole.PARTICIPANT;
+
   const handleUsernameChange = (newName: string) => {
-    login(newName);
+    updateName(newName);
     setIsEditingUsername(false);
     setIsMenuOpen(false);
 
@@ -70,15 +103,15 @@ export default function AccountIndicator() {
               newName,
             },
             (
-              response: { success: boolean } | { error: string } | undefined,
+              response: { success: boolean } | { error: string } | undefined
             ) => {
               if (response && "error" in response) {
                 console.error(
                   "Failed to update username in room:",
-                  response.error,
+                  response.error
                 );
               }
-            },
+            }
           );
         }
       });
@@ -95,10 +128,15 @@ export default function AccountIndicator() {
       <div className="relative" ref={menuRef}>
         {/* Account Avatar */}
         <button
+          type="button"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center text-white text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 ${getAvatarColor(
+            userRole
+          )}`}
           data-testid="account-indicator"
-          title={`Logged in as ${account.name}`}
+          title={`Logged in as ${account.name} (${getRoleDisplayText(
+            userRole
+          )})`}
         >
           {getInitials(account.name)}
         </button>
@@ -116,18 +154,25 @@ export default function AccountIndicator() {
             >
               <div className="p-4">
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-medium ${
+                      getAvatarColor(userRole).split(" ")[0]
+                    }`}
+                  >
                     {getInitials(account.name)}
                   </div>
                   <div>
                     <p className="text-white font-medium">{account.name}</p>
-                    <p className="text-gray-400 text-sm">Room participant</p>
+                    <p className="text-gray-400 text-sm">
+                      {getRoleDisplayText(userRole)}
+                    </p>
                   </div>
                 </div>
 
                 <hr className="border-gray-700 mb-4" />
 
                 <button
+                  type="button"
                   onClick={handleChangeUsername}
                   className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-150"
                   data-testid="change-username-button"
@@ -156,7 +201,7 @@ export default function AccountIndicator() {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.2 }}
             >
-              <Card className="max-w-md w-full">
+              <Card className="w-md">
                 <div className="mb-6">
                   <h2 className="text-2xl font-medium text-white mb-2">
                     Change Username

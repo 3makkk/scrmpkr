@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useRoom } from "../../../hooks/useRoom";
 import { useAuth } from "../../../AuthProvider";
+import { shouldShowVotingControls } from "../../../utils/ui-permissions";
 import Card from "../shared/Card";
 import PokerCard from "../shared/PokerCard";
 
@@ -13,6 +14,36 @@ export default function VotingDeck() {
   if (!roomState || !account) return null;
 
   const isRoundRevealed = roomState.currentRoundState?.status === "revealed";
+
+  // Check if current user can vote using the centralized ACL
+  const currentUser = roomState.participants.find((p) => p.id === account.id);
+  const canUserVote = currentUser?.role
+    ? shouldShowVotingControls(currentUser.role)
+    : false;
+
+  // If user is a visitor, show observer message
+  if (!canUserVote) {
+    return (
+      <Card
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+      >
+        <div className="text-center py-12">
+          <h2 className="text-lg font-medium text-white mb-4">Observer Mode</h2>
+          <p className="text-gray-400 mb-6">
+            You're viewing this session as a visitor. You can observe but not
+            participate in voting.
+          </p>
+          <div className="inline-flex items-center px-4 py-2 bg-purple-900/20 border border-purple-700/40 rounded-lg">
+            <span className="text-purple-400 text-sm font-medium">
+              👁 Visitor Access
+            </span>
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card

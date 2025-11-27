@@ -55,7 +55,11 @@ export default function Home() {
         return;
       }
       setRoomName("");
-      navigate(`/r/${response.roomId}`, { viewTransition: true });
+      // Navigate with state indicating the user created this room
+      navigate(`/r/${response.roomId}`, {
+        state: { isCreator: true },
+        viewTransition: true,
+      });
     });
   };
 
@@ -205,12 +209,7 @@ export default function Home() {
               >
                 Choose your room name
               </motion.h2>
-              <motion.div
-                className="space-y-3"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
+              <div className="space-y-3">
                 <label
                   htmlFor="custom-room-name"
                   className="block text-sm text-gray-400 sr-only"
@@ -237,7 +236,7 @@ export default function Home() {
                 <p className="text-xs text-gray-500">
                   Allowed: a-z, hyphen (-), underscore (_). Max 50 characters.
                 </p>
-              </motion.div>
+              </div>
               {createError && (
                 <motion.p
                   className="text-sm text-red-500"

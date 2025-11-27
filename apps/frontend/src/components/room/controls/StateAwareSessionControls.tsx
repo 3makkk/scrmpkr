@@ -1,27 +1,47 @@
 import { useRoom } from "../../../hooks/useRoom";
 import { useAuth } from "../../../AuthProvider";
+import { UserRole } from "@scrmpkr/shared";
+import { shouldShowSessionControls } from "../../../utils/ui-permissions";
 import Button from "../../ds/Button/Button";
 
 export default function StateAwareSessionControls() {
-  const { roomState, votedCount, allVoted, revealVotes, clearVotes } =
-    useRoom();
+  const { roomState, revealVotes, clearVotes } = useRoom();
   const { account } = useAuth();
 
   if (!roomState || !account) return null;
 
   const isRoundRevealed = roomState.currentRoundState?.status === "revealed";
   const hasVotes = (roomState.currentRoundState?.votes.length ?? 0) > 0;
-  const isOwner = roomState.ownerId === account.id;
 
-  // Only show controls when there's a clear action available
-  const getAvailableActions = () => {
-    const actions = [];
+  // Check if current user can perform actions using the centralized ACL
+  const currentUser = roomState.participants.find((p) => p.id === account.id);
+  const canControl = currentUser?.role
+    ? shouldShowSessionControls(currentUser.role)
+    : false;
+
+  // Filter active participants (exclude visitors) for counting
+  const activeParticipants = roomState.participants.filter(
+    (p) => p.role !== UserRole.VISITOR,
+  );
+  const votedActiveParticipants = activeParticipants.filter(
+    (p) => p.hasVoted,
+  ).length;
+  const allActiveVoted =
+    activeParticipants.length > 0 &&
+    activeParticipants.every((p) => p.hasVoted);
+
+  // Only show controls when there's a clear action available and user has permissions
+  const getAvailableActions = (): React.ReactElement[] => {
+    const actions: React.ReactElement[] = [];
+
+    // Only owners can reveal or clear votes
+    if (!canControl) return actions;
 
     // During voting phase - show reveal button if there are votes
-    if (!isRoundRevealed && votedCount > 0) {
-      const buttonText = allVoted
+    if (!isRoundRevealed && votedActiveParticipants > 0) {
+      const buttonText = allActiveVoted
         ? "Reveal Votes (Everyone Voted!)"
-        : `Reveal Votes (${votedCount}/${roomState.participants.length} voted)`;
+        : `Reveal Votes (${votedActiveParticipants}/${activeParticipants.length} voted)`;
 
       actions.push(
         <Button
@@ -69,17 +89,22 @@ export default function StateAwareSessionControls() {
 
         {/* Show helpful context about what the action will do */}
         <div className="text-center mt-2">
-          {!isRoundRevealed && votedCount > 0 && (
-            <p className="text-xs text-gray-400">
-              {allVoted
+          {!canControl && (
+            <p className="text-xs text-gray-500">
+              Only participants and room owners can control voting sessions
+            </p>
+          )}
+          {canControl && !isRoundRevealed && votedActiveParticipants > 0 && (
+            <p className="text-xs text-gray-400" data-testid="voting-progress">
+              {allActiveVoted
                 ? "All participants have voted. Ready to see the results!"
                 : `${
-                    roomState.participants.length - votedCount
+                    activeParticipants.length - votedActiveParticipants
                   } participants still voting...`}
             </p>
           )}
 
-          {isRoundRevealed && hasVotes && (
+          {canControl && isRoundRevealed && hasVotes && (
             <p className="text-xs text-gray-400">
               Ready to start a new voting round with the same participants.
             </p>

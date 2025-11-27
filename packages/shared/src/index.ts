@@ -1,6 +1,22 @@
 // Shared types for the Scrum Poker app
 
-export type Participant = { id: string; name: string; hasVoted: boolean };
+export const UserRole = {
+  OWNER: "owner",
+  PARTICIPANT: "participant",
+  VISITOR: "visitor",
+};
+
+export type UserRole = "owner" | "participant" | "visitor";
+
+// Export permission system
+export * from "./permissions";
+
+export type Participant = {
+  id: string;
+  name: string;
+  hasVoted: boolean;
+  role: UserRole;
+};
 
 export type RoundStatus = "voting" | "revealed";
 export type RoundVote = { id: string; name: string; value?: number | "?" };
@@ -39,7 +55,7 @@ export interface ClientToServerEvents {
     cb: (resp: { roomId: string } | { error: string }) => void,
   ) => void;
   "room:join": (
-    data: { roomId: string },
+    data: { roomId: string; role?: UserRole },
     cb: (resp: { state: RoomState } | { error: string }) => void,
   ) => void;
   "room:leave": (

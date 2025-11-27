@@ -1,11 +1,20 @@
 import Round from "./round";
 import type { RoomState, RoundState } from "@scrmpkr/shared";
+import {
+  type UserRole,
+  canVote,
+  canControlSession,
+  type PermissionContext,
+  canPerformAction,
+  type ValidPermission,
+} from "@scrmpkr/shared";
 
 export type Participant = {
   id: string;
   name: string;
   hasVoted: boolean;
   value?: number | "?";
+  role: UserRole;
 };
 
 export type User = {
@@ -27,6 +36,7 @@ export default class Room {
       id: ownerId,
       name: ownerName,
       hasVoted: false,
+      role: "owner",
     });
   }
 
@@ -38,11 +48,15 @@ export default class Room {
   currentRound: number;
   private currentRoundTracker: Round;
 
-  addParticipant(user: User): void {
+  addParticipant(user: User, role: UserRole = "participant"): void {
+    // If this user is the room owner, always keep their OWNER role regardless of requested role
+    const actualRole: UserRole = user.id === this.ownerId ? "owner" : role;
+
     this.participants.set(user.id, {
       id: user.id,
       name: user.name,
       hasVoted: false,
+      role: actualRole,
     });
   }
 
@@ -125,11 +139,72 @@ export default class Room {
           id: participant.id,
           name: participant.name,
           hasVoted: participant.hasVoted,
+          role: participant.role,
         }),
       ),
       status: this.status,
       currentRound: this.currentRound,
       currentRoundState: this.getCurrentRoundState(),
     };
+  }
+
+  // ACL methods using the centralized permission system
+  canVote(userId: string): boolean {
+    const participant = this.participants.get(userId);
+    if (!participant) return false;
+    return canVote(participant.role);
+  }
+
+  canRevealVotes(userId: string): boolean {
+    const participant = this.participants.get(userId);
+    if (!participant) return false;
+
+    const context: PermissionContext = {
+      userRole: participant.role,
+      userId,
+      roomOwnerId: this.ownerId,
+      hasVotes: this.hasAnyVotes(),
+    };
+
+    return canPerformAction("round:reveal", context);
+  }
+
+  canClearVotes(userId: string): boolean {
+    const participant = this.participants.get(userId);
+    if (!participant) return false;
+
+    const context: PermissionContext = {
+      userRole: participant.role,
+      userId,
+      roomOwnerId: this.ownerId,
+      hasVotes: this.hasAnyVotes(),
+    };
+
+    return canPerformAction("round:clear", context);
+  }
+
+  canControlSession(userId: string): boolean {
+    const participant = this.participants.get(userId);
+    if (!participant) return false;
+    return canControlSession(participant.role);
+  }
+
+  getUserRole(userId: string): UserRole | null {
+    const participant = this.participants.get(userId);
+    return participant?.role || null;
+  }
+
+  // Check if user can perform any action (generic permission check)
+  hasPermission(userId: string, permission: string): boolean {
+    const participant = this.participants.get(userId);
+    if (!participant) return false;
+
+    const context: PermissionContext = {
+      userRole: participant.role,
+      userId,
+      roomOwnerId: this.ownerId,
+    };
+
+    return canPerformAction(permission as ValidPermission, context);
   }
 }

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../AuthProvider";
 import { useRoom } from "../hooks/useRoom";
+import type { UserRole } from "@scrmpkr/shared";
 import LoginForm from "../components/auth/LoginForm";
+import RoleSelectionForm from "../components/auth/RoleSelectionForm";
 import LoadingSpinner from "../components/core/layout/LoadingSpinner";
 import PageLayout from "../components/core/layout/PageLayout";
 import RoomContextBar from "../components/room/header/RoomContextBar";
@@ -18,21 +20,48 @@ export default function Room() {
   const { roomId } = useParams();
   const { account, login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const normalizedRoomId = roomId ? roomId.trim().toLowerCase() : "";
   const [isReopening, setIsReopening] = useState(false);
   const [reopenError, setReopenError] = useState<string | null>(null);
+  const [showRoleSelection, setShowRoleSelection] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+
+  // Check if user created this room (from navigation state)
+  const isCreator = location.state?.isCreator === true;
 
   // Use the room hook instead of managing state locally
-  const { roomState, error, isLoading, clearVotes, joinRoom } = useRoom();
-  // Join room when account and roomId are available
-  useEffect(() => {
-    if (!account || !normalizedRoomId) return;
+  const { roomState, error, isLoading, joinRoom } = useRoom();
 
-    const cleanup = joinRoom(normalizedRoomId, account);
+  // Automatically set role for room creators
+  useEffect(() => {
+    if (account && isCreator && !selectedRole) {
+      setSelectedRole("owner" as UserRole);
+    }
+  }, [account, isCreator, selectedRole]);
+
+  // Join room when account, roomId, and role are available
+  useEffect(() => {
+    if (!account || !normalizedRoomId || !selectedRole) return;
+
+    const cleanup = joinRoom(normalizedRoomId, account, selectedRole);
 
     // Return cleanup function
     return cleanup;
-  }, [normalizedRoomId, account, joinRoom]);
+  }, [normalizedRoomId, account, selectedRole, joinRoom]);
+
+  const handleRoleSelection = (role: UserRole) => {
+    setSelectedRole(role);
+    setShowRoleSelection(false);
+  };
+
+  const handleLoginWithRole = (
+    name: string,
+    role: UserRole = "participant",
+  ) => {
+    login(name);
+    setSelectedRole(role);
+  };
 
   const handleReopen = () => {
     if (!account || !normalizedRoomId) return;
@@ -46,13 +75,48 @@ export default function Room() {
         setReopenError(response.error);
         return;
       }
-      joinRoom(normalizedRoomId, account);
+      // When reopening, user becomes owner
+      setSelectedRole("owner" as UserRole);
     });
   };
 
   // Don't render if no account
   if (!account) {
-    return <LoginForm title="Scrum Poker" onLogin={login} />;
+    return (
+      <LoginForm
+        title="Scrum Poker"
+        onLogin={(name) => handleLoginWithRole(name)}
+        secondaryButton={
+          <Button
+            variant="secondary"
+            onClick={() => setShowRoleSelection(true)}
+          >
+            Join as Visitor
+          </Button>
+        }
+      />
+    );
+  }
+
+  // Show role selection if needed (but not for room creators)
+  if (account && !selectedRole && showRoleSelection && !isCreator) {
+    return (
+      <RoleSelectionForm
+        roomId={normalizedRoomId}
+        onJoin={handleRoleSelection}
+        onCancel={() => setShowRoleSelection(false)}
+      />
+    );
+  }
+
+  // Show role selection for existing users who haven't chosen (but not for creators)
+  if (account && !selectedRole && !isCreator) {
+    return (
+      <RoleSelectionForm
+        roomId={normalizedRoomId}
+        onJoin={handleRoleSelection}
+      />
+    );
   }
 
   // Show error state with retry option

@@ -12,6 +12,7 @@ import type {
   ServerToClientEvents,
   ClientToServerEvents,
   RoomState,
+  UserRole,
 } from "@scrmpkr/shared";
 
 type RoomAction =
@@ -86,6 +87,7 @@ type RoomContextValue = {
   joinRoom: (
     roomId: string,
     account: { id: string; name: string },
+    role?: UserRole,
   ) => () => void;
   leaveRoom: (callback?: () => void) => void;
   castVote: (value: number | "?") => void;
@@ -117,7 +119,11 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     : false;
 
   const joinRoom = useCallback(
-    (roomId: string, account: { id: string; name: string }) => {
+    (
+      roomId: string,
+      account: { id: string; name: string },
+      role?: UserRole,
+    ) => {
       if (!account) return () => {};
 
       const normalizedRoomId = roomId.trim().toLowerCase();
@@ -139,15 +145,19 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         joinTimeout = setTimeout(() => {
           dispatch({ type: "TIMEOUT_ERROR" });
         }, 10000);
-        socket.emit("room:join", { roomId: normalizedRoomId }, (response) => {
-          if (joinTimeout) clearTimeout(joinTimeout);
+        socket.emit(
+          "room:join",
+          { roomId: normalizedRoomId, role },
+          (response) => {
+            if (joinTimeout) clearTimeout(joinTimeout);
 
-          if ("error" in response) {
-            dispatch({ type: "SET_ERROR", payload: response.error });
-          } else if ("state" in response) {
-            dispatch({ type: "SET_ROOM_STATE", payload: response.state });
-          }
-        });
+            if ("error" in response) {
+              dispatch({ type: "SET_ERROR", payload: response.error });
+            } else if ("state" in response) {
+              dispatch({ type: "SET_ROOM_STATE", payload: response.state });
+            }
+          },
+        );
       };
 
       if (socket.connected) startJoin();

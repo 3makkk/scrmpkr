@@ -4,6 +4,7 @@ export type Account = { id: string; name: string };
 type AuthContextValue = {
   account: Account | null;
   login: (name: string) => void;
+  updateName: (name: string) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -30,8 +31,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAccount(user);
   };
 
+  const updateName = (name: string) => {
+    if (account) {
+      const updatedUser: Account = { ...account, name };
+      localStorage.setItem("scrmpkr_user", JSON.stringify(updatedUser));
+      setAccount(updatedUser);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ account, login }}>
+    <AuthContext.Provider value={{ account, login, updateName }}>
       {children}
     </AuthContext.Provider>
   );

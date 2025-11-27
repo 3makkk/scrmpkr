@@ -23,7 +23,11 @@ export default {
     nodeResolve({ preferBuiltins: true }),
     commonjs(),
     json(),
-    typescript({ tsconfig: "./tsconfig.json", module: "esnext" }),
+    typescript({
+      tsconfig: "./tsconfig.json",
+      module: "esnext",
+      target: "ES2020",
+    }),
   ],
   treeshake: false,
 };
