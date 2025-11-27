@@ -57,7 +57,7 @@ export default function Room() {
 
   const handleLoginWithRole = (
     name: string,
-    role: UserRole = "participant",
+    role: UserRole = "participant"
   ) => {
     login(name);
     setSelectedRole(role);
@@ -86,14 +86,6 @@ export default function Room() {
       <LoginForm
         title="Scrum Poker"
         onLogin={(name) => handleLoginWithRole(name)}
-        secondaryButton={
-          <Button
-            variant="secondary"
-            onClick={() => setShowRoleSelection(true)}
-          >
-            Join as Visitor
-          </Button>
-        }
       />
     );
   }

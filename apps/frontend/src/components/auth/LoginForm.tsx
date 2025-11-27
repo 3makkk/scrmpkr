@@ -26,8 +26,6 @@ export default function LoginForm({
 
         <div className="space-y-8">
           <UsernameForm onSubmit={onLogin} submitText={primaryButtonText} />
-
-          {secondaryButton && <div className="pt-4">{secondaryButton}</div>}
         </div>
       </Card>
     </div>

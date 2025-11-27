@@ -31,15 +31,10 @@ export default function VotingDeck() {
       >
         <div className="text-center py-12">
           <h2 className="text-lg font-medium text-white mb-4">Observer Mode</h2>
-          <p className="text-gray-400 mb-6">
+          <p className="text-gray-400">
             You're viewing this session as a visitor. You can observe but not
             participate in voting.
           </p>
-          <div className="inline-flex items-center px-4 py-2 bg-purple-900/20 border border-purple-700/40 rounded-lg">
-            <span className="text-purple-400 text-sm font-medium">
-              👁 Visitor Access
-            </span>
-          </div>
         </div>
       </Card>
     );
@@ -87,19 +82,19 @@ export default function VotingDeck() {
               isRoundRevealed
                 ? {}
                 : selectedCard === value
-                  ? {
-                      scale: 1.15,
-                      y: -15,
-                      rotate: -4,
-                      transition: { duration: 0.1, ease: "easeOut" },
-                    }
-                  : {
-                      scale: 1.05,
-                      y: -4,
-                      rotate: -1,
-                      boxShadow: "0 6px 20px rgba(0, 0, 0, 0.25)",
-                      transition: { duration: 0.1, ease: "easeOut" },
-                    }
+                ? {
+                    scale: 1.15,
+                    y: -15,
+                    rotate: -4,
+                    transition: { duration: 0.1, ease: "easeOut" },
+                  }
+                : {
+                    scale: 1.05,
+                    y: -4,
+                    rotate: -1,
+                    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.25)",
+                    transition: { duration: 0.1, ease: "easeOut" },
+                  }
             }
             whileTap={
               isRoundRevealed
