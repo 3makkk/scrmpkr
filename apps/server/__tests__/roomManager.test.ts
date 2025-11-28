@@ -11,7 +11,7 @@ describe("RoomManager", () => {
     manager = new RoomManager();
     mockNamespace = {
       to: vi.fn(() => ({
-        emit: vi.fn() as any,
+        emit: vi.fn().mockReturnValue(true),
       })),
     };
   });
