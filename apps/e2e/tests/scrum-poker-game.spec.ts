@@ -1,6 +1,13 @@
 import { test, expect } from "@playwright/test";
 import {
-  TestActions,
+  createUser,
+  loginUser,
+  createRoom,
+  joinRoom,
+  castVote,
+  revealVotes,
+  clearVotes,
+  leaveRoom,
   RoomAssertions,
   VotingAssertions,
 } from "./test-assertions";
@@ -18,7 +25,7 @@ test.describe("Scrum Poker Game Simulation", () => {
       const userNames = ["Alice", "Bob", "Charlie", "Diana", "Eve"];
 
       for (const name of userNames) {
-        const user = await TestActions.createUser(browser, name);
+        const user = await createUser(browser, name);
         users.push(user);
       }
 
@@ -40,8 +47,8 @@ test.describe("Scrum Poker Game Simulation", () => {
   }) => {
     // Step 1: Room owner creates a room
     await test.step("Room creation phase", async () => {
-      await TestActions.loginUser(roomOwner);
-      room = await TestActions.createRoom(
+      await loginUser(roomOwner);
+      room = await createRoom(
         roomOwner,
         `test-room-${Date.now()}-${Math.random().toString(36).substring(7)}`,
       );
@@ -56,8 +63,8 @@ test.describe("Scrum Poker Game Simulation", () => {
     // Step 2: Initial 4 users (excluding owner) join the room
     await test.step("Initial user joining phase", async () => {
       for (let i = 1; i < 5; i++) {
-        await TestActions.loginUser(users[i]);
-        const participation = await TestActions.joinRoom(users[i], room);
+        await loginUser(users[i]);
+        const participation = await joinRoom(users[i], room);
         participations.push(participation);
 
         // Verify user appears in participant list on all pages
@@ -83,7 +90,7 @@ test.describe("Scrum Poker Game Simulation", () => {
     await test.step("First voting round", async () => {
       const round1Votes = ["1", "2", "3", "5", "8"];
       for (let i = 0; i < 5; i++) {
-        await TestActions.castVote(participations[i], round1Votes[i]);
+        await castVote(participations[i], round1Votes[i]);
       }
 
       // Wait for reveal button to appear (indicating all have voted)
@@ -95,7 +102,7 @@ test.describe("Scrum Poker Game Simulation", () => {
 
     // Step 4: Any user reveals votes
     await test.step("First round reveal", async () => {
-      await TestActions.revealVotes(participations[0]);
+      await revealVotes(participations[0]);
 
       // Verify results visible to all active users
       for (const user of users.slice(0, 5)) {
@@ -109,12 +116,12 @@ test.describe("Scrum Poker Game Simulation", () => {
     // Step 5: One user (Eve) leaves between rounds
     await test.step("User leaves between rounds", async () => {
       const leavingParticipation = participations[4]; // Eve
-      await TestActions.leaveRoom(leavingParticipation);
+      await leaveRoom(leavingParticipation);
     });
 
     // Step 6: Any remaining user starts new round by clearing votes
     await test.step("Start second round", async () => {
-      await TestActions.clearVotes(participations[0]);
+      await clearVotes(participations[0]);
 
       // Verify participant count updated (now 4 users)
       await RoomAssertions.for(room).shouldHaveParticipantCount(
@@ -127,14 +134,14 @@ test.describe("Scrum Poker Game Simulation", () => {
     const activeParticipations = participations.slice(0, 4); // First 4 participations
 
     await test.step("New users join mid-game", async () => {
-      const newUser1 = await TestActions.createUser(browser, "Frank");
-      const newUser2 = await TestActions.createUser(browser, "Grace");
+      const newUser1 = await createUser(browser, "Frank");
+      const newUser2 = await createUser(browser, "Grace");
 
-      await TestActions.loginUser(newUser1);
-      const participation1 = await TestActions.joinRoom(newUser1, room);
+      await loginUser(newUser1);
+      const participation1 = await joinRoom(newUser1, room);
 
-      await TestActions.loginUser(newUser2);
-      const participation2 = await TestActions.joinRoom(newUser2, room);
+      await loginUser(newUser2);
+      const participation2 = await joinRoom(newUser2, room);
 
       // Verify participant count updated (now 6 users)
       await RoomAssertions.for(room).shouldHaveParticipantCount(
@@ -150,7 +157,7 @@ test.describe("Scrum Poker Game Simulation", () => {
     await test.step("Second voting round with new users", async () => {
       const round2Votes = ["2", "3", "5", "8", "1", "2"];
       for (let i = 0; i < activeParticipations.length; i++) {
-        await TestActions.castVote(activeParticipations[i], round2Votes[i]);
+        await castVote(activeParticipations[i], round2Votes[i]);
       }
 
       // Verify all current users voted
@@ -163,7 +170,7 @@ test.describe("Scrum Poker Game Simulation", () => {
 
     // Step 9: Reveal second round
     await test.step("Second round reveal", async () => {
-      await TestActions.revealVotes(activeParticipations[0]);
+      await revealVotes(activeParticipations[0]);
 
       // Verify results visible to all active users
       for (const participation of activeParticipations) {
@@ -178,12 +185,12 @@ test.describe("Scrum Poker Game Simulation", () => {
 
     // Step 10: One more user leaves (Bob)
     await test.step("Another user leaves", async () => {
-      await TestActions.leaveRoom(activeParticipations[1]); // Bob's participation
+      await leaveRoom(activeParticipations[1]); // Bob's participation
     });
 
     // Step 11: Start third round
     await test.step("Start third round", async () => {
-      await TestActions.clearVotes(activeParticipations[0]);
+      await clearVotes(activeParticipations[0]);
 
       // Verify participant count updated (now 5 users)
       await RoomAssertions.for(room).shouldHaveParticipantCount(
@@ -204,10 +211,7 @@ test.describe("Scrum Poker Game Simulation", () => {
       const round3Votes = ["5", "5", "8", "5", "5"];
 
       for (let i = 0; i < finalActiveParticipations.length; i++) {
-        await TestActions.castVote(
-          finalActiveParticipations[i],
-          round3Votes[i],
-        );
+        await castVote(finalActiveParticipations[i], round3Votes[i]);
       }
     });
 
@@ -221,7 +225,7 @@ test.describe("Scrum Poker Game Simulation", () => {
         activeParticipations[5], // Grace
       ];
 
-      await TestActions.revealVotes(finalActiveParticipations[0]);
+      await revealVotes(finalActiveParticipations[0]);
 
       // Verify consensus achieved (most votes are 5)
       for (const participation of finalActiveParticipations) {
@@ -243,9 +247,9 @@ test.describe("Scrum Poker Game Simulation", () => {
   });
 
   test("verify room functionality edge cases", async ({ browser }) => {
-    const testUser = await TestActions.createUser(browser, "TestUser");
-    await TestActions.loginUser(testUser);
-    const testRoom = await TestActions.createRoom(
+    const testUser = await createUser(browser, "TestUser");
+    await loginUser(testUser);
+    const testRoom = await createRoom(
       testUser,
       `edge-case-room-${Date.now()}-${Math.random().toString(36).substring(7)}`,
     );
@@ -253,7 +257,7 @@ test.describe("Scrum Poker Game Simulation", () => {
 
     await test.step("Test question mark vote", async () => {
       // Cast a question mark vote
-      await TestActions.castVote(testParticipation, "?");
+      await castVote(testParticipation, "?");
 
       // Verify the participant shows as having voted
       await expect(
@@ -263,15 +267,15 @@ test.describe("Scrum Poker Game Simulation", () => {
 
     await test.step("Reveal question mark vote", async () => {
       // Reveal votes with just one user
-      await TestActions.revealVotes(testParticipation);
+      await revealVotes(testParticipation);
       await RoomAssertions.for(testRoom).shouldShowVotingResults(testUser);
     });
 
     await test.step("Test zero vote", async () => {
       // Clear and test with zero vote
-      await TestActions.clearVotes(testParticipation);
-      await TestActions.castVote(testParticipation, "0");
-      await TestActions.revealVotes(testParticipation);
+      await clearVotes(testParticipation);
+      await castVote(testParticipation, "0");
+      await revealVotes(testParticipation);
     });
 
     await test.step("Cleanup edge case test", async () => {

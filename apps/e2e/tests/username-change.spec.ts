@@ -1,5 +1,13 @@
 import { test, expect } from "@playwright/test";
-import { TestActions, UserAssertions, RoomAssertions } from "./test-assertions";
+import {
+  createUser,
+  loginUser,
+  createRoom,
+  joinRoom,
+  changeUsername,
+  UserAssertions,
+  RoomAssertions,
+} from "./test-assertions";
 import type { User, Room } from "./domain-objects";
 
 test.describe("Username Change Functionality", () => {
@@ -13,7 +21,7 @@ test.describe("Username Change Functionality", () => {
       const userNames = ["Alice", "Bob"];
 
       for (const name of userNames) {
-        const user = await TestActions.createUser(browser, name);
+        const user = await createUser(browser, name);
         users.push(user);
       }
 
@@ -33,8 +41,8 @@ test.describe("Username Change Functionality", () => {
   test("user can change username and other participants see the change", async () => {
     // Step 1: Room owner creates a room and second user joins
     await test.step("Setup room with two participants", async () => {
-      await TestActions.loginUser(roomOwner);
-      room = await TestActions.createRoom(
+      await loginUser(roomOwner);
+      room = await createRoom(
         roomOwner,
         `username-test-room-${Date.now()}-${Math.random()
           .toString(36)
@@ -42,8 +50,8 @@ test.describe("Username Change Functionality", () => {
       );
 
       // Second user joins
-      await TestActions.loginUser(users[1]);
-      await TestActions.joinRoom(users[1], room);
+      await loginUser(users[1]);
+      await joinRoom(users[1], room);
 
       // Verify both users are in the room
       await RoomAssertions.for(room).shouldHaveParticipantCount(roomOwner, 2);
@@ -65,7 +73,7 @@ test.describe("Username Change Functionality", () => {
 
     // Step 3: Alice changes her username
     await test.step("Alice changes username to 'Alice Smith'", async () => {
-      await TestActions.changeUsername(roomOwner, "Alice Smith");
+      await changeUsername(roomOwner, "Alice Smith");
 
       // Verify Alice's account indicator updates
       await UserAssertions.for(roomOwner).shouldHaveAccountInitials("AS");
@@ -90,7 +98,7 @@ test.describe("Username Change Functionality", () => {
 
     // Step 5: Bob changes his username
     await test.step("Bob changes username to 'Robert Johnson'", async () => {
-      await TestActions.changeUsername(users[1], "Robert Johnson");
+      await changeUsername(users[1], "Robert Johnson");
 
       // Verify Bob's account indicator updates
       await UserAssertions.for(users[1]).shouldHaveAccountInitials("RJ");
@@ -127,11 +135,11 @@ test.describe("Username Change Functionality", () => {
   test("username change workflow cancellation", async ({ browser }) => {
     // Step 1: Create a single user test
     await test.step("Setup single user for cancellation test", async () => {
-      const testUser = await TestActions.createUser(browser, "TestUser");
+      const testUser = await createUser(browser, "TestUser");
       users.push(testUser);
 
-      await TestActions.loginUser(testUser);
-      await TestActions.createRoom(
+      await loginUser(testUser);
+      await createRoom(
         testUser,
         `cancel-test-room-${Date.now()}-${Math.random()
           .toString(36)
@@ -191,11 +199,11 @@ test.describe("Username Change Functionality", () => {
     browser,
   }) => {
     await test.step("Test username change edge cases", async () => {
-      const testUser = await TestActions.createUser(browser, "EdgeCaseUser");
+      const testUser = await createUser(browser, "EdgeCaseUser");
       users.push(testUser);
 
-      await TestActions.loginUser(testUser);
-      const testRoom = await TestActions.createRoom(
+      await loginUser(testUser);
+      const testRoom = await createRoom(
         testUser,
         `edge-case-room-${Date.now()}-${Math.random()
           .toString(36)
@@ -215,7 +223,7 @@ test.describe("Username Change Functionality", () => {
 
       for (const testCase of testCases) {
         await test.step(`Test username: ${testCase.name}`, async () => {
-          await TestActions.changeUsername(testUser, testCase.name);
+          await changeUsername(testUser, testCase.name);
 
           // Wait for update to propagate
           await testUser.page.waitForTimeout(500);

@@ -77,7 +77,7 @@ export class UserAssertions {
   async shouldNotSeeVotingDeck() {
     await test.step(`Verify ${this.user.name} cannot see voting deck (visitor mode)`, async () => {
       await this.user.page.waitForTimeout(1000);
-      const votingDeck = this.user.getVotingDeck();
+      const _votingDeck = this.user.getVotingDeck();
     });
   }
 }
@@ -202,71 +202,76 @@ export class VotingAssertions {
 /**
  * Test-specific actions that wrap domain actions with test steps
  */
-export class TestActions {
-  static async createUser(browser: Browser, name: string): Promise<User> {
-    return await test.step(`Create user: ${name}`, async () => {
-      return User.create(browser, name);
-    });
-  }
 
-  static async loginUser(user: User): Promise<void> {
-    await test.step(`Login user: ${user.name}`, async () => {
-      await user.navigateToHome();
-      await user.fillLoginForm();
-    });
-  }
+export async function createUser(
+  browser: Browser,
+  name: string,
+): Promise<User> {
+  return await test.step(`Create user: ${name}`, async () => {
+    return User.create(browser, name);
+  });
+}
 
-  static async createRoom(user: User, roomName: string): Promise<Room> {
-    return await test.step(`${user.name} creates room: ${roomName}`, async () => {
-      return Room.createByUser(user, roomName);
-    });
-  }
+export async function loginUser(user: User): Promise<void> {
+  await test.step(`Login user: ${user.name}`, async () => {
+    await user.navigateToHome();
+    await user.fillLoginForm();
+  });
+}
 
-  static async joinRoom(
-    user: User,
-    room: Room,
-    role: "PARTICIPANT" | "VISITOR" = "PARTICIPANT",
-  ): Promise<Participation> {
-    await test.step(`${user.name} joins room: ${room.id} as ${role}`, async () => {
-      await room.addUser(user, role);
-    });
-    return new Participation(user, room, role);
-  }
+export async function createRoom(user: User, roomName: string): Promise<Room> {
+  return await test.step(`${user.name} creates room: ${roomName}`, async () => {
+    return Room.createByUser(user, roomName);
+  });
+}
 
-  static async changeUsername(user: User, newName: string): Promise<void> {
-    await test.step(`${user.name} changes username to: ${newName}`, async () => {
-      await user.openAccountMenu();
-      await user.clickChangeUsername();
-      await user.fillNewUsername(newName);
-    });
-  }
+export async function joinRoom(
+  user: User,
+  room: Room,
+  role: "PARTICIPANT" | "VISITOR" = "PARTICIPANT",
+): Promise<Participation> {
+  await test.step(`${user.name} joins room: ${room.id} as ${role}`, async () => {
+    await room.addUser(user, role);
+  });
+  return new Participation(user, room, role);
+}
 
-  static async castVote(
-    participation: Participation,
-    value: string,
-  ): Promise<void> {
-    await test.step(`${participation.user.name} casts vote: ${value}`, async () => {
-      await participation.castVote(value);
-    });
-  }
+export async function changeUsername(
+  user: User,
+  newName: string,
+): Promise<void> {
+  await test.step(`${user.name} changes username to: ${newName}`, async () => {
+    await user.openAccountMenu();
+    await user.clickChangeUsername();
+    await user.fillNewUsername(newName);
+  });
+}
 
-  static async revealVotes(participation: Participation): Promise<void> {
-    await test.step(`${participation.user.name} reveals votes`, async () => {
-      await participation.revealVotes();
-    });
-  }
+export async function castVote(
+  participation: Participation,
+  value: string,
+): Promise<void> {
+  await test.step(`${participation.user.name} casts vote: ${value}`, async () => {
+    await participation.castVote(value);
+  });
+}
 
-  static async clearVotes(participation: Participation): Promise<void> {
-    await test.step(`${participation.user.name} clears votes`, async () => {
-      await participation.clearVotes();
-    });
-  }
+export async function revealVotes(participation: Participation): Promise<void> {
+  await test.step(`${participation.user.name} reveals votes`, async () => {
+    await participation.revealVotes();
+  });
+}
 
-  static async leaveRoom(participation: Participation): Promise<void> {
-    await test.step(`${participation.user.name} leaves room`, async () => {
-      await participation.leave();
-      // Add a small delay to ensure server state is fully updated
-      await participation.user.page.waitForTimeout(500);
-    });
-  }
+export async function clearVotes(participation: Participation): Promise<void> {
+  await test.step(`${participation.user.name} clears votes`, async () => {
+    await participation.clearVotes();
+  });
+}
+
+export async function leaveRoom(participation: Participation): Promise<void> {
+  await test.step(`${participation.user.name} leaves room`, async () => {
+    await participation.leave();
+    // Add a small delay to ensure server state is fully updated
+    await participation.user.page.waitForTimeout(500);
+  });
 }

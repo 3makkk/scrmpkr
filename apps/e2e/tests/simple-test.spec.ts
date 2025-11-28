@@ -1,17 +1,22 @@
 import { test, expect } from "@playwright/test";
-import { TestActions, UserAssertions } from "./test-assertions";
+import {
+  createUser,
+  loginUser,
+  createRoom,
+  UserAssertions,
+} from "./test-assertions";
 
 test.describe("Simple Scrum Poker Test", () => {
   test("basic login and room creation", async ({ browser }) => {
-    const user = await TestActions.createUser(browser, "TestUser");
+    const user = await createUser(browser, "TestUser");
 
     try {
       // Step 1: Login
-      await TestActions.loginUser(user);
+      await loginUser(user);
       await UserAssertions.for(user).shouldBeLoggedIn();
 
       // Step 2: Create room
-      await TestActions.createRoom(
+      await createRoom(
         user,
         `simple-test-room-${Date.now()}-${Math.random()
           .toString(36)
