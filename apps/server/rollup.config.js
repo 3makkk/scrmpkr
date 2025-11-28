@@ -4,19 +4,23 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import { builtinModules } from "node:module";
 
-// Externalize only Node built-ins; bundle all npm deps
+// Externalize Node built-ins and pino packages that have CommonJS/worker issues
 const external = [
   ...builtinModules,
   ...builtinModules.map((moduleName) => `node:${moduleName}`),
+  // Externalize pino packages to avoid __dirname issues in bundled ESM
+  "pino",
+  "pino-pretty",
+  "pino/file",
+  "thread-stream",
 ];
 
 export default {
   input: "src/index.ts",
   output: {
     file: "dist/index.js",
-    format: "cjs",
+    format: "esm",
     sourcemap: true,
-    exports: "auto",
   },
   external,
   plugins: [
@@ -26,7 +30,7 @@ export default {
     typescript({
       tsconfig: "./tsconfig.json",
       module: "esnext",
-      target: "ES2020",
+      target: "ES2022",
     }),
   ],
   treeshake: false,
