@@ -14,7 +14,7 @@ export default function LoginForm({
   subtitle,
   onLogin,
   primaryButtonText = "Enter",
-  secondaryButton = null,
+  secondaryButton: _secondaryButton = null,
 }: Props) {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">

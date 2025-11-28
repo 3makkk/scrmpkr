@@ -5,7 +5,7 @@ import type React from "react";
 // while allowing simple extra props. Always supports composition via `children`.
 export type UIProps<
   Tag extends keyof React.JSX.IntrinsicElements,
-  Extra extends object = {},
+  Extra extends Record<string, unknown> = Record<string, never>,
 > = Extra &
   Omit<React.ComponentPropsWithoutRef<Tag>, keyof Extra> & {
     children?: React.ReactNode;

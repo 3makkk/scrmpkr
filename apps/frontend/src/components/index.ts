@@ -3,6 +3,9 @@ export { default as Card } from "./ds/Card/Card";
 export { default as Button } from "./ds/Button/Button";
 export { default as Input } from "./ds/Input/Input";
 export { default as PokerCard } from "./ds/PokerCard/PokerCard";
+export { default as Dropdown } from "./ds/Dropdown/Dropdown";
+export { default as Modal } from "./ds/Modal/Modal";
+export { default as UserAvatar } from "./ds/UserAvatar/UserAvatar";
 
 // Core Layout & Effects
 export { default as PageLayout } from "./core/layout/PageLayout";
@@ -13,6 +16,7 @@ export { default as ConfettiOverlay } from "./core/effects/ConfettiOverlay";
 export { default as AccountIndicator } from "./auth/AccountIndicator";
 export { default as LoginForm } from "./auth/LoginForm";
 export { default as UsernameForm } from "./auth/UsernameForm";
+export { default as UserInfoSection } from "./auth/UserInfoSection";
 
 // Room Components
 export { default as RoomContextBar } from "./room/header/RoomContextBar";

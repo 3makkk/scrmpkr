@@ -134,3 +134,81 @@ import { motionVariants } from "./ds/Motion/Motion";
 - Add scroll-triggered animations
 - Create specialized motion components for data visualization
 - Add sound feedback integration for accessibility
+
+## New Design System Components
+
+### UserAvatar
+
+A reusable avatar component that displays user initials with role-based coloring.
+
+**Props:**
+
+- `name`: User's display name
+- `role`: User's role (affects color)
+- `size`: "sm" | "md" | "lg" (default: "md")
+- `showTooltip`: Whether to show name and role in tooltip (default: false)
+- `interactive`: Whether the avatar is clickable (default: false)
+
+```tsx
+<UserAvatar
+  name="John Doe"
+  role={UserRole.PARTICIPANT}
+  size="md"
+  interactive
+  showTooltip
+/>
+```
+
+### Dropdown
+
+A dropdown menu component with controlled or uncontrolled state management.
+
+**Props:**
+
+- `trigger`: React node that triggers the dropdown
+- `open`: Controlled open state (optional)
+- `onOpenChange`: Callback when open state changes
+- `placement`: "bottom-left" | "bottom-right" | "top-left" | "top-right" (default: "bottom-right")
+
+**Features:**
+
+- Click outside to close
+- Escape key to close
+- Smooth animations
+
+```tsx
+<Dropdown trigger={<button>Open Menu</button>} placement="bottom-right">
+  <div className="p-4">Menu content here</div>
+</Dropdown>
+```
+
+### Modal
+
+A modal overlay component for displaying content above the main interface.
+
+**Props:**
+
+- `open`: Whether the modal is open
+- `onClose`: Callback when the modal should close
+- `closeOnEscape`: Whether to close on Escape key (default: true)
+- `closeOnBackdrop`: Whether to close when clicking backdrop (default: true)
+
+**Features:**
+
+- Backdrop click to close (configurable)
+- Escape key to close (configurable)
+- Focus management
+- Smooth animations
+
+```tsx
+<Modal open={isOpen} onClose={() => setIsOpen(false)}>
+  <Card>Modal content here</Card>
+</Modal>
+```
+
+## Component Architecture Principles
+
+- **Composition over Configuration**: Components favor children composition over complex props
+- **Type Safety**: All components use `UIProps<Tag, Extra>` to ensure they support standard HTML attributes
+- **Accessibility**: Components include proper keyboard navigation and ARIA support where appropriate
+- **Consistent Styling**: All styling uses inline Tailwind classes (no custom CSS classes or @apply)
