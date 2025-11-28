@@ -55,12 +55,9 @@ export default function Room() {
     setShowRoleSelection(false);
   };
 
-  const handleLoginWithRole = (
-    name: string,
-    role: UserRole = "participant",
-  ) => {
+  const handleLoginWithRole = (name: string) => {
     login(name);
-    setSelectedRole(role);
+    // Don't set a default role - let the user choose via role selection form
   };
 
   const handleReopen = () => {
