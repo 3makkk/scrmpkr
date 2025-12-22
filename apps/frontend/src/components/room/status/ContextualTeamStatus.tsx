@@ -1,4 +1,3 @@
-import { motion, AnimatePresence } from "framer-motion";
 import { useRoom } from "../../../hooks/useRoom";
 import { useAuth } from "../../../AuthProvider";
 import { type Participant, UserRole } from "@scrmpkr/shared";
@@ -85,52 +84,45 @@ export default function ContextualTeamStatus() {
             </span>
           </h3>
           <div className="lg:space-y-3 lg:block flex flex-wrap gap-2">
-            <AnimatePresence>
-              {activeParticipants.map((participant, index) => (
-                <motion.div
-                  key={participant.id}
-                  className="flex items-center justify-between bg-gray-800/40 border border-gray-700/40 rounded-lg p-3 lg:w-full w-auto"
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  transition={{ delay: index * 0.05 }}
-                  data-testid={`participant-${participant.name}`}
-                >
-                  <div className="flex items-center space-x-3">
-                    {getParticipantIndicator(participant)}
-                    <div className="flex flex-col">
-                      <span
-                        className={`text-sm font-medium ${
-                          participant.id === account.id
-                            ? "text-blue-400"
-                            : "text-gray-300"
-                        }`}
-                        data-testid={`participant-name-${participant.name}`}
-                      >
-                        {participant.id === account.id
-                          ? "You"
-                          : participant.name}
-                        {getRoleDisplay(participant) && (
-                          <span className="ml-1 text-xs text-gray-400">
-                            {getRoleDisplay(participant)}
-                          </span>
-                        )}
+            {activeParticipants.map((participant, index) => (
+              <div
+                key={participant.id}
+                className={`flex items-center justify-between bg-gray-800/40 border border-gray-700/40 rounded-lg p-3 lg:w-full w-auto animate-slide-in-left`}
+                style={{ animationDelay: `${index * 50}ms` }}
+                data-testid={`participant-${participant.name}`}
+              >
+                <div className="flex items-center space-x-3">
+                  {getParticipantIndicator(participant)}
+                  <div className="flex flex-col">
+                    <span
+                      className={`text-sm font-medium ${
+                        participant.id === account.id
+                          ? "text-blue-400"
+                          : "text-gray-300"
+                      }`}
+                      data-testid={`participant-name-${participant.name}`}
+                    >
+                      {participant.id === account.id ? "You" : participant.name}
+                      {getRoleDisplay(participant) && (
+                        <span className="ml-1 text-xs text-gray-400">
+                          {getRoleDisplay(participant)}
+                        </span>
+                      )}
+                    </span>
+                    {!isRoundRevealed && (
+                      <span className="text-xs text-gray-500">
+                        {getParticipantStatus(participant)}
                       </span>
-                      {!isRoundRevealed && (
-                        <span className="text-xs text-gray-500">
-                          {getParticipantStatus(participant)}
-                        </span>
-                      )}
-                      {isRoundRevealed && (
-                        <span className="text-xs text-gray-400">
-                          Vote: {getParticipantStatus(participant)}
-                        </span>
-                      )}
-                    </div>
+                    )}
+                    {isRoundRevealed && (
+                      <span className="text-xs text-gray-400">
+                        Vote: {getParticipantStatus(participant)}
+                      </span>
+                    )}
                   </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -142,43 +134,36 @@ export default function ContextualTeamStatus() {
               <span data-testid="visitor-count">{visitors.length}</span>)
             </h3>
             <div className="lg:space-y-3 lg:block flex flex-wrap gap-2">
-              <AnimatePresence>
-                {visitors.map((participant, index) => (
-                  <motion.div
-                    key={participant.id}
-                    className="flex items-center justify-between bg-purple-900/20 border border-purple-700/40 rounded-lg p-3 lg:w-full w-auto"
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ delay: index * 0.05 }}
-                    data-testid={`visitor-${participant.name}`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      {getParticipantIndicator(participant)}
-                      <div className="flex flex-col">
-                        <span
-                          className={`text-sm font-medium ${
-                            participant.id === account.id
-                              ? "text-purple-400"
-                              : "text-gray-300"
-                          }`}
-                          data-testid={`visitor-name-${participant.name}`}
-                        >
-                          {participant.id === account.id
-                            ? "You"
-                            : participant.name}
-                          <span className="ml-1 text-xs text-purple-500">
-                            👁
-                          </span>
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {getParticipantStatus(participant)}
-                        </span>
-                      </div>
+              {visitors.map((participant, index) => (
+                <div
+                  key={participant.id}
+                  className={`flex items-center justify-between bg-purple-900/20 border border-purple-700/40 rounded-lg p-3 lg:w-full w-auto animate-slide-in-left`}
+                  style={{ animationDelay: `${index * 50}ms` }}
+                  data-testid={`visitor-${participant.name}`}
+                >
+                  <div className="flex items-center space-x-3">
+                    {getParticipantIndicator(participant)}
+                    <div className="flex flex-col">
+                      <span
+                        className={`text-sm font-medium ${
+                          participant.id === account.id
+                            ? "text-purple-400"
+                            : "text-gray-300"
+                        }`}
+                        data-testid={`visitor-name-${participant.name}`}
+                      >
+                        {participant.id === account.id
+                          ? "You"
+                          : participant.name}
+                        <span className="ml-1 text-xs text-purple-500">👁</span>
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {getParticipantStatus(participant)}
+                      </span>
                     </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

@@ -34,7 +34,7 @@ export default function RoleSelectionForm({ roomId, onJoin, onCancel }: Props) {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-3">
-            <label className="block">
+            <label className="block animate-fade-in-scale animation-delay-200">
               <input
                 type="radio"
                 name="role"
@@ -59,7 +59,7 @@ export default function RoleSelectionForm({ roomId, onJoin, onCancel }: Props) {
               </div>
             </label>
 
-            <label className="block">
+            <label className="block animate-fade-in-scale animation-delay-300">
               <input
                 type="radio"
                 name="role"
@@ -85,10 +85,10 @@ export default function RoleSelectionForm({ roomId, onJoin, onCancel }: Props) {
             </label>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center animate-fade-in-down animation-delay-400">
             <Button
               type="submit"
-              className="sm:min-w-[120px]"
+              className="sm:min-w-[120px] "
               data-testid="role-selection-join-button"
             >
               Join Room

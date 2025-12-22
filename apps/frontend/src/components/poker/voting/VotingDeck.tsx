@@ -1,4 +1,3 @@
-import { motion, AnimatePresence } from "framer-motion";
 import { useRoom } from "../../../hooks/useRoom";
 import { useAuth } from "../../../AuthProvider";
 import { shouldShowVotingControls } from "../../../utils/ui-permissions";
@@ -26,11 +25,7 @@ export default function VotingDeck() {
   // If user is a visitor, show observer message
   if (!canUserVote) {
     return (
-      <Card
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-      >
+      <Card className="animate-fade-in-scale">
         <div className="text-center py-12">
           <h2 className="text-lg font-medium text-white mb-4">Observer Mode</h2>
           <p className="text-gray-400">
@@ -43,94 +38,36 @@ export default function VotingDeck() {
   }
 
   return (
-    <Card
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+    <Card className="animate-fade-in-scale">
       <h2
         className="text-lg font-medium text-white mb-8 text-center"
         data-testid="voting-deck-title"
       >
         Choose your estimate
       </h2>
-      <motion.div
-        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.3 }}
-      >
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {DECK.map((value, index) => (
-          <PokerCard
+          <div
             key={value}
-            value={value}
-            isSelected={selectedCard === value}
-            onValueClick={castVote}
-            disabled={isRoundRevealed}
-            initial={{ scale: 0.8, opacity: 0, y: 30, rotate: 10 }}
-            animate={{
-              scale: selectedCard === value ? 1.12 : 1,
-              opacity: 1,
-              y: selectedCard === value ? -12 : 0,
-              rotate: selectedCard === value ? -3 : 0,
-              borderColor:
-                selectedCard === value ? "#3B82F6" : "rgba(75, 85, 99, 0.8)",
-              boxShadow:
-                selectedCard === value
-                  ? "0 0 20px rgba(59, 130, 246, 0.4), 0 8px 25px rgba(0, 0, 0, 0.3)"
-                  : "0 4px 12px rgba(0, 0, 0, 0.2)",
-            }}
-            whileHover={
-              isRoundRevealed
-                ? {}
-                : selectedCard === value
-                  ? {
-                      scale: 1.15,
-                      y: -15,
-                      rotate: -4,
-                      transition: { duration: 0.1, ease: "easeOut" },
-                    }
-                  : {
-                      scale: 1.05,
-                      y: -4,
-                      rotate: -1,
-                      boxShadow: "0 6px 20px rgba(0, 0, 0, 0.25)",
-                      transition: { duration: 0.1, ease: "easeOut" },
-                    }
-            }
-            whileTap={
-              isRoundRevealed
-                ? {}
-                : {
-                    scale: 0.97,
-                    y: 1,
-                    transition: { duration: 0.05, ease: "easeOut" },
-                  }
-            }
-            transition={{
-              duration: 0.2,
-              ease: "easeOut",
-              delay: index * 0.03,
-            }}
-          />
+            className={`animate-fade-in-scale`}
+            style={{ animationDelay: `${index * 50}ms` }}
+          >
+            <PokerCard
+              value={value}
+              isSelected={selectedCard === value}
+              onValueClick={castVote}
+              disabled={isRoundRevealed}
+            />
+          </div>
         ))}
-      </motion.div>
+      </div>
 
-      <AnimatePresence>
-        {selectedCard !== null && (
-          <motion.div
-            className="mt-8 text-center"
-            data-testid="vote-confirmation"
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            transition={{
-              duration: 0.2,
-              ease: "easeOut",
-            }}
-          ></motion.div>
-        )}
-      </AnimatePresence>
+      {selectedCard !== null && (
+        <div
+          className="mt-8 text-center animate-fade-in-scale"
+          data-testid="vote-confirmation"
+        ></div>
+      )}
     </Card>
   );
 }

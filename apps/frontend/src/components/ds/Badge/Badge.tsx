@@ -1,7 +1,5 @@
-import { motion } from "framer-motion";
 import { forwardRef } from "react";
 import type { UIProps } from "../uiTypes";
-import type { MotionProps } from "framer-motion";
 
 export type BadgeProps = UIProps<
   "span",
@@ -9,10 +7,9 @@ export type BadgeProps = UIProps<
     bgClass?: string; // Tailwind background utilities e.g. "bg-blue-600"
     rounded?: "full" | "lg" | "md" | "sm" | "none";
   }
-> &
-  MotionProps;
+>;
 
-const BaseBadge = forwardRef<HTMLSpanElement, BadgeProps>(
+const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   (
     {
       children,
@@ -44,8 +41,6 @@ const BaseBadge = forwardRef<HTMLSpanElement, BadgeProps>(
   },
 );
 
-BaseBadge.displayName = "BaseBadge";
-
-const Badge = motion.create(BaseBadge);
+Badge.displayName = "Badge";
 
 export default Badge;

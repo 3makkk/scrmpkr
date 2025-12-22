@@ -1,13 +1,11 @@
-import { motion } from "framer-motion";
 import { forwardRef } from "react";
 import type { UIProps } from "../uiTypes";
-import type { MotionProps } from "framer-motion";
 
 type Variant = "primary" | "secondary" | "danger";
 
-type ButtonProps = UIProps<"button", { variant?: Variant }> & MotionProps;
+type ButtonProps = UIProps<"button", { variant?: Variant }>;
 
-const BaseButton = forwardRef<HTMLButtonElement, ButtonProps>(
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       variant = "primary",
@@ -20,7 +18,7 @@ const BaseButton = forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const getVariantClasses = (variant: Variant) => {
       const baseClasses =
-        "font-semibold px-6 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed";
+        "font-semibold px-6 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99]";
 
       switch (variant) {
         case "secondary":
@@ -45,8 +43,6 @@ const BaseButton = forwardRef<HTMLButtonElement, ButtonProps>(
   },
 );
 
-BaseButton.displayName = "BaseButton";
-
-const Button = motion.create(BaseButton);
+Button.displayName = "Button";
 
 export default Button;

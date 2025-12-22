@@ -1,11 +1,9 @@
-import { motion } from "framer-motion";
 import { forwardRef } from "react";
 import type { UIProps } from "../uiTypes";
-import type { MotionProps } from "framer-motion";
 
-type CardProps = UIProps<"div"> & MotionProps;
+type CardProps = UIProps<"div">;
 
-const BaseCard = forwardRef<HTMLDivElement, CardProps>(
+const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ children, className = "", ...props }, ref) => {
     const cardClasses =
       "bg-gray-900/60 backdrop-blur-xl border border-gray-800/80 rounded-2xl p-6 shadow-2xl";
@@ -18,8 +16,6 @@ const BaseCard = forwardRef<HTMLDivElement, CardProps>(
   },
 );
 
-BaseCard.displayName = "BaseCard";
-
-const Card = motion.create(BaseCard);
+Card.displayName = "Card";
 
 export default Card;

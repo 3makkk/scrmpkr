@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import { useAuth } from "../AuthProvider";
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/auth/LoginForm";
@@ -89,129 +88,50 @@ export default function Home() {
   return (
     <PageLayout className="flex items-center justify-center px-4">
       <Card className="max-w-lg w-full">
-        <motion.div
-          className="text-center mb-10"
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.6,
-            ease: "easeOut",
-            delay: 0.1,
-          }}
-        >
-          <motion.h1
-            className="text-4xl font-light text-white mb-3"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-              duration: 0.5,
-              ease: "easeOut",
-              delay: 0.2,
-            }}
-          >
+        <div className="text-center mb-10 animate-fade-in-down">
+          <h1 className="text-4xl font-light text-white mb-3 animate-fade-in-scale animation-delay-100">
             Scrum Poker
-          </motion.h1>
-          <motion.p
-            className="text-gray-400 mb-4"
+          </h1>
+          <p
+            className="text-gray-400 mb-4 animate-fade-in-scale animation-delay-200"
             data-testid="welcome-message"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{
-              duration: 0.4,
-              delay: 0.3,
-            }}
           >
             Welcome back,{" "}
             <span className="font-semibold text-blue-400">{account.name}</span>
-          </motion.p>
-        </motion.div>
+          </p>
+        </div>
 
-        <motion.div
-          className="space-y-8"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.5,
-            ease: "easeOut",
-            delay: 0.4,
-          }}
-        >
+        <div className="space-y-8 animate-fade-in-scale animation-delay-300">
           {!showCustomForm ? (
-            <motion.div
-              className="space-y-4"
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: { opacity: 0 },
-                visible: {
-                  opacity: 1,
-                  transition: {
-                    staggerChildren: 0.1,
-                    delayChildren: 0.1,
-                  },
-                },
-              }}
-            >
-              <motion.div
-                variants={{
-                  hidden: { opacity: 0, x: -20 },
-                  visible: { opacity: 1, x: 0 },
-                }}
+            <div className="space-y-4">
+              <Button
+                type="button"
+                onClick={() => setShowCustomForm(true)}
+                className="w-full"
+                data-testid="create-custom-room-button"
               >
-                <Button
-                  type="button"
-                  onClick={() => setShowCustomForm(true)}
-                  className="w-full"
-                  data-testid="create-custom-room-button"
-                >
-                  Create custom Room
-                </Button>
-              </motion.div>
-              <motion.div
-                variants={{
-                  hidden: { opacity: 0, x: 20 },
-                  visible: { opacity: 1, x: 0 },
-                }}
+                Create custom Room
+              </Button>
+
+              <Button
+                type="button"
+                onClick={createRandomRoom}
+                variant="secondary"
+                className="w-full"
+                data-testid="create-random-room-button"
               >
-                <Button
-                  type="button"
-                  onClick={createRandomRoom}
-                  variant="secondary"
-                  className="w-full"
-                  data-testid="create-random-room-button"
-                >
-                  Create Random Room
-                </Button>
-              </motion.div>
-              <motion.p
-                className="text-sm text-gray-500 text-center"
-                variants={{
-                  hidden: { opacity: 0, y: 10 },
-                  visible: { opacity: 1, y: 0 },
-                }}
-              >
+                Create Random Room
+              </Button>
+              <p className="text-sm text-gray-500 text-center animate-fade-in-down animation-delay-150">
                 Custom lets you pick a readable room name to share; Random
                 instantly creates a room with a generated ID.
-              </motion.p>
-            </motion.div>
+              </p>
+            </div>
           ) : (
-            <motion.div
-              className="space-y-6"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{
-                duration: 0.3,
-                ease: "easeOut",
-              }}
-            >
-              <motion.h2
-                className="text-lg font-medium text-gray-200"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-              >
+            <div className="space-y-6 animate-fade-in-scale">
+              <h2 className="text-lg font-medium text-gray-200 animate-slide-in-left animation-delay-100">
                 Choose your room name
-              </motion.h2>
+              </h2>
               <div className="space-y-3">
                 <label
                   htmlFor="custom-room-name"
@@ -241,24 +161,14 @@ export default function Home() {
                 </p>
               </div>
               {createError && (
-                <motion.p
-                  className="text-sm text-red-500"
+                <p
+                  className="text-sm text-red-500 animate-bounce-in"
                   role="alert"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{
-                    duration: 0.3,
-                    ease: "easeOut",
-                  }}
                 >
                   {createError}
-                </motion.p>
+                </p>
               )}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
+              <div className="animate-fade-in-down animation-delay-200">
                 <Button
                   type="button"
                   onClick={createNamedRoom}
@@ -268,10 +178,10 @@ export default function Home() {
                 >
                   Create custom Room
                 </Button>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           )}
-        </motion.div>
+        </div>
       </Card>
     </PageLayout>
   );
