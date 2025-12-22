@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@scrmpkr/shared": "workspace:*",
-    "@storybook/addon-docs": "9.1.5",
+    "@storybook/addon-docs": "10.1.10",
     "@storybook/addon-links": "9.1.5",
     "@storybook/react-vite": "9.1.5",
     "@tailwindcss/vite": "^4.1.17",
