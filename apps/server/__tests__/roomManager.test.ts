@@ -21,14 +21,14 @@ describe("RoomManager", () => {
       const room = manager.createRoom(
         "Test-Room",
         { id: "owner-1", name: "Owner" },
-        "participant"
+        "participant",
       );
       expect(room.id).toBe("test-room");
 
       const joined = manager.joinRoom(
         "TEST-room",
         { id: "u1", name: "User 1" },
-        "participant"
+        "participant",
       );
       expect(joined.participants.size).toBe(2);
 
@@ -43,7 +43,7 @@ describe("RoomManager", () => {
         const room = manager.createRoom(
           name,
           { id: `owner-${index}`, name: "Owner" },
-          "participant"
+          "participant",
         );
         expect(room.id).toBe(name.toLowerCase());
       });
@@ -69,16 +69,16 @@ describe("RoomManager", () => {
             manager.createRoom(
               name,
               { id: "owner", name: "Owner" },
-              "participant"
-            )
+              "participant",
+            ),
           ).not.toThrow();
         } else {
           expect(() =>
             manager.createRoom(
               name,
               { id: "owner", name: "Owner" },
-              "participant"
-            )
+              "participant",
+            ),
           ).toThrow();
         }
       });
@@ -88,15 +88,15 @@ describe("RoomManager", () => {
       manager.createRoom(
         "test-room",
         { id: "owner-1", name: "Owner" },
-        "participant"
+        "participant",
       );
 
       expect(() =>
         manager.createRoom(
           "test-room",
           { id: "owner-2", name: "Owner 2" },
-          "participant"
-        )
+          "participant",
+        ),
       ).toThrow("Room already exists");
     });
 
@@ -104,7 +104,7 @@ describe("RoomManager", () => {
       const room = manager.createRoom(
         "test-room",
         { id: "owner-1", name: "Owner" },
-        "participant"
+        "participant",
       );
 
       expect(room.participants.size).toBe(1);
@@ -127,23 +127,23 @@ describe("RoomManager", () => {
       const room = manager.createRoom(
         "test-room",
         { id: "owner", name: "Owner" },
-        "participant"
+        "participant",
       );
 
       manager.joinRoom(
         "test-room",
         { id: "user1", name: "User 1" },
-        "participant"
+        "participant",
       );
       manager.joinRoom(
         "test-room",
         { id: "user2", name: "User 2" },
-        "participant"
+        "participant",
       );
 
       expect(room.participants.size).toBe(3);
       expect(Array.from(room.participants.keys())).toEqual(
-        expect.arrayContaining(["owner", "user1", "user2"])
+        expect.arrayContaining(["owner", "user1", "user2"]),
       );
     });
 
@@ -151,12 +151,12 @@ describe("RoomManager", () => {
       const room = manager.createRoom(
         "test-room",
         { id: "owner", name: "Owner" },
-        "participant"
+        "participant",
       );
       manager.joinRoom(
         "test-room",
         { id: "user1", name: "User 1" },
-        "participant"
+        "participant",
       );
 
       expect(room.participants.size).toBe(2);
@@ -165,7 +165,7 @@ describe("RoomManager", () => {
       manager.joinRoom(
         "test-room",
         { id: "user1", name: "User 1 Updated" },
-        "participant"
+        "participant",
       );
 
       expect(room.participants.size).toBe(2);
@@ -174,17 +174,17 @@ describe("RoomManager", () => {
 
     it("validates room id when joining", () => {
       expect(() =>
-        manager.joinRoom("", { id: "user", name: "User" }, "participant")
+        manager.joinRoom("", { id: "user", name: "User" }, "participant"),
       ).toThrow("Room name is required");
 
       expect(() =>
         manager.joinRoom(
           "invalid@room",
           { id: "user", name: "User" },
-          "participant"
-        )
+          "participant",
+        ),
       ).toThrow(
-        "Room name can only contain lowercase letters, hyphens, and underscores"
+        "Room name can only contain lowercase letters, hyphens, and underscores",
       );
     });
   });
@@ -194,17 +194,17 @@ describe("RoomManager", () => {
       manager.createRoom(
         "test-room",
         { id: "owner", name: "Owner" },
-        "participant"
+        "participant",
       );
       manager.joinRoom(
         "test-room",
         { id: "user1", name: "User 1" },
-        "participant"
+        "participant",
       );
       manager.joinRoom(
         "test-room",
         { id: "user2", name: "User 2" },
-        "participant"
+        "participant",
       );
     });
 
@@ -226,7 +226,7 @@ describe("RoomManager", () => {
         manager.joinRoom(
           "test-room",
           { id: userId, name: `User ${index}` },
-          "participant"
+          "participant",
         );
         manager.castVote("test-room", userId, value);
 
@@ -323,12 +323,12 @@ describe("RoomManager", () => {
       manager.createRoom(
         "test-room",
         { id: "owner", name: "Owner" },
-        "participant"
+        "participant",
       );
       manager.joinRoom(
         "test-room",
         { id: "user1", name: "User 1" },
-        "participant"
+        "participant",
       );
     });
 
@@ -341,7 +341,7 @@ describe("RoomManager", () => {
       expect(state?.currentRound).toBe(2);
       expect(state?.currentRoundState.votes.length).toBe(0);
       expect(
-        state?.participants.every((p) => p.hasVoted === false)
+        state?.participants.every((p) => p.hasVoted === false),
       ).toBeTruthy();
     });
 
@@ -374,12 +374,12 @@ describe("RoomManager", () => {
       manager.createRoom(
         "test-room",
         { id: "owner", name: "Owner" },
-        "participant"
+        "participant",
       );
       manager.joinRoom(
         "test-room",
         { id: "user1", name: "User 1" },
-        "participant"
+        "participant",
       );
     });
 
@@ -422,17 +422,17 @@ describe("RoomManager", () => {
       manager.createRoom(
         "test-room",
         { id: "owner", name: "Owner" },
-        "participant"
+        "participant",
       );
       manager.joinRoom(
         "test-room",
         { id: "user1", name: "User 1" },
-        "participant"
+        "participant",
       );
       manager.joinRoom(
         "test-room",
         { id: "user2", name: "User 2" },
-        "participant"
+        "participant",
       );
     });
 
@@ -477,17 +477,17 @@ describe("RoomManager", () => {
       manager.createRoom(
         "room-one",
         { id: "owner", name: "Owner" },
-        "participant"
+        "participant",
       );
       manager.joinRoom(
         "room-one",
         { id: "user1", name: "User 1" },
-        "participant"
+        "participant",
       );
       manager.joinRoom(
         "room-one",
         { id: "user2", name: "User 2" },
-        "participant"
+        "participant",
       );
     });
 
@@ -520,7 +520,7 @@ describe("RoomManager", () => {
       manager.createRoom(
         "solo-room",
         { id: "solo-user", name: "Solo User" },
-        "participant"
+        "participant",
       );
 
       const roomId = manager.findUserRoom("solo-user");
@@ -544,12 +544,12 @@ describe("RoomManager", () => {
       manager.createRoom(
         "test-room",
         { id: "owner", name: "Owner Name" },
-        "participant"
+        "participant",
       );
       manager.joinRoom(
         "test-room",
         { id: "user1", name: "User 1" },
-        "participant"
+        "participant",
       );
       manager.castVote("test-room", "owner", 5);
 
@@ -582,7 +582,7 @@ describe("RoomManager", () => {
       manager.createRoom(
         "Test-Room",
         { id: "owner", name: "Owner" },
-        "participant"
+        "participant",
       );
 
       expect(manager.getState("test-room")).not.toBeNull();
@@ -594,16 +594,16 @@ describe("RoomManager", () => {
   describe("Edge Cases and Error Handling", () => {
     it("handles empty strings gracefully", () => {
       expect(() =>
-        manager.createRoom("", { id: "", name: "" }, "participant")
+        manager.createRoom("", { id: "", name: "" }, "participant"),
       ).toThrow();
       expect(() =>
-        manager.joinRoom("", { id: "", name: "" }, "participant")
+        manager.joinRoom("", { id: "", name: "" }, "participant"),
       ).toThrow();
     });
 
     it("handles whitespace-only strings", () => {
       expect(() =>
-        manager.createRoom("   ", { id: "   ", name: "   " }, "participant")
+        manager.createRoom("   ", { id: "   ", name: "   " }, "participant"),
       ).toThrow();
     });
 
@@ -613,8 +613,8 @@ describe("RoomManager", () => {
         manager.createRoom(
           longName,
           { id: "owner", name: "Owner" },
-          "participant"
-        )
+          "participant",
+        ),
       ).toThrow();
     });
 
@@ -623,7 +623,7 @@ describe("RoomManager", () => {
       const room = manager.createRoom(
         "Test-Room",
         { id: "owner", name: "Owner" },
-        "participant"
+        "participant",
       );
       expect(room.id).toBe("test-room");
 
@@ -631,7 +631,7 @@ describe("RoomManager", () => {
       manager.joinRoom(
         "TEST-room",
         { id: "user1", name: "User 1" },
-        "participant"
+        "participant",
       );
 
       // Vote with yet another case
@@ -647,7 +647,7 @@ describe("RoomManager", () => {
       manager.createRoom(
         "test-room",
         { id: "owner", name: "Owner" },
-        "participant"
+        "participant",
       );
       manager.joinRoom(
         "test-room",
@@ -655,7 +655,7 @@ describe("RoomManager", () => {
           id: "user1",
           name: "User with émojis 🎉",
         },
-        "participant"
+        "participant",
       );
 
       const state = manager.getState("test-room");
@@ -666,12 +666,12 @@ describe("RoomManager", () => {
       manager.createRoom(
         "test-room",
         { id: "123", name: "Numeric Owner" },
-        "participant"
+        "participant",
       );
       manager.joinRoom(
         "test-room",
         { id: "456", name: "Numeric User" },
-        "participant"
+        "participant",
       );
 
       const state = manager.getState("test-room");
@@ -682,12 +682,12 @@ describe("RoomManager", () => {
       manager.createRoom(
         "test-room",
         { id: "owner", name: "Owner" },
-        "participant"
+        "participant",
       );
       manager.joinRoom(
         "test-room",
         { id: "user1", name: "User 1" },
-        "participant"
+        "participant",
       );
 
       manager.castVote("test-room", "owner", 5);
@@ -705,7 +705,7 @@ describe("RoomManager", () => {
       state = manager.getState("test-room");
       expect(state?.currentRoundState.status).toBe("voting"); // Status resets when new vote comes in
       expect(
-        state?.currentRoundState.votes.find((v) => v.id === "user1")?.value
+        state?.currentRoundState.votes.find((v) => v.id === "user1")?.value,
       ).toBe(8);
     });
 
@@ -713,12 +713,12 @@ describe("RoomManager", () => {
       manager.createRoom(
         "test-room",
         { id: "owner", name: "Owner" },
-        "participant"
+        "participant",
       );
       manager.joinRoom(
         "test-room",
         { id: "user1", name: "User 1" },
-        "participant"
+        "participant",
       );
 
       manager.castVote("test-room", "owner", 5);
@@ -738,7 +738,7 @@ describe("RoomManager", () => {
       manager.createRoom(
         "large-room",
         { id: "owner", name: "Owner" },
-        "participant"
+        "participant",
       );
 
       // Add many participants
@@ -746,7 +746,7 @@ describe("RoomManager", () => {
         manager.joinRoom(
           "large-room",
           { id: `user${i}`, name: `User ${i}` },
-          "participant"
+          "participant",
         );
       }
 
@@ -759,7 +759,7 @@ describe("RoomManager", () => {
       const room = manager.createRoom(
         "a",
         { id: "owner", name: "Owner" },
-        "participant"
+        "participant",
       );
       expect(room.id).toBe("a");
 
@@ -768,7 +768,7 @@ describe("RoomManager", () => {
       const room2 = manager.createRoom(
         maxName,
         { id: "owner2", name: "Owner 2" },
-        "participant"
+        "participant",
       );
       expect(room2.id).toBe(maxName);
 
@@ -776,7 +776,7 @@ describe("RoomManager", () => {
       const room3 = manager.createRoom(
         "test-room_name",
         { id: "owner3", name: "Owner 3" },
-        "participant"
+        "participant",
       );
       expect(room3.id).toBe("test-room_name");
     });
@@ -785,7 +785,7 @@ describe("RoomManager", () => {
       manager.createRoom(
         "stats-room",
         { id: "owner", name: "Owner" },
-        "participant"
+        "participant",
       );
 
       // Test with only "?" votes
@@ -801,7 +801,7 @@ describe("RoomManager", () => {
       manager.joinRoom(
         "stats-room",
         { id: "user1", name: "User 1" },
-        "participant"
+        "participant",
       );
 
       // Test with mixed numeric and "?" votes
