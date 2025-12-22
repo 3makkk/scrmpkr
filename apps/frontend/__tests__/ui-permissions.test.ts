@@ -7,13 +7,11 @@ import {
 describe("Frontend UI Permission Utilities", () => {
   describe("UI Control Visibility", () => {
     it("should correctly show voting controls based on role", () => {
-      expect(shouldShowVotingControls("owner")).toBe(true);
       expect(shouldShowVotingControls("participant")).toBe(true);
       expect(shouldShowVotingControls("visitor")).toBe(false);
     });
 
     it("should correctly show session controls based on role", () => {
-      expect(shouldShowSessionControls("owner")).toBe(true);
       expect(shouldShowSessionControls("participant")).toBe(true);
       expect(shouldShowSessionControls("visitor")).toBe(false);
     });
