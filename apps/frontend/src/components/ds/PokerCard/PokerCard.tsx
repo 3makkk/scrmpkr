@@ -1,7 +1,5 @@
-import { motion } from "framer-motion";
 import { forwardRef } from "react";
 import type { UIProps } from "../uiTypes";
-import type { MotionProps } from "framer-motion";
 
 type Value = number | "?";
 
@@ -12,10 +10,9 @@ type PokerCardProps = UIProps<
     isSelected?: boolean;
     onValueClick: (value: Value) => void;
   }
-> &
-  MotionProps;
+>;
 
-const BasePokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
+const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
   (
     {
       value,
@@ -45,17 +42,23 @@ const BasePokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
 
     const { faint, ornament } = colorFor(value);
 
-    // Base styles for the poker card
+    // Base styles for the poker card with CSS transitions for hover/selection
     const baseStyles = `
     relative bg-gradient-to-br from-gray-800 to-gray-900 text-gray-200 font-semibold overflow-hidden
     border border-gray-700/80 rounded-2xl shadow-lg cursor-pointer
-    transition-all duration-200 ease-out hover:shadow-xl hover:border-gray-600/80
+    transition-all duration-200 ease-out
     focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-0
     w-full flex items-center justify-center select-none
     aspect-[5/7]
   `;
 
-    // State-dependent styles
+    // Hover and selection styles
+    const hoverStyles = disabled
+      ? ""
+      : "hover:shadow-xl hover:border-gray-600/80 hover:scale-105 hover:-translate-y-1";
+    const selectedStyles = isSelected
+      ? "scale-110 -translate-y-3 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.4),0_8px_25px_rgba(0,0,0,0.3)]"
+      : "";
     const disabledStyles = disabled ? "opacity-50 cursor-not-allowed" : "";
 
     const handleClick = () => {
@@ -70,7 +73,7 @@ const BasePokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
         type="button"
         onClick={handleClick}
         disabled={disabled}
-        className={`${baseStyles} ${disabledStyles} ${className}`}
+        className={`${baseStyles} ${hoverStyles} ${selectedStyles} ${disabledStyles} ${className}`}
         data-testid={`vote-card-${value}`}
         style={{
           transformOrigin: "center",
@@ -135,8 +138,6 @@ const BasePokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
   },
 );
 
-BasePokerCard.displayName = "BasePokerCard";
-
-const PokerCard = motion.create(BasePokerCard);
+PokerCard.displayName = "PokerCard";
 
 export default PokerCard;

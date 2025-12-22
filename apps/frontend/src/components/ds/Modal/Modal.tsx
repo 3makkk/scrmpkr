@@ -1,5 +1,4 @@
 import { forwardRef, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import type { UIProps } from "../uiTypes";
 
 type ModalProps = UIProps<
@@ -25,7 +24,7 @@ const Modal = forwardRef<HTMLDialogElement, ModalProps>(
       onKeyDown,
       ...props
     },
-    ref,
+    ref
   ) => {
     const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -101,32 +100,18 @@ const Modal = forwardRef<HTMLDialogElement, ModalProps>(
       | string
       | undefined;
 
+    if (!open) return null;
+
     return (
-      <AnimatePresence>
-        {open && (
-          <motion.dialog
-            ref={combinedRef}
-            data-testid={dataTestId}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="backdrop:bg-black/50 bg-transparent border-none outline-none p-4 max-w-none max-h-none w-full h-full flex items-center justify-center"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.2 }}
-              className={className}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {children}
-            </motion.div>
-          </motion.dialog>
-        )}
-      </AnimatePresence>
+      <dialog
+        ref={combinedRef}
+        data-testid={dataTestId}
+        className="backdrop:bg-black/50 bg-transparent border-none outline-none p-4 max-w-none max-h-none w-full h-full flex items-center justify-center animate-fade-in-scale"
+      >
+        {children}
+      </dialog>
     );
-  },
+  }
 );
 
 Modal.displayName = "Modal";

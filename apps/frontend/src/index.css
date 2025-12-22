@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --animate-fade-in-scale: fade-in-scale 0.3s ease-out;
-  --animate-fade-in-down: fade-in-down 0.3s ease-out;
-  --animate-bounce-in: bounce-in 0.5s ease-out;
-  --animate-slide-in-left: slide-in-left 0.4s ease-out;
-  --animate-slide-in-right: slide-in-right 0.4s ease-out;
-  --animate-rotate-in: rotate-in 0.6s ease-out;
+  --animate-fade-in-scale: fade-in-scale 0.3s ease-out both;
+  --animate-fade-in-down: fade-in-down 0.3s ease-out both;
+  --animate-bounce-in: bounce-in 0.5s ease-out both;
+  --animate-slide-in-left: slide-in-left 0.4s ease-out both;
+  --animate-slide-in-right: slide-in-right 0.4s ease-out both;
+  --animate-rotate-in: rotate-in 0.6s ease-out both;
   --animate-float: float 3s ease-in-out infinite;
   --animate-glow-pulse: glow-pulse 2s ease-in-out infinite;
   --animate-shimmer: shimmer 1.5s linear infinite;
@@ -119,35 +119,6 @@
   animation-delay: calc(--value(integer) * 1ms);
 }
 
-/* Framer Motion optimization */
-.motion-safe {
-  @media (prefers-reduced-motion: no-preference) {
-    --motion-duration: 0.3s;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .motion-safe {
-    --motion-duration: 0s;
-  }
-}
-
-/* Custom utility classes for enhanced animations */
-.animate-float {
-  animation: var(--animate-float);
-}
-
-.animate-glow-pulse {
-  animation: var(--animate-glow-pulse);
-}
-
-.animate-shimmer {
-  animation: var(--animate-shimmer);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
-  background-size: 200% 100%;
+@utility animation-duration-* {
+  animation-duration: calc(--value(integer) * 1ms);
 }

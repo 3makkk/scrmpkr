@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import type { UIProps } from "../uiTypes";
 
 /**
@@ -204,28 +203,14 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
           })}
 
           {/* Dropdown Menu positioned relative to trigger */}
-          <AnimatePresence>
-            {isOpen && (
-              <motion.div
-                ref={menuRef}
-                initial={{
-                  opacity: 0,
-                  scale: 0.95,
-                  y: placement.includes("top") ? 10 : -10,
-                }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{
-                  opacity: 0,
-                  scale: 0.95,
-                  y: placement.includes("top") ? 10 : -10,
-                }}
-                transition={{ duration: 0.15 }}
-                className={`absolute bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50 ${getPlacementClasses()}`}
-              >
-                {children}
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {isOpen && (
+            <div
+              ref={menuRef}
+              className={`absolute bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50 animate-fade-in-scale ${getPlacementClasses()}`}
+            >
+              {children}
+            </div>
+          )}
         </div>
       </div>
     );
