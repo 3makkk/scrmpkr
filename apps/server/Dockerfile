@@ -13,10 +13,8 @@ RUN pnpm install -r --frozen-lockfile
 
 FROM deps AS build
 COPY . .
-# First build the shared package
-RUN pnpm --filter ./packages/shared build
-# Then build the server
-RUN pnpm --filter ./apps/server build
+# Build the server and all its dependencies (e.g., shared package)
+RUN pnpm --filter '{./apps/server}...' build
 
 # Create a pruned, production-only deploy directory for the server
 RUN pnpm --filter ./apps/server deploy --prod /app/server-deploy
