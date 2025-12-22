@@ -23,26 +23,16 @@ export type User = {
 };
 
 export default class Room {
-  constructor(
-    id: string,
-    creatorId: string,
-    ownerName: string,
-    role: UserRole,
-  ) {
+  constructor(id: string, participant: Participant) {
     this.id = id;
-    this.creatorId = creatorId;
+    this.creatorId = participant.id;
     this.name = id;
     this.participants = new Map();
     this.status = "voting";
     this.currentRound = 1;
     this.currentRoundTracker = new Round(this.currentRound);
 
-    this.participants.set(creatorId, {
-      id: creatorId,
-      name: ownerName,
-      hasVoted: false,
-      role: role,
-    });
+    this.participants.set(participant.id, participant);
   }
 
   readonly id: string;

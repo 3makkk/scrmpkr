@@ -50,6 +50,11 @@ Run the backend:
 pnpm dev:server
 ```
 
+The server exposes a Prometheus metrics endpoint at `http://localhost:9464/metrics` with the following custom metrics:
+
+- `poker_rooms_active`: Number of currently active poker rooms (gauge)
+- `poker_users_active`: Number of unique active users across all rooms (gauge)
+
 ### Frontend
 
 Create `frontend/.env` using `frontend/.env.example`.

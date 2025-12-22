@@ -1,4 +1,5 @@
 import "dotenv/config";
+import "./metrics";
 import express from "express";
 import http from "node:http";
 import cors from "cors";
@@ -6,6 +7,7 @@ import { Server } from "socket.io";
 import { RoomManager, type User, type RoomState } from "./roomManager";
 import type { UserRole } from "@scrmpkr/shared";
 import logger from "./logger";
+import { setMetricCallbacks } from "./metrics";
 
 const app = express();
 app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
@@ -61,6 +63,12 @@ const io = new Server<
 
 const rooms = new RoomManager();
 
+// Register metric callbacks for OTEL gauges
+setMetricCallbacks(
+  () => rooms.getRoomsCount(),
+  () => rooms.getTotalActiveUsers(),
+);
+
 type AuthPayload = { name?: string; userId?: string };
 
 const namespace = io.of("/poker");
@@ -87,9 +95,12 @@ namespace.use(async (socket, next) => {
 
 namespace.on("connection", (socket) => {
   const transport = socket.conn.transport.name; // in most cases, "polling"
-  logger.info(`Socket connected using transport: ${transport}`);
-
   const { id: userId, name: userName } = socket.data.user;
+
+  // Create a child logger with user context
+  const userLogger = logger.child({ userId, userName });
+
+  userLogger.info({ transport }, "Socket connected");
 
   // Enforce single active connection per userId by disconnecting the previous one
   const existingSocketId = activeSockets.get(userId);
@@ -100,8 +111,8 @@ namespace.on("connection", (socket) => {
         reason: "Another session connected with your account",
       });
       existingSocket.disconnect(true);
-      logger.info(
-        { userId, userName, kickedSocketId: existingSocketId },
+      userLogger.info(
+        { kickedSocketId: existingSocketId },
         "Disconnected previous socket for user",
       );
     }
@@ -110,47 +121,24 @@ namespace.on("connection", (socket) => {
 
   socket.conn.on("upgrade", () => {
     const upgradedTransport = socket.conn.transport.name; // in most cases, "websocket"
-    logger.info(`Socket upgraded to transport: ${upgradedTransport}`);
+    userLogger.info({ transport: upgradedTransport }, "Socket upgraded");
   });
 
-  logger.info(
-    {
-      userId: socket.data.user.id,
-      userName: socket.data.user.name,
-      socketId: socket.id,
-    },
-    "User connected",
-  );
+  userLogger.info({ socketId: socket.id }, "User connected");
 
   socket.on("room:exists", ({ roomId }, cb) => {
-    logger.info(
-      {
-        userId: socket.data.user.id,
-        roomId,
-      },
-      "Room existence check was requested",
-    );
     const exists = rooms.roomExists(roomId);
     cb({ exists });
   });
 
   socket.on("room:join", ({ roomId, role }, cb) => {
-    logger.info(
-      {
-        userId: socket.data.user.id,
-        userName: socket.data.user.name,
-        roomId,
-        role: role,
-      },
-      "Room join was requested",
-    );
+    const roomLogger = userLogger.child({ roomId, role });
     try {
-      const room = rooms.joinRoom(roomId, socket.data.user, role);
+      const room = rooms.roomExists(roomId)
+        ? rooms.joinRoom(roomId, socket.data.user, role)
+        : rooms.createRoom(roomId, socket.data.user, role);
       socket.join(room.id);
-      logger.info(
-        { userId: socket.data.user.id, roomId: room.id },
-        "User joined socket room",
-      );
+      roomLogger.info("User joined socket room");
       const state = rooms.getState(room.id);
       if (state) {
         cb({ state });
@@ -160,31 +148,18 @@ namespace.on("connection", (socket) => {
       }
     } catch (error) {
       const e = error as Error;
-      logger.warn(
-        { userId: socket.data.user.id, roomId, error: e.message },
-        "Room join failed",
-      );
+      roomLogger.warn({ error: e.message }, "Room join failed");
       cb({ error: e.message });
     }
   });
 
   socket.on("room:leave", ({ roomId }, cb) => {
-    logger.info(
-      {
-        userId: socket.data.user.id,
-        userName: socket.data.user.name,
-        roomId,
-      },
-      "Room leave was requested",
-    );
+    const roomLogger = userLogger.child({ roomId });
     const result = rooms.leaveRoom(roomId, socket.data.user.id);
     if (result !== false && result.wasInRoom) {
       const normalizedRoomId = roomId.trim().toLowerCase();
       socket.leave(normalizedRoomId);
-      logger.info(
-        { userId: socket.data.user.id, roomId: normalizedRoomId },
-        "User left socket room",
-      );
+      roomLogger.info("User left socket room");
       // Notify other participants about the updated room state
       {
         const state = rooms.getState(roomId);
@@ -192,24 +167,17 @@ namespace.on("connection", (socket) => {
       }
       if (cb) cb({ success: true });
     } else {
-      logger.warn(
-        { userId: socket.data.user.id, roomId },
-        "Leave failed, user not in room",
-      );
+      roomLogger.warn("Leave failed, user not in room");
       if (cb) cb({ success: false });
     }
   });
 
   socket.on("user:updateName", ({ roomId, newName }, cb) => {
-    logger.info(
-      {
-        userId: socket.data.user.id,
-        oldName: socket.data.user.name,
-        newName,
-        roomId,
-      },
-      "Username update was requested",
-    );
+    const roomLogger = userLogger.child({
+      roomId,
+      oldName: socket.data.user.name,
+      newName,
+    });
     try {
       // Update the socket's user data
       socket.data.user.name = newName;
@@ -227,63 +195,33 @@ namespace.on("connection", (socket) => {
 
         if (cb) cb({ success: true });
       } else {
-        logger.warn(
-          { userId: socket.data.user.id, roomId },
-          "Username update failed - user not in room",
-        );
+        roomLogger.warn("Username update failed - user not in room");
         if (cb) cb({ error: "User not found in room" });
       }
     } catch (error) {
       const e = error as Error;
-      logger.error(
-        { userId: socket.data.user.id, roomId, error: e.message },
-        "Username update failed",
-      );
+      roomLogger.error({ error: e.message }, "Username update failed");
       if (cb) cb({ error: e.message });
     }
   });
 
   socket.on("vote:cast", ({ roomId, value }) => {
-    logger.info(
-      {
-        userId: socket.data.user.id,
-        userName: socket.data.user.name,
-        roomId,
-        value,
-      },
-      "Vote was cast",
-    );
     rooms.castVote(roomId, socket.data.user.id, value);
     const state = rooms.getState(roomId);
     if (state) namespace.to(state.id).emit("room:state", state);
   });
 
   socket.on("reveal:start", ({ roomId }) => {
-    logger.info(
-      {
-        userId: socket.data.user.id,
-        userName: socket.data.user.name,
-        roomId,
-      },
-      "Reveal was requested",
-    );
+    const roomLogger = userLogger.child({ roomId });
     // Check if there are votes to reveal
     if (!rooms.hasAnyVotes(roomId)) {
-      logger.warn({ roomId }, "Reveal was denied, no votes");
+      roomLogger.warn("Reveal was denied, no votes");
       return; // Don't allow reveal if no votes
     }
     rooms.startReveal(roomId, socket.data.user.id, namespace);
   });
 
   socket.on("vote:clear", ({ roomId }) => {
-    logger.info(
-      {
-        userId: socket.data.user.id,
-        userName: socket.data.user.name,
-        roomId,
-      },
-      "Clear votes was requested",
-    );
     rooms.clearVotes(roomId, socket.data.user.id);
     // Notify clients that votes were cleared, and broadcast fresh state
     const normalizedRoomId = roomId.trim().toLowerCase();
@@ -295,27 +233,23 @@ namespace.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    logger.info(
-      {
-        userId: socket.data.user.id,
-        userName: socket.data.user.name,
-        socketId: socket.id,
-      },
-      "User disconnected",
-    );
+    userLogger.info({ socketId: socket.id }, "User disconnected");
     // Clear active socket tracking if this was the registered one for the user
     if (activeSockets.get(socket.data.user.id) === socket.id) {
       activeSockets.delete(socket.data.user.id);
     }
 
-    // Remove user from all rooms and update affected rooms
-    const updatedRoomIds = rooms.leaveAll(socket.data.user.id);
-    // Emit updated state to all affected rooms
-    updatedRoomIds.forEach((roomId) => {
-      logger.info({ roomId }, "Room state update was sent");
-      const state = rooms.getState(roomId);
-      if (state) namespace.to(roomId).emit("room:state", state);
-    });
+    // Remove user from their room if they're in one
+    const roomId = rooms.findUserRoom(socket.data.user.id);
+    if (roomId) {
+      const result = rooms.leaveRoom(roomId, socket.data.user.id);
+      // Emit updated state if room still exists
+      if (result && !result.roomDeleted) {
+        userLogger.child({ roomId }).info("Room state update was sent");
+        const state = rooms.getState(roomId);
+        if (state) namespace.to(roomId).emit("room:state", state);
+      }
+    }
   });
 });
 

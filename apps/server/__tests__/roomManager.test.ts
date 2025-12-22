@@ -396,64 +396,50 @@ describe("RoomManager", () => {
     });
   });
 
-  describe("Leave All Functionality", () => {
+  describe("Find User Room", () => {
     beforeEach(() => {
       manager.createRoom("owner", "Owner", "room-one", "participant");
-      manager.createRoom("user1", "User 1", "room-two", "participant");
-
       manager.joinRoom("room-one", { id: "user1", name: "User 1" });
       manager.joinRoom("room-one", { id: "user2", name: "User 2" });
-      manager.joinRoom("room-two", { id: "user2", name: "User 2" });
     });
 
-    it("removes user from all rooms and returns rooms to update", () => {
-      const roomsToUpdate = manager.leaveAll("user2");
-
-      // user2 leaves room-one (still has owner + user1) and room-two (still has user1 as owner)
-      expect(roomsToUpdate).toEqual(
-        expect.arrayContaining(["room-one", "room-two"]),
-      );
-      expect(roomsToUpdate).toHaveLength(2);
-
-      const roomOneState = manager.getState("room-one");
-      expect(roomOneState?.participants.map((p) => p.id)).not.toContain(
-        "user2",
-      );
-
-      const roomTwoState = manager.getState("room-two");
-      expect(roomTwoState?.participants.map((p) => p.id)).not.toContain(
-        "user2",
-      );
+    it("finds the room a user is in", () => {
+      const roomId = manager.findUserRoom("user2");
+      expect(roomId).toBe("room-one");
     });
 
-    it("deletes empty rooms during leave all", () => {
-      const roomsToUpdate = manager.leaveAll("user1");
-
-      // user1 leaves room-one (still has owner + user2) and room-two (still has user2)
-      expect(roomsToUpdate).toEqual(
-        expect.arrayContaining(["room-one", "room-two"]),
-      );
-      expect(roomsToUpdate).toHaveLength(2);
-
-      // Both rooms should still exist since they have other participants
-      expect(manager.getState("room-two")).not.toBeNull();
-      expect(manager.getState("room-one")).not.toBeNull();
+    it("returns null for user not in any room", () => {
+      const roomId = manager.findUserRoom("nonexistent-user");
+      expect(roomId).toBeNull();
     });
 
-    it("completely empties and deletes a room", () => {
+    it("user can leave their room via disconnect flow", () => {
+      // Simulate disconnect: find room and leave
+      const roomId = manager.findUserRoom("user2");
+      expect(roomId).toBe("room-one");
+
+      if (roomId) {
+        const result = manager.leaveRoom(roomId, "user2");
+        expect(result).toEqual({ roomDeleted: false, wasInRoom: true });
+      }
+
+      const roomState = manager.getState("room-one");
+      expect(roomState?.participants.map((p) => p.id)).not.toContain("user2");
+    });
+
+    it("deletes room when last user leaves via disconnect", () => {
       // Create a room where a user is the only participant
       manager.createRoom("solo-user", "Solo User", "solo-room", "participant");
 
-      const roomsToUpdate = manager.leaveAll("solo-user");
+      const roomId = manager.findUserRoom("solo-user");
+      expect(roomId).toBe("solo-room");
 
-      // No rooms to update since the room was deleted
-      expect(roomsToUpdate).toEqual([]);
+      if (roomId) {
+        const result = manager.leaveRoom(roomId, "solo-user");
+        expect(result).toEqual({ roomDeleted: true, wasInRoom: true });
+      }
+
       expect(manager.getState("solo-room")).toBeNull();
-    });
-
-    it("handles leave all for user not in any rooms", () => {
-      const roomsToUpdate = manager.leaveAll("nonexistent-user");
-      expect(roomsToUpdate).toEqual([]);
     });
   });
 
