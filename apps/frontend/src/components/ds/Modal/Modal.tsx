@@ -24,7 +24,7 @@ const Modal = forwardRef<HTMLDialogElement, ModalProps>(
       onKeyDown,
       ...props
     },
-    ref
+    ref,
   ) => {
     const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -111,7 +111,7 @@ const Modal = forwardRef<HTMLDialogElement, ModalProps>(
         {children}
       </dialog>
     );
-  }
+  },
 );
 
 Modal.displayName = "Modal";
