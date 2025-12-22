@@ -24,7 +24,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 # The deploy directory contains server package files and pruned node_modules
 COPY --from=build /app/server-deploy ./
+
 EXPOSE 4000
+EXPOSE 9464
+
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s CMD wget -qO- http://127.0.0.1:4000/health || exit 1
 CMD ["node", "dist/index.js"]
 
