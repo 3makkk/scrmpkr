@@ -9,7 +9,7 @@ export default function ContextualTeamStatus() {
 
   if (!roomState || !account) return null;
 
-  const { participants, currentRoundState, ownerId } = roomState;
+  const { participants, currentRoundState } = roomState;
   const isRoundRevealed = currentRoundState?.status === "revealed";
 
   // Filter out visitors from participant counting and display
@@ -110,11 +110,6 @@ export default function ContextualTeamStatus() {
                         {participant.id === account.id
                           ? "You"
                           : participant.name}
-                        {participant.id === ownerId && (
-                          <span className="ml-1 text-xs text-yellow-500">
-                            ★
-                          </span>
-                        )}
                         {getRoleDisplay(participant) && (
                           <span className="ml-1 text-xs text-gray-400">
                             {getRoleDisplay(participant)}

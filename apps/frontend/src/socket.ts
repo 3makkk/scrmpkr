@@ -4,6 +4,8 @@ import type {
   ClientToServerEvents,
 } from "@scrmpkr/shared";
 
+type CheckRoomExistsCallback = (exists: boolean) => void;
+
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | undefined;
 
 export type AuthPayload = { name: string; userId: string };
@@ -37,4 +39,15 @@ export function getCurrentSocket():
   | Socket<ServerToClientEvents, ClientToServerEvents>
   | undefined {
   return socket;
+}
+
+export function checkRoomExists(
+  auth: AuthPayload,
+  roomId: string,
+  callback: CheckRoomExistsCallback,
+): void {
+  const sock = getSocket(auth);
+  sock.emit("room:exists", { roomId }, ({ exists }) => {
+    callback(exists);
+  });
 }

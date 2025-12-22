@@ -18,7 +18,12 @@ describe("RoomManager", () => {
 
   describe("Room Creation", () => {
     it("creates and joins a room, normalizing the id", () => {
-      const room = manager.createRoom("owner-1", "Owner", "Test-Room");
+      const room = manager.createRoom(
+        "owner-1",
+        "Owner",
+        "Test-Room",
+        "participant",
+      );
       expect(room.id).toBe("test-room");
 
       const joined = manager.joinRoom("TEST-room", {
@@ -35,7 +40,12 @@ describe("RoomManager", () => {
       const validNames = ["test", "test-room", "test_room", "a", "a-b_c"];
 
       validNames.forEach((name, index) => {
-        const room = manager.createRoom(`owner-${index}`, "Owner", name);
+        const room = manager.createRoom(
+          `owner-${index}`,
+          "Owner",
+          name,
+          "participant",
+        );
         expect(room.id).toBe(name.toLowerCase());
       });
     });
@@ -57,28 +67,35 @@ describe("RoomManager", () => {
         if (name === "TEST") {
           // This should work due to normalization
           expect(() =>
-            manager.createRoom("owner", "Owner", name),
+            manager.createRoom("owner", "Owner", name, "participant"),
           ).not.toThrow();
         } else {
-          expect(() => manager.createRoom("owner", "Owner", name)).toThrow();
+          expect(() =>
+            manager.createRoom("owner", "Owner", name, "participant"),
+          ).toThrow();
         }
       });
     });
 
     it("prevents creating duplicate rooms", () => {
-      manager.createRoom("owner-1", "Owner", "test-room");
+      manager.createRoom("owner-1", "Owner", "test-room", "participant");
 
       expect(() =>
-        manager.createRoom("owner-2", "Owner 2", "test-room"),
+        manager.createRoom("owner-2", "Owner 2", "test-room", "participant"),
       ).toThrow("Room already exists");
     });
 
     it("creates room with owner as first participant", () => {
-      const room = manager.createRoom("owner-1", "Owner", "test-room");
+      const room = manager.createRoom(
+        "owner-1",
+        "Owner",
+        "test-room",
+        "participant",
+      );
 
       expect(room.participants.size).toBe(1);
       expect(room.participants.has("owner-1")).toBe(true);
-      expect(room.ownerId).toBe("owner-1");
+      expect(room.creatorId).toBe("owner-1");
 
       const state = manager.getState("test-room");
       expect(state?.participants).toHaveLength(1);
@@ -86,20 +103,19 @@ describe("RoomManager", () => {
         id: "owner-1",
         name: "Owner",
         hasVoted: false,
-        role: "owner",
+        role: "participant",
       });
     });
   });
 
   describe("Room Joining", () => {
-    it("throws a reopen hint when joining a missing room", () => {
-      expect(() =>
-        manager.joinRoom("missing-room", { id: "x", name: "Missing" }),
-      ).toThrow(/reopen/i);
-    });
-
     it("allows multiple users to join a room", () => {
-      const room = manager.createRoom("owner", "Owner", "test-room");
+      const room = manager.createRoom(
+        "owner",
+        "Owner",
+        "test-room",
+        "participant",
+      );
 
       manager.joinRoom("test-room", { id: "user1", name: "User 1" });
       manager.joinRoom("test-room", { id: "user2", name: "User 2" });
@@ -111,7 +127,12 @@ describe("RoomManager", () => {
     });
 
     it("allows same user to rejoin a room", () => {
-      const room = manager.createRoom("owner", "Owner", "test-room");
+      const room = manager.createRoom(
+        "owner",
+        "Owner",
+        "test-room",
+        "participant",
+      );
       manager.joinRoom("test-room", { id: "user1", name: "User 1" });
 
       expect(room.participants.size).toBe(2);
@@ -138,7 +159,7 @@ describe("RoomManager", () => {
 
   describe("Voting System", () => {
     beforeEach(() => {
-      manager.createRoom("owner", "Owner", "test-room");
+      manager.createRoom("owner", "Owner", "test-room", "participant");
       manager.joinRoom("test-room", { id: "user1", name: "User 1" });
       manager.joinRoom("test-room", { id: "user2", name: "User 2" });
     });
@@ -251,7 +272,7 @@ describe("RoomManager", () => {
 
   describe("Round Management", () => {
     beforeEach(() => {
-      manager.createRoom("owner", "Owner", "test-room");
+      manager.createRoom("owner", "Owner", "test-room", "participant");
       manager.joinRoom("test-room", { id: "user1", name: "User 1" });
     });
 
@@ -294,7 +315,7 @@ describe("RoomManager", () => {
 
   describe("Reveal Functionality", () => {
     beforeEach(() => {
-      manager.createRoom("owner", "Owner", "test-room");
+      manager.createRoom("owner", "Owner", "test-room", "participant");
       manager.joinRoom("test-room", { id: "user1", name: "User 1" });
     });
 
@@ -332,29 +353,9 @@ describe("RoomManager", () => {
     });
   });
 
-  describe("Owner Management", () => {
-    it("correctly identifies room owner", () => {
-      manager.createRoom("owner-1", "Owner", "test-room");
-
-      expect(manager.isOwner("test-room", "owner-1")).toBe(true);
-      expect(manager.isOwner("test-room", "other-user")).toBe(false);
-    });
-
-    it("returns false for non-existent room", () => {
-      expect(manager.isOwner("nonexistent", "owner")).toBe(false);
-    });
-
-    it("normalizes room id when checking ownership", () => {
-      manager.createRoom("owner-1", "Owner", "Test-Room");
-
-      expect(manager.isOwner("TEST-room", "owner-1")).toBe(true);
-      expect(manager.isOwner("test-ROOM", "owner-1")).toBe(true);
-    });
-  });
-
   describe("Room Leaving", () => {
     beforeEach(() => {
-      manager.createRoom("owner", "Owner", "test-room");
+      manager.createRoom("owner", "Owner", "test-room", "participant");
       manager.joinRoom("test-room", { id: "user1", name: "User 1" });
       manager.joinRoom("test-room", { id: "user2", name: "User 2" });
     });
@@ -397,8 +398,8 @@ describe("RoomManager", () => {
 
   describe("Leave All Functionality", () => {
     beforeEach(() => {
-      manager.createRoom("owner", "Owner", "room-one");
-      manager.createRoom("user1", "User 1", "room-two");
+      manager.createRoom("owner", "Owner", "room-one", "participant");
+      manager.createRoom("user1", "User 1", "room-two", "participant");
 
       manager.joinRoom("room-one", { id: "user1", name: "User 1" });
       manager.joinRoom("room-one", { id: "user2", name: "User 2" });
@@ -441,7 +442,7 @@ describe("RoomManager", () => {
 
     it("completely empties and deletes a room", () => {
       // Create a room where a user is the only participant
-      manager.createRoom("solo-user", "Solo User", "solo-room");
+      manager.createRoom("solo-user", "Solo User", "solo-room", "participant");
 
       const roomsToUpdate = manager.leaveAll("solo-user");
 
@@ -454,18 +455,6 @@ describe("RoomManager", () => {
       const roomsToUpdate = manager.leaveAll("nonexistent-user");
       expect(roomsToUpdate).toEqual([]);
     });
-
-    it("handles owner leaving their own room", () => {
-      const roomsToUpdate = manager.leaveAll("owner");
-
-      // owner leaves room-one, but room still has user1 and user2
-      expect(roomsToUpdate).toEqual(["room-one"]);
-      const roomOneState = manager.getState("room-one");
-      expect(roomOneState?.participants.map((p) => p.id)).not.toContain(
-        "owner",
-      );
-      expect(roomOneState?.ownerId).toBe("owner"); // Owner ID doesn't change
-    });
   });
 
   describe("State Management", () => {
@@ -474,7 +463,7 @@ describe("RoomManager", () => {
     });
 
     it("returns complete room state", () => {
-      manager.createRoom("owner", "Owner Name", "test-room");
+      manager.createRoom("owner", "Owner Name", "test-room", "participant");
       manager.joinRoom("test-room", { id: "user1", name: "User 1" });
       manager.castVote("test-room", "owner", 5);
 
@@ -482,9 +471,14 @@ describe("RoomManager", () => {
 
       expect(state).toEqual({
         id: "test-room",
-        ownerId: "owner",
+        creatorId: "owner",
         participants: [
-          { id: "owner", name: "Owner Name", hasVoted: true, role: "owner" },
+          {
+            id: "owner",
+            name: "Owner Name",
+            hasVoted: true,
+            role: "participant",
+          },
           { id: "user1", name: "User 1", hasVoted: false, role: "participant" },
         ],
         status: "voting",
@@ -499,7 +493,7 @@ describe("RoomManager", () => {
     });
 
     it("normalizes room id for state retrieval", () => {
-      manager.createRoom("owner", "Owner", "Test-Room");
+      manager.createRoom("owner", "Owner", "Test-Room", "participant");
 
       expect(manager.getState("test-room")).not.toBeNull();
       expect(manager.getState("TEST-room")).not.toBeNull();
@@ -509,22 +503,31 @@ describe("RoomManager", () => {
 
   describe("Edge Cases and Error Handling", () => {
     it("handles empty strings gracefully", () => {
-      expect(() => manager.createRoom("", "", "")).toThrow();
+      expect(() => manager.createRoom("", "", "", "participant")).toThrow();
       expect(() => manager.joinRoom("", { id: "", name: "" })).toThrow();
     });
 
     it("handles whitespace-only strings", () => {
-      expect(() => manager.createRoom("   ", "   ", "   ")).toThrow();
+      expect(() =>
+        manager.createRoom("   ", "   ", "   ", "participant"),
+      ).toThrow();
     });
 
     it("handles very long room names", () => {
       const longName = "a".repeat(51);
-      expect(() => manager.createRoom("owner", "Owner", longName)).toThrow();
+      expect(() =>
+        manager.createRoom("owner", "Owner", longName, "participant"),
+      ).toThrow();
     });
 
     it("maintains consistency across operations", () => {
       // Create room with mixed case
-      const room = manager.createRoom("owner", "Owner", "Test-Room");
+      const room = manager.createRoom(
+        "owner",
+        "Owner",
+        "Test-Room",
+        "participant",
+      );
       expect(room.id).toBe("test-room");
 
       // Join with different case
@@ -540,7 +543,7 @@ describe("RoomManager", () => {
     });
 
     it("handles special characters in user names", () => {
-      manager.createRoom("owner", "Owner", "test-room");
+      manager.createRoom("owner", "Owner", "test-room", "participant");
       manager.joinRoom("test-room", {
         id: "user1",
         name: "User with émojis 🎉",
@@ -551,16 +554,15 @@ describe("RoomManager", () => {
     });
 
     it("handles numeric user IDs as strings", () => {
-      manager.createRoom("123", "Numeric Owner", "test-room");
+      manager.createRoom("123", "Numeric Owner", "test-room", "participant");
       manager.joinRoom("test-room", { id: "456", name: "Numeric User" });
 
       const state = manager.getState("test-room");
       expect(state?.participants).toHaveLength(2);
-      expect(state?.ownerId).toBe("123");
     });
 
     it("handles concurrent voting and revealing", () => {
-      manager.createRoom("owner", "Owner", "test-room");
+      manager.createRoom("owner", "Owner", "test-room", "participant");
       manager.joinRoom("test-room", { id: "user1", name: "User 1" });
 
       manager.castVote("test-room", "owner", 5);
@@ -583,7 +585,7 @@ describe("RoomManager", () => {
     });
 
     it("handles multiple reveals on same round", () => {
-      manager.createRoom("owner", "Owner", "test-room");
+      manager.createRoom("owner", "Owner", "test-room", "participant");
       manager.joinRoom("test-room", { id: "user1", name: "User 1" });
 
       manager.castVote("test-room", "owner", 5);
@@ -600,7 +602,7 @@ describe("RoomManager", () => {
     });
 
     it("handles large number of participants", () => {
-      manager.createRoom("owner", "Owner", "large-room");
+      manager.createRoom("owner", "Owner", "large-room", "participant");
 
       // Add many participants
       for (let i = 1; i <= 100; i++) {
@@ -613,21 +615,31 @@ describe("RoomManager", () => {
 
     it("handles room name edge cases correctly", () => {
       // Test minimum length
-      const room = manager.createRoom("owner", "Owner", "a");
+      const room = manager.createRoom("owner", "Owner", "a", "participant");
       expect(room.id).toBe("a");
 
       // Test maximum length
       const maxName = "a".repeat(50);
-      const room2 = manager.createRoom("owner2", "Owner 2", maxName);
+      const room2 = manager.createRoom(
+        "owner2",
+        "Owner 2",
+        maxName,
+        "participant",
+      );
       expect(room2.id).toBe(maxName);
 
       // Test with hyphens and underscores
-      const room3 = manager.createRoom("owner3", "Owner 3", "test-room_name");
+      const room3 = manager.createRoom(
+        "owner3",
+        "Owner 3",
+        "test-room_name",
+        "participant",
+      );
       expect(room3.id).toBe("test-room_name");
     });
 
     it("handles vote statistics edge cases", () => {
-      manager.createRoom("owner", "Owner", "stats-room");
+      manager.createRoom("owner", "Owner", "stats-room", "participant");
 
       // Test with only "?" votes
       manager.castVote("stats-room", "owner", "?");

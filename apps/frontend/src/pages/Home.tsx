@@ -6,7 +6,7 @@ import LoginForm from "../components/auth/LoginForm";
 import PageLayout from "../components/core/layout/PageLayout";
 import Card from "../components/poker/shared/Card";
 import Button from "../components/ds/Button/Button";
-import { getSocket } from "../socket";
+import { checkRoomExists } from "../socket";
 import { Input } from "../components";
 
 export default function Home() {
@@ -48,19 +48,22 @@ export default function Home() {
       return;
     }
     setCreateError(null);
-    const s = getSocket({ name: account.name, userId: account.id });
-    s.emit("room:create", { roomName: sanitized }, (response) => {
-      if ("error" in response) {
-        setCreateError(response.error);
-        return;
-      }
-      setRoomName("");
-      // Navigate with state indicating the user created this room
-      navigate(`/r/${response.roomId}`, {
-        state: { isCreator: true },
-        viewTransition: true,
-      });
-    });
+
+    // Check if room already exists
+    checkRoomExists(
+      {
+        name: account.name,
+        userId: account.id,
+      },
+      sanitized,
+      (exists) => {
+        if (exists) {
+          setCreateError(`Room "${sanitized}" already exists.`);
+        } else {
+          navigate(`/r/${sanitized}`);
+        }
+      },
+    );
   };
 
   const createNamedRoom = () => {

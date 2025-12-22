@@ -1,31 +1,24 @@
 import { test, expect } from "@playwright/test";
-import {
-  createUser,
-  loginUser,
-  createRoom,
-  joinRoom,
-  castVote,
-  revealVotes,
-  UserAssertions,
-  RoomAssertions,
-} from "./test-assertions";
-import { type User, type Room, Participation } from "./domain-objects";
+import { UserAssertions, RoomAssertions } from "./test-assertions";
+import type { TestParticipation } from "./domain-objects/TestParticipation";
+import { TestUser } from "./domain-objects/TestUser";
+import { TestRoom } from "./domain-objects/TestRoom";
 
 test.describe("Visitor Role Functionality", () => {
-  const users: User[] = [];
-  let roomOwner: User;
-  let participant: User;
-  let visitor: User;
-  let room: Room;
-  let ownerParticipation: Participation;
-  let participantParticipation: Participation;
+  const users: TestUser[] = [];
+  let roomOwner: TestUser;
+  let participant: TestUser;
+  let visitor: TestUser;
+  let room: TestRoom;
+  let ownerParticipation: TestParticipation;
+  let participantParticipation: TestParticipation;
 
   test.beforeAll(async ({ browser }) => {
     await test.step("Setup users for visitor role test", async () => {
       const userNames = ["Alice", "Bob", "Charlie"];
 
       for (const name of userNames) {
-        const user = await createUser(browser, name);
+        const user = await TestUser.create(browser, name);
         users.push(user);
       }
 
@@ -42,26 +35,24 @@ test.describe("Visitor Role Functionality", () => {
   });
 
   test("visitor can join room but cannot vote, owners and participants can reveal/clear votes", async () => {
-    // Step 1: Room owner creates a room (becomes OWNER role automatically)
+    // Step 1: Room owner creates a room
     await test.step("Room owner creates a room", async () => {
-      await loginUser(roomOwner);
-      room = await createRoom(
+      await roomOwner.navigateToHome();
+      await roomOwner.fillLoginForm();
+      room = await TestRoom.createByUser(
         roomOwner,
         `visitor-test-room-${Date.now()}-${Math.random()
           .toString(36)
           .substring(7)}`,
       );
-      ownerParticipation = new Participation(roomOwner, room, "OWNER");
+      ownerParticipation = await room.addUser(roomOwner, "PARTICIPANT");
     });
 
     // Step 2: Participant joins as normal participant
     await test.step("Participant joins as normal participant", async () => {
-      await loginUser(participant);
-      participantParticipation = await joinRoom(
-        participant,
-        room,
-        "PARTICIPANT",
-      );
+      await participant.navigateToHome();
+      await participant.fillLoginForm();
+      participantParticipation = await room.addUser(participant, "PARTICIPANT");
 
       // Verify we have 2 total participants
       await RoomAssertions.for(room).shouldHaveParticipantCount(roomOwner, 2);
@@ -69,8 +60,9 @@ test.describe("Visitor Role Functionality", () => {
 
     // Step 3: Visitor joins as visitor role
     await test.step("Visitor joins as visitor role", async () => {
-      await loginUser(visitor);
-      await joinRoom(visitor, room, "VISITOR");
+      await visitor.navigateToHome();
+      await visitor.fillLoginForm();
+      await room.addUser(visitor, "VISITOR");
 
       // Now we should have 3 total participants (2 active + 1 visitor)
       await RoomAssertions.for(room).shouldHaveParticipantCount(roomOwner, 3);
@@ -90,8 +82,8 @@ test.describe("Visitor Role Functionality", () => {
       await UserAssertions.for(participant).shouldSeeVotingDeck();
 
       // Cast votes
-      await castVote(ownerParticipation, "5");
-      await castVote(participantParticipation, "8");
+      await ownerParticipation.castVote("5");
+      await participantParticipation.castVote("8");
 
       // Simply wait for reveal button to become available (indicating all have voted)
       await roomOwner.page.waitForSelector(
@@ -120,7 +112,7 @@ test.describe("Visitor Role Functionality", () => {
 
     // Step 7: Owner reveals votes
     await test.step("Owner reveals votes", async () => {
-      await revealVotes(ownerParticipation);
+      await ownerParticipation.revealVotes();
 
       // All users should see voting results
       await RoomAssertions.for(room).shouldShowVotingResults(roomOwner);

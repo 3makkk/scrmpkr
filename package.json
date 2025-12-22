@@ -10,7 +10,7 @@
     "test:e2e": "pnpm --filter e2e test",
     "test:e2e:ui": "pnpm --filter e2e test:ui",
     "typecheck": "pnpm -r typecheck",
-    "lint": "biome lint --write .",
+    "lint": "biome lint --write --unsafe .",
     "format": "biome format . --write",
     "format:check": "biome format ."
   },

@@ -41,7 +41,12 @@ export class RoomManager {
     return normalized;
   }
 
-  createRoom(ownerId: string, ownerName: string, roomId: string): Room {
+  createRoom(
+    ownerId: string,
+    ownerName: string,
+    roomId: string,
+    role: UserRole,
+  ): Room {
     const id = this.validateRoomId(roomId);
 
     if (this.rooms.has(id)) {
@@ -49,7 +54,7 @@ export class RoomManager {
       throw new Error("Room already exists");
     }
 
-    const room = new Room(id, ownerId, ownerName);
+    const room = new Room(id, ownerId, ownerName, role);
     this.rooms.set(id, room);
 
     logger.info({ roomId: id, ownerId, ownerName }, "Room was created");
@@ -57,15 +62,18 @@ export class RoomManager {
     return room;
   }
 
+  roomExists(id: string): boolean {
+    const roomId = this.normalizeRoomId(id);
+    return this.rooms.has(roomId);
+  }
+
   joinRoom(id: string, user: User, role: UserRole = "participant"): Room {
     const roomId = this.validateRoomId(id);
-    const room = this.rooms.get(roomId);
+
+    let room = this.rooms.get(roomId);
     if (!room) {
-      logger.warn(
-        { roomId, userId: user.id, userName: user.name },
-        "Room join was rejected",
-      );
-      throw new Error("Room does not exist anymore, you want to reopen it?");
+      room = new Room(roomId, user.id, user.name, role);
+      this.rooms.set(roomId, room);
     }
 
     const wasAlreadyInRoom = room.participants.has(user.id);
@@ -174,19 +182,6 @@ export class RoomManager {
     room.resetForNewRound();
 
     logger.info({ roomId, removedVotes: votedCount }, "Votes were cleared");
-  }
-
-  isOwner(id: string, userId: string): boolean {
-    const roomId = this.normalizeRoomId(id);
-    const room = this.rooms.get(roomId);
-    const isOwner = !!room && room.ownerId === userId;
-    if (room && !isOwner) {
-      logger.warn(
-        { roomId, userId, ownerId: room.ownerId },
-        "Access was denied, user not owner",
-      );
-    }
-    return isOwner;
   }
 
   hasAnyVotes(id: string): boolean {

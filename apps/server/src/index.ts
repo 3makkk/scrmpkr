@@ -4,7 +4,7 @@ import http from "node:http";
 import cors from "cors";
 import { Server } from "socket.io";
 import { RoomManager, type User, type RoomState } from "./roomManager";
-import { UserRole } from "@scrmpkr/shared";
+import type { UserRole } from "@scrmpkr/shared";
 import logger from "./logger";
 
 const app = express();
@@ -20,12 +20,12 @@ interface ServerToClientEvents {
 }
 
 interface ClientToServerEvents {
-  "room:create": (
-    data: { roomName: string },
-    cb: (resp: { roomId: string } | { error: string }) => void,
+  "room:exists": (
+    data: { roomId: string },
+    cb: (resp: { exists: boolean }) => void,
   ) => void;
   "room:join": (
-    data: { roomId: string; role?: UserRole },
+    data: { roomId: string; role: UserRole },
     cb: (resp: { state: RoomState } | { error: string }) => void,
   ) => void;
   "room:leave": (
@@ -122,41 +122,16 @@ namespace.on("connection", (socket) => {
     "User connected",
   );
 
-  socket.on("room:create", ({ roomName }, cb) => {
+  socket.on("room:exists", ({ roomId }, cb) => {
     logger.info(
       {
         userId: socket.data.user.id,
-        userName: socket.data.user.name,
+        roomId,
       },
-      "Room creation was requested",
+      "Room existence check was requested",
     );
-    try {
-      const room = rooms.createRoom(
-        socket.data.user.id,
-        socket.data.user.name,
-        roomName,
-      );
-      socket.join(room.id);
-      logger.info(
-        { userId: socket.data.user.id, roomId: room.id },
-        "User joined socket room",
-      );
-      cb({ roomId: room.id });
-      const state = rooms.getState(room.id);
-      if (state) namespace.to(room.id).emit("room:state", state);
-    } catch (error) {
-      const e = error as Error;
-      logger.warn(
-        {
-          userId: socket.data.user.id,
-          userName: socket.data.user.name,
-          roomName,
-          error: e.message,
-        },
-        "Room creation failed",
-      );
-      cb({ error: e.message });
-    }
+    const exists = rooms.roomExists(roomId);
+    cb({ exists });
   });
 
   socket.on("room:join", ({ roomId, role }, cb) => {
@@ -165,16 +140,12 @@ namespace.on("connection", (socket) => {
         userId: socket.data.user.id,
         userName: socket.data.user.name,
         roomId,
-        role: role || UserRole.PARTICIPANT,
+        role: role,
       },
       "Room join was requested",
     );
     try {
-      const room = rooms.joinRoom(
-        roomId,
-        socket.data.user,
-        role || UserRole.PARTICIPANT,
-      );
+      const room = rooms.joinRoom(roomId, socket.data.user, role);
       socket.join(room.id);
       logger.info(
         { userId: socket.data.user.id, roomId: room.id },

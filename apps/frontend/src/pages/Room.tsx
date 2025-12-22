@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthProvider";
 import { useRoom } from "../hooks/useRoom";
 import type { UserRole } from "@scrmpkr/shared";
@@ -12,69 +12,28 @@ import ContextualTeamStatus from "../components/room/status/ContextualTeamStatus
 import PrimaryActionZone from "../components/poker/voting/PrimaryActionZone";
 import StateAwareSessionControls from "../components/room/controls/StateAwareSessionControls";
 import ConfettiOverlay from "../components/core/effects/ConfettiOverlay";
-import Button from "../components/ds/Button/Button";
-import Card from "../components/ds/Card/Card";
-import { getSocket } from "../socket";
 
 export default function Room() {
   const { roomId } = useParams();
   const { account, login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const normalizedRoomId = roomId ? roomId.trim().toLowerCase() : "";
-  const [isReopening, setIsReopening] = useState(false);
-  const [reopenError, setReopenError] = useState<string | null>(null);
-  const [showRoleSelection, setShowRoleSelection] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
-
-  // Check if user created this room (from navigation state)
-  const isCreator = location.state?.isCreator === true;
 
   // Use the room hook instead of managing state locally
   const { roomState, error, isLoading, joinRoom } = useRoom();
 
-  // Automatically set role for room creators
-  useEffect(() => {
-    if (account && isCreator && !selectedRole) {
-      setSelectedRole("owner" as UserRole);
-    }
-  }, [account, isCreator, selectedRole]);
-
-  // Join room when account, roomId, and role are available
-  useEffect(() => {
-    if (!account || !normalizedRoomId || !selectedRole) return;
-
-    const cleanup = joinRoom(normalizedRoomId, account, selectedRole);
-
-    // Return cleanup function
-    return cleanup;
-  }, [normalizedRoomId, account, selectedRole, joinRoom]);
-
   const handleRoleSelection = (role: UserRole) => {
+    if (!account) return;
+
+    console.log("[Room] Joining room:", { normalizedRoomId, role, account });
     setSelectedRole(role);
-    setShowRoleSelection(false);
+    joinRoom(normalizedRoomId, account, role);
   };
 
   const handleLoginWithRole = (name: string) => {
     login(name);
     // Don't set a default role - let the user choose via role selection form
-  };
-
-  const handleReopen = () => {
-    if (!account || !normalizedRoomId) return;
-    setIsReopening(true);
-    setReopenError(null);
-
-    const socket = getSocket({ name: account.name, userId: account.id });
-    socket.emit("room:create", { roomName: normalizedRoomId }, (response) => {
-      setIsReopening(false);
-      if ("error" in response) {
-        setReopenError(response.error);
-        return;
-      }
-      // When reopening, user becomes owner
-      setSelectedRole("owner" as UserRole);
-    });
   };
 
   // Don't render if no account
@@ -88,63 +47,13 @@ export default function Room() {
   }
 
   // Show role selection if needed (but not for room creators)
-  if (account && !selectedRole && showRoleSelection && !isCreator) {
+  if (account && !selectedRole) {
     return (
       <RoleSelectionForm
         roomId={normalizedRoomId}
         onJoin={handleRoleSelection}
-        onCancel={() => setShowRoleSelection(false)}
+        onCancel={() => navigate("/")}
       />
-    );
-  }
-
-  // Show role selection for existing users who haven't chosen (but not for creators)
-  if (account && !selectedRole && !isCreator) {
-    return (
-      <RoleSelectionForm
-        roomId={normalizedRoomId}
-        onJoin={handleRoleSelection}
-      />
-    );
-  }
-
-  // Show error state with retry option
-  if (error) {
-    const canReopen =
-      !!normalizedRoomId && error.includes("reopen") && !!account;
-    return (
-      <PageLayout>
-        <div className="flex items-center justify-center min-h-[400px] px-4">
-          <Card className="w-full max-w-md text-center space-y-6">
-            <div className="space-y-2">
-              <div className="text-lg text-gray-400">{error}</div>
-              {reopenError && (
-                <div className="text-sm text-red-300">{reopenError}</div>
-              )}
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-              {canReopen && (
-                <Button
-                  type="button"
-                  onClick={handleReopen}
-                  disabled={isReopening}
-                  className="sm:min-w-[150px]"
-                >
-                  {isReopening ? "Reopening..." : "Reopen Room"}
-                </Button>
-              )}
-              <Button
-                type="button"
-                onClick={() => navigate("/")}
-                variant="secondary"
-                className="sm:min-w-[150px]"
-              >
-                Back to Home
-              </Button>
-            </div>
-          </Card>
-        </div>
-      </PageLayout>
     );
   }
 
@@ -155,6 +64,24 @@ export default function Room() {
         <div className="flex flex-col items-center justify-center min-h-[400px]">
           <LoadingSpinner />
           <p className="mt-4 text-gray-600">Joining room...</p>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageLayout>
+        <div className="flex flex-col items-center justify-center min-h-[400px]">
+          <h2 className="text-xl font-semibold text-red-600 mb-4">Error</h2>
+          <p className="text-gray-600">{error}</p>
+          <button
+            type="button"
+            className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={() => navigate("/")}
+          >
+            Return Home
+          </button>
         </div>
       </PageLayout>
     );

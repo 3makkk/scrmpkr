@@ -37,8 +37,6 @@ export type ValidPermission =
   | "round:clear"
   | "round:read"
   | "participant:read"
-  | "participant:update"
-  | "participant:kick"
   | "session:control";
 
 /**
@@ -49,10 +47,10 @@ export const PERMISSION_MATRIX: Record<
   UserRole,
   Record<ValidPermission, boolean>
 > = {
-  owner: {
+  participant: {
     "room:create": true,
     "room:read": true,
-    "room:update": true,
+    "room:update": false,
     "room:delete": true,
     "room:join": true,
     "room:leave": true,
@@ -62,25 +60,6 @@ export const PERMISSION_MATRIX: Record<
     "round:clear": true,
     "round:read": true,
     "participant:read": true,
-    "participant:update": true,
-    "participant:kick": true,
-    "session:control": true,
-  },
-  participant: {
-    "room:create": true,
-    "room:read": true,
-    "room:update": false,
-    "room:delete": false,
-    "room:join": true,
-    "room:leave": true,
-    "vote:cast": true,
-    "vote:read": true,
-    "round:reveal": true,
-    "round:clear": true,
-    "round:read": true,
-    "participant:read": true,
-    "participant:update": true,
-    "participant:kick": false,
     "session:control": true,
   },
   visitor: {
@@ -96,8 +75,6 @@ export const PERMISSION_MATRIX: Record<
     "round:clear": false,
     "round:read": true,
     "participant:read": true,
-    "participant:update": true,
-    "participant:kick": false,
     "session:control": false,
   },
 };
@@ -120,7 +97,6 @@ export function hasPermission(
 export interface PermissionContext {
   userRole: UserRole;
   userId: string;
-  roomOwnerId?: string;
   isRoundRevealed?: boolean;
   hasVotes?: boolean;
 }
@@ -132,26 +108,14 @@ export function canPerformAction(
   permission: ValidPermission,
   context: PermissionContext,
 ): boolean {
-  const { userRole, userId, roomOwnerId } = context;
+  const { userRole } = context;
 
   // Base permission check
   if (!hasPermission(userRole, permission)) {
     return false;
   }
 
-  // Additional context-based checks
-  switch (permission) {
-    case "room:delete":
-      // Only room owner can delete room
-      return userRole === "owner" && userId === roomOwnerId;
-
-    case "participant:kick":
-      // Only room owner can kick participants
-      return userRole === "owner" && userId === roomOwnerId;
-
-    default:
-      return true;
-  }
+  return true;
 }
 
 /**
@@ -204,7 +168,6 @@ export function getRolePermissions(role: UserRole): ValidPermission[] {
 export const ROLE_HIERARCHY: Record<UserRole, number> = {
   visitor: 1,
   participant: 2,
-  owner: 3,
 };
 
 /**

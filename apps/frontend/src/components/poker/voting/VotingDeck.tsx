@@ -13,6 +13,8 @@ export default function VotingDeck() {
 
   if (!roomState || !account) return null;
 
+  console.log("Rendering Home page", roomState);
+
   const isRoundRevealed = roomState.currentRoundState?.status === "revealed";
 
   // Check if current user can vote using the centralized ACL

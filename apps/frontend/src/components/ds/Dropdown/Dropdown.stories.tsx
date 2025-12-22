@@ -270,7 +270,7 @@ export const WithUserAvatar = {
           >
             <UserAvatar
               name="John Doe"
-              role={UserRole.OWNER}
+              role={UserRole.PARTICIPANT}
               interactive={true}
               showTooltip={true}
             />
@@ -280,10 +280,9 @@ export const WithUserAvatar = {
       >
         <div className="p-4 w-64">
           <div className="flex items-center space-x-3 mb-4">
-            <UserAvatar name="John Doe" role={UserRole.OWNER} size="lg" />
+            <UserAvatar name="John Doe" role={UserRole.PARTICIPANT} size="lg" />
             <div>
               <p className="text-white font-medium">John Doe</p>
-              <p className="text-gray-400 text-sm">Room Owner</p>
             </div>
           </div>
 

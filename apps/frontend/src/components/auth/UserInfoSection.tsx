@@ -16,8 +16,6 @@ const UserInfoSection = forwardRef<HTMLDivElement, UserInfoSectionProps>(
     // Get role display text
     const getRoleDisplayText = (role: UserRole) => {
       switch (role) {
-        case UserRole.OWNER:
-          return "Room Owner";
         case UserRole.PARTICIPANT:
           return "Participant";
         case UserRole.VISITOR:

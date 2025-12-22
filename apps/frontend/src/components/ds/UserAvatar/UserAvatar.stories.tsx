@@ -10,13 +10,6 @@ export default {
   },
 };
 
-export const Owner = {
-  args: {
-    name: "Alice Smith",
-    role: UserRole.OWNER,
-  },
-};
-
 export const Participant = {
   args: {
     name: "Bob Johnson",
@@ -58,7 +51,7 @@ export const Large = {
 export const Interactive = {
   args: {
     name: "Interactive User",
-    role: UserRole.OWNER,
+    role: UserRole.PARTICIPANT,
     interactive: true,
   },
 };
@@ -74,7 +67,7 @@ export const WithTooltip = {
 export const InteractiveWithTooltip = {
   args: {
     name: "Interactive User",
-    role: UserRole.OWNER,
+    role: UserRole.PARTICIPANT,
     interactive: true,
     showTooltip: true,
   },
@@ -97,7 +90,7 @@ export const SingleName = {
 export const AllSizes = {
   render: () => (
     <div className="flex items-center gap-4 p-6">
-      <UserAvatar name="Small User" role={UserRole.OWNER} size="sm" />
+      <UserAvatar name="Small User" role={UserRole.PARTICIPANT} size="sm" />
       <UserAvatar name="Medium User" role={UserRole.PARTICIPANT} size="md" />
       <UserAvatar name="Large User" role={UserRole.VISITOR} size="lg" />
     </div>
@@ -107,7 +100,6 @@ export const AllSizes = {
 export const AllRoles = {
   render: () => (
     <div className="flex items-center gap-4 p-6">
-      <UserAvatar name="Owner" role={UserRole.OWNER} />
       <UserAvatar name="Participant" role={UserRole.PARTICIPANT} />
       <UserAvatar name="Visitor" role={UserRole.VISITOR} />
     </div>

@@ -39,8 +39,6 @@ const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
     // Get user avatar color based on role
     const getAvatarColor = (role: UserRole) => {
       switch (role) {
-        case UserRole.OWNER:
-          return "bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500";
         case UserRole.PARTICIPANT:
           return "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500";
         case UserRole.VISITOR:
@@ -53,8 +51,6 @@ const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
     // Get role display text
     const getRoleDisplayText = (role: UserRole) => {
       switch (role) {
-        case UserRole.OWNER:
-          return "Room Owner";
         case UserRole.PARTICIPANT:
           return "Participant";
         case UserRole.VISITOR:

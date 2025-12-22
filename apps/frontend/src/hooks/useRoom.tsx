@@ -87,7 +87,7 @@ type RoomContextValue = {
   joinRoom: (
     roomId: string,
     account: { id: string; name: string },
-    role?: UserRole,
+    role: UserRole,
   ) => () => void;
   leaveRoom: (callback?: () => void) => void;
   castVote: (value: number | "?") => void;
@@ -119,11 +119,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     : false;
 
   const joinRoom = useCallback(
-    (
-      roomId: string,
-      account: { id: string; name: string },
-      role?: UserRole,
-    ) => {
+    (roomId: string, account: { id: string; name: string }, role: UserRole) => {
       if (!account) return () => {};
 
       const normalizedRoomId = roomId.trim().toLowerCase();
@@ -143,14 +139,17 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       let joinTimeout: NodeJS.Timeout | null = null;
       const startJoin = () => {
         joinTimeout = setTimeout(() => {
+          console.log("[useRoom] Join timeout");
           dispatch({ type: "TIMEOUT_ERROR" });
         }, 10000);
+        console.log("[useRoom] Emitting room:join", { normalizedRoomId, role });
         socket.emit(
           "room:join",
           { roomId: normalizedRoomId, role },
           (response) => {
             if (joinTimeout) clearTimeout(joinTimeout);
 
+            console.log("[useRoom] room:join response:", response);
             if ("error" in response) {
               dispatch({ type: "SET_ERROR", payload: response.error });
             } else if ("state" in response) {

@@ -23,25 +23,30 @@ export type User = {
 };
 
 export default class Room {
-  constructor(id: string, ownerId: string, ownerName: string) {
+  constructor(
+    id: string,
+    creatorId: string,
+    ownerName: string,
+    role: UserRole,
+  ) {
     this.id = id;
-    this.ownerId = ownerId;
+    this.creatorId = creatorId;
     this.name = id;
     this.participants = new Map();
     this.status = "voting";
     this.currentRound = 1;
     this.currentRoundTracker = new Round(this.currentRound);
 
-    this.participants.set(ownerId, {
-      id: ownerId,
+    this.participants.set(creatorId, {
+      id: creatorId,
       name: ownerName,
       hasVoted: false,
-      role: "owner",
+      role: role,
     });
   }
 
   readonly id: string;
-  readonly ownerId: string;
+  readonly creatorId: string;
   readonly name: string;
   readonly participants: Map<string, Participant>;
   status: "voting";
@@ -49,14 +54,11 @@ export default class Room {
   private currentRoundTracker: Round;
 
   addParticipant(user: User, role: UserRole = "participant"): void {
-    // If this user is the room owner, always keep their OWNER role regardless of requested role
-    const actualRole: UserRole = user.id === this.ownerId ? "owner" : role;
-
     this.participants.set(user.id, {
       id: user.id,
       name: user.name,
       hasVoted: false,
-      role: actualRole,
+      role: role,
     });
   }
 
@@ -133,7 +135,7 @@ export default class Room {
   toState(): RoomState {
     return {
       id: this.id,
-      ownerId: this.ownerId,
+      creatorId: this.creatorId,
       participants: Array.from(this.participants.values()).map(
         (participant) => ({
           id: participant.id,
@@ -162,7 +164,6 @@ export default class Room {
     const context: PermissionContext = {
       userRole: participant.role,
       userId,
-      roomOwnerId: this.ownerId,
       hasVotes: this.hasAnyVotes(),
     };
 
@@ -176,7 +177,6 @@ export default class Room {
     const context: PermissionContext = {
       userRole: participant.role,
       userId,
-      roomOwnerId: this.ownerId,
       hasVotes: this.hasAnyVotes(),
     };
 
@@ -202,7 +202,6 @@ export default class Room {
     const context: PermissionContext = {
       userRole: participant.role,
       userId,
-      roomOwnerId: this.ownerId,
     };
 
     return canPerformAction(permission as ValidPermission, context);

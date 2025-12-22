@@ -1,7 +1,6 @@
 // Core types for the Scrum Poker app
 
 export const UserRole = {
-  OWNER: "owner",
   PARTICIPANT: "participant",
   VISITOR: "visitor",
 } as const;
@@ -33,7 +32,7 @@ export type RevealedVote = RoundVote;
 
 export type RoomState = {
   id: string;
-  ownerId: string;
+  creatorId: string;
   participants: Participant[];
   status: "voting";
   currentRound: number;
@@ -47,6 +46,10 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
+  "room:exists": (
+    data: { roomId: string },
+    cb: (resp: { exists: boolean }) => void,
+  ) => void;
   "room:create": (
     data: { roomName: string },
     cb: (resp: { roomId: string } | { error: string }) => void,

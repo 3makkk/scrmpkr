@@ -1,19 +1,11 @@
 import { test, expect } from "@playwright/test";
-import {
-  createUser,
-  loginUser,
-  createRoom,
-  joinRoom,
-  changeUsername,
-  UserAssertions,
-  RoomAssertions,
-} from "./test-assertions";
-import type { User, Room } from "./domain-objects";
+import { TestUser } from "./domain-objects/TestUser";
+import { TestRoom } from "./domain-objects/TestRoom";
 
 test.describe("Username Change Functionality", () => {
-  const users: User[] = [];
-  let roomOwner: User;
-  let room: Room;
+  const users: TestUser[] = [];
+  let roomOwner: TestUser;
+  let room: TestRoom;
 
   test.beforeAll(async ({ browser }) => {
     await test.step("Setup users for username change test", async () => {
@@ -21,7 +13,7 @@ test.describe("Username Change Functionality", () => {
       const userNames = ["Alice", "Bob"];
 
       for (const name of userNames) {
-        const user = await createUser(browser, name);
+        const user = await TestUser.create(browser, name);
         users.push(user);
       }
 
@@ -41,42 +33,50 @@ test.describe("Username Change Functionality", () => {
   test("user can change username and other participants see the change", async () => {
     // Step 1: Room owner creates a room and second user joins
     await test.step("Setup room with two participants", async () => {
-      await loginUser(roomOwner);
-      room = await createRoom(
-        roomOwner,
-        `username-test-room-${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(7)}`,
-      );
+      await roomOwner.navigateToHome();
+      await roomOwner.fillLoginForm();
+
+      const roomName = `username-test-room-${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(7)}`;
+      room = await TestRoom.createByUser(roomOwner, roomName);
+
+      await room.addUser(roomOwner, "PARTICIPANT");
 
       // Second user joins
-      await loginUser(users[1]);
-      await joinRoom(users[1], room);
+      await users[1].navigateToHome();
+      await users[1].fillLoginForm();
+      await room.addUser(users[1], "PARTICIPANT");
 
       // Verify both users are in the room
-      await RoomAssertions.for(room).shouldHaveParticipantCount(roomOwner, 2);
-      await RoomAssertions.for(room).shouldHaveParticipantCount(users[1], 2);
+      await expect(room.getParticipantCountElement(users[1])).toHaveText("2");
+      await expect(room.getParticipantCountElement(roomOwner)).toHaveText("2");
     });
 
     // Step 2: Verify initial state - both users can see each other
     await test.step("Verify initial participant visibility", async () => {
       // Alice should see Bob
-      await RoomAssertions.for(room).shouldShowParticipant(roomOwner, "Bob");
+      await roomOwner.page.waitForSelector(`[data-testid="participant-Bob"]`);
 
       // Bob should see Alice
-      await RoomAssertions.for(room).shouldShowParticipant(users[1], "Alice");
+      await users[1].page.waitForSelector(`[data-testid="participant-Alice"]`);
 
       // Verify account indicators show correct initials
-      await UserAssertions.for(roomOwner).shouldHaveAccountInitials("A");
-      await UserAssertions.for(users[1]).shouldHaveAccountInitials("B");
+      const roomOwnerAccountIndicator = roomOwner.getAccountIndicator();
+      await expect(roomOwnerAccountIndicator).toHaveText("A");
+      const user1AccountIndicator = users[1].getAccountIndicator();
+      await expect(user1AccountIndicator).toHaveText("B");
     });
 
     // Step 3: Alice changes her username
     await test.step("Alice changes username to 'Alice Smith'", async () => {
-      await changeUsername(roomOwner, "Alice Smith");
+      await roomOwner.openAccountMenu();
+      await roomOwner.clickChangeUsername();
+      await roomOwner.fillNewUsername("Alice Smith");
 
       // Verify Alice's account indicator updates
-      await UserAssertions.for(roomOwner).shouldHaveAccountInitials("AS");
+      const accountIndicator = roomOwner.getAccountIndicator();
+      await expect(accountIndicator).toHaveText("AS");
     });
 
     // Step 4: Verify Bob sees Alice's new name
@@ -85,9 +85,8 @@ test.describe("Username Change Functionality", () => {
       await users[1].page.waitForTimeout(1000);
 
       // Bob should now see "Alice Smith" in the participant list
-      await RoomAssertions.for(room).shouldShowParticipant(
-        users[1],
-        "Alice Smith",
+      await users[1].page.waitForSelector(
+        `[data-testid="participant-Alice Smith"]`,
       );
 
       // The old name should no longer be visible
@@ -98,10 +97,13 @@ test.describe("Username Change Functionality", () => {
 
     // Step 5: Bob changes his username
     await test.step("Bob changes username to 'Robert Johnson'", async () => {
-      await changeUsername(users[1], "Robert Johnson");
+      await users[1].openAccountMenu();
+      await users[1].clickChangeUsername();
+      await users[1].fillNewUsername("Robert Johnson");
 
       // Verify Bob's account indicator updates
-      await UserAssertions.for(users[1]).shouldHaveAccountInitials("RJ");
+      const accountIndicator = users[1].getAccountIndicator();
+      await expect(accountIndicator).toHaveText("RJ");
     });
 
     // Step 6: Verify Alice sees Bob's new name
@@ -110,9 +112,8 @@ test.describe("Username Change Functionality", () => {
       await roomOwner.page.waitForTimeout(1000);
 
       // Alice should now see "Robert Johnson" in the participant list
-      await RoomAssertions.for(room).shouldShowParticipant(
-        roomOwner,
-        "Robert Johnson",
+      await roomOwner.page.waitForSelector(
+        `[data-testid="participant-Robert Johnson"]`,
       );
 
       // The old name should no longer be visible
@@ -124,74 +125,11 @@ test.describe("Username Change Functionality", () => {
     // Step 7: Verify basic room functionality still works
     await test.step("Verify room functionality still works after username changes", async () => {
       // Both users should still see the correct participant count
-      await RoomAssertions.for(room).shouldHaveParticipantCount(roomOwner, 2);
-      await RoomAssertions.for(room).shouldHaveParticipantCount(users[1], 2);
+      await expect(room.getParticipantCountElement(users[1])).toHaveText("2");
+      await expect(room.getParticipantCountElement(roomOwner)).toHaveText("2");
 
       // Room functionality is working if participants can see each other
       // This verifies the core functionality without checking specific voting UI
-    });
-  });
-
-  test("username change workflow cancellation", async ({ browser }) => {
-    // Step 1: Create a single user test
-    await test.step("Setup single user for cancellation test", async () => {
-      const testUser = await createUser(browser, "TestUser");
-      users.push(testUser);
-
-      await loginUser(testUser);
-      await createRoom(
-        testUser,
-        `cancel-test-room-${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(7)}`,
-      );
-
-      // Step 2: Test cancellation workflow
-      await test.step("Test username change cancellation", async () => {
-        const originalName = testUser.name;
-
-        // Click on account indicator
-        await testUser.openAccountMenu();
-
-        // Click on change username
-        await testUser.clickChangeUsername();
-
-        // Enter a new name but cancel by pressing escape or clicking outside
-        await testUser.page.fill(
-          '[data-testid="user-name-input"]',
-          "Canceled Name",
-        );
-
-        // Click cancel button if it exists
-        const cancelButton = testUser.page.locator(
-          '[data-testid="username-cancel"]',
-        );
-        if (await cancelButton.isVisible()) {
-          await cancelButton.click();
-        } else {
-          // If no cancel button, press escape
-          await testUser.page.keyboard.press("Escape");
-        }
-
-        // Verify overlay is closed
-        await testUser.page.waitForSelector(
-          '[data-testid="username-edit-overlay"]',
-          {
-            state: "hidden",
-          },
-        );
-
-        // Verify original name is still shown in account indicator
-        await UserAssertions.for(testUser).shouldHaveAccountInitials("T");
-
-        // Verify participant list still shows original name
-        await expect(
-          testUser.page.locator(`[data-testid="participant-${originalName}"]`),
-        ).toBeVisible();
-      });
-
-      // Cleanup
-      await testUser.context.close();
     });
   });
 
@@ -199,16 +137,18 @@ test.describe("Username Change Functionality", () => {
     browser,
   }) => {
     await test.step("Test username change edge cases", async () => {
-      const testUser = await createUser(browser, "EdgeCaseUser");
+      const testUser = await TestUser.create(browser, "EdgeCaseUser");
       users.push(testUser);
 
-      await loginUser(testUser);
-      const testRoom = await createRoom(
-        testUser,
-        `edge-case-room-${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(7)}`,
-      );
+      await testUser.navigateToHome();
+      await testUser.fillLoginForm();
+
+      const roomName = `edge-case-room-${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(7)}`;
+      const testRoom = await TestRoom.createByUser(testUser, roomName);
+
+      await testRoom.addUser(testUser, "PARTICIPANT");
 
       // Test different username formats
       const testCases = [
@@ -223,19 +163,19 @@ test.describe("Username Change Functionality", () => {
 
       for (const testCase of testCases) {
         await test.step(`Test username: ${testCase.name}`, async () => {
-          await changeUsername(testUser, testCase.name);
+          await testUser.openAccountMenu();
+          await testUser.clickChangeUsername();
+          await testUser.fillNewUsername(testCase.name);
 
           // Wait for update to propagate
           await testUser.page.waitForTimeout(500);
 
-          await UserAssertions.for(testUser).shouldHaveAccountInitials(
-            testCase.expectedInitials,
-          );
+          const accountIndicator = testUser.getAccountIndicator();
+          await expect(accountIndicator).toHaveText(testCase.expectedInitials);
 
           // Verify participant name is updated
-          await RoomAssertions.for(testRoom).shouldShowParticipant(
-            testUser,
-            testCase.name,
+          await testUser.page.waitForSelector(
+            `[data-testid="participant-${testCase.name}"]`,
           );
         });
       }

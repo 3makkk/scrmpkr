@@ -1,13 +1,14 @@
-import { test, expect, type Browser } from "@playwright/test";
-import { User, Room, Participation } from "./domain-objects";
+import { test, expect } from "@playwright/test";
+import type { TestUser } from "./domain-objects/TestUser";
+import type { TestRoom } from "./domain-objects/TestRoom";
 
 /**
  * Test-specific assertions and expectations for User interactions
  */
 export class UserAssertions {
-  constructor(private user: User) {}
+  constructor(private user: TestUser) {}
 
-  static for(user: User): UserAssertions {
+  static for(user: TestUser): UserAssertions {
     return new UserAssertions(user);
   }
 
@@ -86,11 +87,11 @@ export class UserAssertions {
  * Test-specific assertions and expectations for Room interactions
  */
 export class RoomAssertions {
-  static for(room: Room): RoomAssertions {
-    return new RoomAssertions(room);
+  static for(_room: TestRoom): RoomAssertions {
+    return new RoomAssertions();
   }
 
-  async shouldHaveParticipantCount(observer: User, expectedCount: number) {
+  async shouldHaveParticipantCount(observer: TestUser, expectedCount: number) {
     await test.step(`Wait for ${expectedCount} total participants in room`, async () => {
       await observer.page.waitForSelector(
         `[data-testid="participant-count"]:has-text("${expectedCount}")`,
@@ -100,7 +101,7 @@ export class RoomAssertions {
   }
 
   async shouldHaveActiveParticipantCount(
-    observer: User,
+    observer: TestUser,
     expectedCount: number,
   ) {
     await test.step(`Wait for ${expectedCount} active participants in room`, async () => {
@@ -111,7 +112,7 @@ export class RoomAssertions {
     });
   }
 
-  async shouldHaveVisitorCount(observer: User, expectedCount: number) {
+  async shouldHaveVisitorCount(observer: TestUser, expectedCount: number) {
     await test.step(`Wait for ${expectedCount} visitors in room`, async () => {
       await observer.page.waitForSelector(
         `[data-testid="visitor-count"]:has-text("${expectedCount}")`,
@@ -120,7 +121,7 @@ export class RoomAssertions {
     });
   }
 
-  async shouldShowParticipant(observer: User, participantName: string) {
+  async shouldShowParticipant(observer: TestUser, participantName: string) {
     await test.step(`${observer.name} verifies participant ${participantName} is visible`, async () => {
       await observer.page.waitForSelector(
         `[data-testid="participant-${participantName}"]`,
@@ -128,13 +129,13 @@ export class RoomAssertions {
     });
   }
 
-  async shouldShowVotingResults(observer: User) {
+  async shouldShowVotingResults(observer: TestUser) {
     await test.step(`Verify voting results are visible`, async () => {
       await observer.page.waitForSelector('[data-testid="voting-results"]', {});
     });
   }
 
-  async shouldShowVotingDeckAfterClear(observer: User) {
+  async shouldShowVotingDeckAfterClear(observer: TestUser) {
     await test.step(`Verify voting deck reappears after clearing votes`, async () => {
       await observer.page.waitForSelector(
         '[data-testid="voting-deck-title"]',
@@ -148,11 +149,15 @@ export class RoomAssertions {
  * Test-specific assertions and expectations for Voting interactions
  */
 export class VotingAssertions {
-  static forRoom(room: Room): VotingAssertions {
+  static forRoom(room: TestRoom): VotingAssertions {
     return new VotingAssertions(room);
   }
 
-  async shouldShowVotingProgress(observer: User, voted: number, total: number) {
+  async shouldShowVotingProgress(
+    observer: TestUser,
+    voted: number,
+    total: number,
+  ) {
     await test.step(`Wait for voting progress: ${voted} of ${total} voted`, async () => {
       await observer.page.waitForFunction(
         ([expectedVoted, expectedTotal]) => {
@@ -186,7 +191,10 @@ export class VotingAssertions {
     });
   }
 
-  async shouldShowParticipantHasVoted(observer: User, participantName: string) {
+  async shouldShowParticipantHasVoted(
+    observer: TestUser,
+    participantName: string,
+  ) {
     await test.step(`Verify ${participantName} shows as having voted`, async () => {
       await observer.page.waitForFunction((playerName) => {
         const participantElement = document.querySelector(
@@ -197,81 +205,4 @@ export class VotingAssertions {
       }, participantName);
     });
   }
-}
-
-/**
- * Test-specific actions that wrap domain actions with test steps
- */
-
-export async function createUser(
-  browser: Browser,
-  name: string,
-): Promise<User> {
-  return await test.step(`Create user: ${name}`, async () => {
-    return User.create(browser, name);
-  });
-}
-
-export async function loginUser(user: User): Promise<void> {
-  await test.step(`Login user: ${user.name}`, async () => {
-    await user.navigateToHome();
-    await user.fillLoginForm();
-  });
-}
-
-export async function createRoom(user: User, roomName: string): Promise<Room> {
-  return await test.step(`${user.name} creates room: ${roomName}`, async () => {
-    return Room.createByUser(user, roomName);
-  });
-}
-
-export async function joinRoom(
-  user: User,
-  room: Room,
-  role: "PARTICIPANT" | "VISITOR" = "PARTICIPANT",
-): Promise<Participation> {
-  await test.step(`${user.name} joins room: ${room.id} as ${role}`, async () => {
-    await room.addUser(user, role);
-  });
-  return new Participation(user, room, role);
-}
-
-export async function changeUsername(
-  user: User,
-  newName: string,
-): Promise<void> {
-  await test.step(`${user.name} changes username to: ${newName}`, async () => {
-    await user.openAccountMenu();
-    await user.clickChangeUsername();
-    await user.fillNewUsername(newName);
-  });
-}
-
-export async function castVote(
-  participation: Participation,
-  value: string,
-): Promise<void> {
-  await test.step(`${participation.user.name} casts vote: ${value}`, async () => {
-    await participation.castVote(value);
-  });
-}
-
-export async function revealVotes(participation: Participation): Promise<void> {
-  await test.step(`${participation.user.name} reveals votes`, async () => {
-    await participation.revealVotes();
-  });
-}
-
-export async function clearVotes(participation: Participation): Promise<void> {
-  await test.step(`${participation.user.name} clears votes`, async () => {
-    await participation.clearVotes();
-  });
-}
-
-export async function leaveRoom(participation: Participation): Promise<void> {
-  await test.step(`${participation.user.name} leaves room`, async () => {
-    await participation.leave();
-    // Add a small delay to ensure server state is fully updated
-    await participation.user.page.waitForTimeout(500);
-  });
 }
