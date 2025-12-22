@@ -22,7 +22,7 @@
     "canvas-confetti": "^1.9.3",
     "react": "19.2.0",
     "react-canvas-confetti": "^2.0.7",
-    "react-dom": "19.2.0",
+    "react-dom": "19.2.3",
     "react-router-dom": "^7.9.4",
     "socket.io-client": "^4.7.5",
     "tailwindcss-animated": "^2.0.0"
@@ -35,7 +35,7 @@
     "@tailwindcss/vite": "^4.1.17",
     "@types/node": "^20.0.0",
     "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.2",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.0.0",
     "autoprefixer": "^10.4.7",
     "babel-plugin-react-compiler": "^1.0.0",
