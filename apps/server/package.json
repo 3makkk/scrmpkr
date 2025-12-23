@@ -15,30 +15,29 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@scrmpkr/shared": "workspace:*",
     "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.67.3",
     "@opentelemetry/exporter-prometheus": "^0.208.0",
     "@opentelemetry/resources": "^2.2.0",
-    "@opentelemetry/semantic-conventions": "^1.38.0",
     "@opentelemetry/sdk-metrics": "^2.2.0",
     "@opentelemetry/sdk-node": "^0.208.0",
-    "@opentelemetry/auto-instrumentations-node": "^0.67.3",
+    "@opentelemetry/semantic-conventions": "^1.38.0",
+    "@scrmpkr/shared": "workspace:*",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.2.1",
     "pino": "^10.1.0",
     "pino-pretty": "^13.1.1",
-    "socket.io": "^4.7.5",
-    "uuid": "^9.0.1"
+    "socket.io": "^4.7.5"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.6",
-    "@types/node": "^20.0.0",
+    "@types/node": "^24.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.9.3",
-    "vite": "^5.0.0",
-    "vitest": "^1.6.1"
+    "vite": "^5.4.21",
+    "vitest": "^4.0.16"
   },
   "packageManager": "pnpm@9.15.5+sha1.cb1f6372ef64e2ba352f2f46325adead1c99ff8f"
 }
