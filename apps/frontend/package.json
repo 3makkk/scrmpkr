@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "@scrmpkr/frontend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -14,8 +14,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@sentry/react": "^10.32.1",
     "@sentry/vite-plugin": "^4.6.0",
@@ -24,8 +23,7 @@
     "react-canvas-confetti": "^2.0.7",
     "react-dom": "19.2.3",
     "react-router-dom": "^7.9.4",
-    "socket.io-client": "^4.7.5",
-    "tailwindcss-animated": "^2.0.0"
+    "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
     "@scrmpkr/shared": "workspace:*",
@@ -37,7 +35,6 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
-    "autoprefixer": "^10.4.7",
     "babel-plugin-react-compiler": "^1.0.0",
     "postcss": "^8.4.14",
     "storybook": "^10.1.10",

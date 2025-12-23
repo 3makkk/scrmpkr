@@ -1,5 +1,5 @@
 {
-  "name": "e2e",
+  "name": "@scrmpkr/e2e",
   "version": "1.0.0",
   "description": "End-to-end tests for Scrum Poker app",
   "type": "module",
@@ -12,7 +12,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@playwright/test": "^1.57.0",
     "@types/node": "^20.0.0"
