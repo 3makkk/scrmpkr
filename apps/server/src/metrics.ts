@@ -14,9 +14,9 @@ const prometheusExporter = new PrometheusExporter(
   () => {
     logger.info(
       { port: 9464, endpoint: "/metrics" },
-      "Prometheus metrics endpoint initialized"
+      "Prometheus metrics endpoint initialized",
     );
-  }
+  },
 );
 
 // Initialize OpenTelemetry NodeSDK with Prometheus exporter
@@ -70,7 +70,7 @@ activeUsersGauge.addCallback((observableResult) => {
 // Export function to set the metric callbacks
 export function setMetricCallbacks(
   roomsCountFn: () => number,
-  usersCountFn: () => number
+  usersCountFn: () => number,
 ) {
   getRoomsCount = roomsCountFn;
   getUsersCount = usersCountFn;

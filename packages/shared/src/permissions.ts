@@ -86,7 +86,7 @@ export const PERMISSION_MATRIX: Record<
  */
 export function hasPermission(
   role: UserRole,
-  permission: ValidPermission
+  permission: ValidPermission,
 ): boolean {
   return PERMISSION_MATRIX[role]?.[permission] ?? false;
 }
@@ -106,7 +106,7 @@ export interface PermissionContext {
  */
 export function canPerformAction(
   permission: ValidPermission,
-  context: PermissionContext
+  context: PermissionContext,
 ): boolean {
   const { userRole } = context;
 
@@ -125,10 +125,10 @@ export class PermissionError extends Error {
   constructor(
     public permission: ValidPermission,
     public userRole: UserRole,
-    message?: string
+    message?: string,
   ) {
     super(
-      message || `Permission '${permission}' denied for role '${userRole}'`
+      message || `Permission '${permission}' denied for role '${userRole}'`,
     );
     this.name = "PermissionError";
   }
@@ -139,13 +139,13 @@ export class PermissionError extends Error {
  */
 export function requirePermission(
   permission: ValidPermission,
-  context: PermissionContext
+  context: PermissionContext,
 ): void {
   if (!canPerformAction(permission, context)) {
     throw new PermissionError(
       permission,
       context.userRole,
-      `Action '${permission}' not allowed for role '${context.userRole}'`
+      `Action '${permission}' not allowed for role '${context.userRole}'`,
     );
   }
 }

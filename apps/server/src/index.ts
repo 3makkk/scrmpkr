@@ -24,19 +24,19 @@ interface ServerToClientEvents {
 interface ClientToServerEvents {
   "room:exists": (
     data: { roomId: string },
-    cb: (resp: { exists: boolean }) => void
+    cb: (resp: { exists: boolean }) => void,
   ) => void;
   "room:join": (
     data: { roomId: string; role: UserRole },
-    cb: (resp: { state: RoomState } | { error: string }) => void
+    cb: (resp: { state: RoomState } | { error: string }) => void,
   ) => void;
   "room:leave": (
     data: { roomId: string },
-    cb?: (resp: { success: boolean }) => void
+    cb?: (resp: { success: boolean }) => void,
   ) => void;
   "user:updateName": (
     data: { roomId: string; newName: string },
-    cb?: (resp: { success: boolean } | { error: string }) => void
+    cb?: (resp: { success: boolean } | { error: string }) => void,
   ) => void;
   "vote:cast": (data: { roomId: string; value: number | "?" }) => void;
   "reveal:start": (data: { roomId: string }) => void;
@@ -66,7 +66,7 @@ const rooms = new RoomManager();
 // Register metric callbacks for OTEL gauges
 setMetricCallbacks(
   () => rooms.getRoomsCount(),
-  () => rooms.getTotalActiveUsers()
+  () => rooms.getTotalActiveUsers(),
 );
 
 type AuthPayload = { name?: string; userId?: string };
@@ -79,7 +79,7 @@ namespace.use(async (socket, next) => {
       socket.data.user = { id: String(userId), name: String(name) };
       logger.info(
         { userId, userName: name },
-        "User authenticated with credentials"
+        "User authenticated with credentials",
       );
     } else {
       logger.warn("Authentication failed, no credentials provided");
@@ -113,7 +113,7 @@ namespace.on("connection", (socket) => {
       existingSocket.disconnect(true);
       userLogger.info(
         { kickedSocketId: existingSocketId },
-        "Disconnected previous socket for user"
+        "Disconnected previous socket for user",
       );
     }
   }
@@ -186,7 +186,7 @@ namespace.on("connection", (socket) => {
       const success = rooms.updateParticipantName(
         roomId,
         socket.data.user.id,
-        newName
+        newName,
       );
       if (success) {
         // Broadcast updated room state to all participants

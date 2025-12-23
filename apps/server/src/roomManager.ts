@@ -35,7 +35,7 @@ export class RoomManager {
     }
     if (!/^[a-z_-]+$/.test(normalized)) {
       throw new Error(
-        "Room name can only contain lowercase letters, hyphens, and underscores"
+        "Room name can only contain lowercase letters, hyphens, and underscores",
       );
     }
     return normalized;
@@ -87,7 +87,7 @@ export class RoomManager {
     roomLogger.info({ role, rejoined: wasAlreadyInRoom }, "User joined room");
     roomLogger.info(
       { participants: room.participants.size },
-      "Room participant count was updated"
+      "Room participant count was updated",
     );
 
     return room;
@@ -137,7 +137,7 @@ export class RoomManager {
     }
 
     const votedCount = Array.from(room.participants.values()).filter(
-      (participant) => participant.hasVoted
+      (participant) => participant.hasVoted,
     ).length;
 
     room.resetForNewRound();
@@ -182,14 +182,14 @@ export class RoomManager {
     }
 
     const votedCount = Array.from(room.participants.values()).filter(
-      (participant) => participant.hasVoted
+      (participant) => participant.hasVoted,
     ).length;
     roomLogger.info(
       {
         votedCount,
         totalParticipants: room.participants.size,
       },
-      "Reveal was started"
+      "Reveal was started",
     );
 
     const unanimousValue = room.revealCurrentRound();
@@ -199,7 +199,7 @@ export class RoomManager {
         votesRevealed: room.getCurrentRoundState().votes.length,
         unanimousValue: unanimousValue ?? "none",
       },
-      "Reveal was completed"
+      "Reveal was completed",
     );
 
     const updatedState = this.getState(roomId);
@@ -208,7 +208,7 @@ export class RoomManager {
 
   leaveRoom(
     roomId: string,
-    userId: string
+    userId: string,
   ): false | { roomDeleted: boolean; wasInRoom: boolean } {
     const normalizedId = this.normalizeRoomId(roomId);
     const roomLogger = logger.child({ roomId: normalizedId, userId });
@@ -224,7 +224,7 @@ export class RoomManager {
     if (wasInRoom) {
       roomLogger.info(
         { userName: participant?.name || "unknown" },
-        "User left room"
+        "User left room",
       );
     }
 
@@ -236,7 +236,7 @@ export class RoomManager {
 
     roomLogger.info(
       { participants: room.participants.size },
-      "Room participant count was updated"
+      "Room participant count was updated",
     );
     return { roomDeleted: false, wasInRoom };
   }
@@ -253,7 +253,7 @@ export class RoomManager {
   updateParticipantName(
     roomId: string,
     userId: string,
-    newName: string
+    newName: string,
   ): boolean {
     const normalizedId = this.normalizeRoomId(roomId);
     const roomLogger = logger.child({ roomId: normalizedId, userId });
@@ -266,7 +266,7 @@ export class RoomManager {
     const participant = room.participants.get(userId);
     if (!participant) {
       roomLogger.warn(
-        "Update participant name was rejected, participant not found"
+        "Update participant name was rejected, participant not found",
       );
       return false;
     }
