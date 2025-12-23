@@ -1,4 +1,4 @@
-import Round from "./round";
+import Round from "./round.js";
 import type { RoomState, RoundState } from "@scrmpkr/shared";
 import {
   type UserRole,
@@ -79,7 +79,7 @@ export default class Room {
     participant.value = value;
     this.currentRoundTracker.addOrUpdateVote(
       { id: participant.id, name: participant.name },
-      value,
+      value
     );
     return participant;
   }
@@ -109,7 +109,7 @@ export default class Room {
     return (
       this.currentRoundTracker.toState().votes.length > 0 ||
       Array.from(this.participants.values()).some(
-        (participant) => participant.hasVoted,
+        (participant) => participant.hasVoted
       )
     );
   }
@@ -132,7 +132,7 @@ export default class Room {
           name: participant.name,
           hasVoted: participant.hasVoted,
           role: participant.role,
-        }),
+        })
       ),
       status: this.status,
       currentRound: this.currentRound,

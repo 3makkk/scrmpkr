@@ -3,7 +3,7 @@ import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentation
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import { PrometheusExporter } from "@opentelemetry/exporter-prometheus";
 import { metrics } from "@opentelemetry/api";
-import logger from "./logger";
+import logger from "./logger.js";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 
 // Configure Prometheus exporter - it automatically creates an HTTP server
@@ -14,9 +14,9 @@ const prometheusExporter = new PrometheusExporter(
   () => {
     logger.info(
       { port: 9464, endpoint: "/metrics" },
-      "Prometheus metrics endpoint initialized",
+      "Prometheus metrics endpoint initialized"
     );
-  },
+  }
 );
 
 // Initialize OpenTelemetry NodeSDK with Prometheus exporter
@@ -70,7 +70,7 @@ activeUsersGauge.addCallback((observableResult) => {
 // Export function to set the metric callbacks
 export function setMetricCallbacks(
   roomsCountFn: () => number,
-  usersCountFn: () => number,
+  usersCountFn: () => number
 ) {
   getRoomsCount = roomsCountFn;
   getUsersCount = usersCountFn;

@@ -1,5 +1,5 @@
 import type { RoundState, RoundStatus, RoundVote } from "@scrmpkr/shared";
-import RoundStatsModel from "./roundStats";
+import RoundStatsModel from "./roundStats.js";
 
 type VoteParticipant = { id: string; name: string };
 
@@ -16,7 +16,7 @@ export default class Round {
 
   addOrUpdateVote(participant: VoteParticipant, value: number | "?"): void {
     const existingIndex = this.votes.findIndex(
-      (vote) => vote.id === participant.id,
+      (vote) => vote.id === participant.id
     );
     const voteRecord: RoundVote = {
       id: participant.id,
