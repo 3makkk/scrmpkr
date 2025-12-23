@@ -18,6 +18,9 @@ services:
         failure_action: rollback
         monitor: 5s
       labels:
+        - "metrics.port=9464"
+        - "metrics.path=/metrics"
+        - "metrics.scrape=true"
         - "traefik.enable=true"
         - "traefik.swarm.network=proxy"
         - "traefik.http.routers.scrmpkr-api.rule=Host(`scrmpkr.friedemann.dev`) && PathPrefix(`/api`)"
