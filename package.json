@@ -16,6 +16,6 @@
   },
   "packageManager": "pnpm@9.15.5+sha1.cb1f6372ef64e2ba352f2f46325adead1c99ff8f",
   "devDependencies": {
-    "@biomejs/biome": "^2.1.4"
+    "@biomejs/biome": "^2.3.10"
   }
 }
