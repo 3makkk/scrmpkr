@@ -1,0 +1,81 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and Push Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set SHORT_SHA
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build + Push server
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/server/Dockerfile
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/scrmpkr-server:${{ env.SHORT_SHA }}
+      - name: Build + Push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/frontend/Dockerfile
+          push: true
+          platforms: linux/amd64
+          secrets: |
+            sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
+          build-args: |
+            VITE_API_URL=https://scrmpkr.friedemann.dev
+            VITE_SOCKET_PATH=/api/socket.io/
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/scrmpkr-frontend:${{ env.SHORT_SHA }}
+
+  deploy:
+    name: Deploy Stack (Swarm)
+    runs-on: ubuntu-latest
+    needs: build
+    if: vars.DEPLOY_ENABLED == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set SHORT_SHA
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+      - name: Test SSH connection
+        run: |
+          echo "Testing SSH connection to ${{ secrets.DEPLOY_HOST }}..."
+          ssh -o HostKeyAlgorithms=+ssh-ed25519 ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "echo 'SSH connection successful' && docker --version"
+      - name: Create Docker context
+        run: |
+          echo "Creating Docker context..."
+          docker context create friedemann.dev --docker "host=ssh://${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}"
+      - name: Log in to GHCR on remote Docker
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker --context friedemann.dev login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Deploy stack using Docker context
+        run: |
+          IMAGE_TAG=${SHORT_SHA} docker --context friedemann.dev stack deploy -c docker-stack.yml scrmpkr --with-registry-auth
