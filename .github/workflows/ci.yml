@@ -25,6 +25,7 @@ jobs:
       - run: pnpm --filter ./packages/shared build
       - run: pnpm --filter frontend test
       - run: pnpm --filter server test
+      - run: pnpm --filter frontend test-storybook
 
   build:
     name: Build and Push Images

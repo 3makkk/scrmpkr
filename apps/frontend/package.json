@@ -10,6 +10,7 @@
     "test": "vitest run",
     "start": "vite preview",
     "storybook": "storybook dev -p 6006",
+    "test-storybook": "vitest --project=storybook",
     "build-storybook": "storybook build",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

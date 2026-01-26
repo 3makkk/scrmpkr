@@ -181,7 +181,7 @@ export class VotingAssertions {
           );
           if (!match) return false;
 
-          const stillVoting = parseInt(match[1]);
+          const stillVoting = parseInt(match[1], 10);
           const actualVoted = expectedTotal - stillVoting;
 
           return actualVoted === expectedVoted;

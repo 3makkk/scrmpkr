@@ -42,17 +42,19 @@ export const Basic = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Modal should not be visible initially
     expect(canvas.queryByText("Basic Modal")).not.toBeInTheDocument();
-    
+
     // Click the "Open Modal" button
     const openButton = canvas.getByRole("button", { name: /open modal/i });
     await userEvent.click(openButton);
-    
+
     // Modal should now be visible
     await expect(canvas.getByText("Basic Modal")).toBeInTheDocument();
-    await expect(canvas.getByText("This is a basic modal with content.")).toBeInTheDocument();
+    await expect(
+      canvas.getByText("This is a basic modal with content."),
+    ).toBeInTheDocument();
   },
 };
 
@@ -104,13 +106,15 @@ export const WithForm = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Click the "Open Modal" button
     const openButton = canvas.getByRole("button", { name: /edit profile/i });
     await userEvent.click(openButton);
-    
+
     // Modal should now be visible
-    await expect(canvas.getByText("Update your profile information")).toBeInTheDocument();
+    await expect(
+      canvas.getByText("Update your profile information"),
+    ).toBeInTheDocument();
   },
 };
 
@@ -152,20 +156,22 @@ export const NoBackdropClose = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Click the "Open Modal (No Backdrop Close)" button
-    const openButton = canvas.getByRole("button", { name: /open modal \(no backdrop close\)/i });
+    const openButton = canvas.getByRole("button", {
+      name: /open modal \(no backdrop close\)/i,
+    });
     await userEvent.click(openButton);
-    
+
     // Modal should now be visible
     await expect(canvas.getByText("Important Notice")).toBeInTheDocument();
 
     // Click outside the modal content
     await userEvent.click(document.body);
-    
+
     // Modal should still be visible
     await expect(canvas.getByText("Important Notice")).toBeInTheDocument();
-  }
+  },
 };
 
 export const NoEscapeClose = {
@@ -363,18 +369,21 @@ export const ConfirmationModal = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    
+
     // Click the "Delete Item" button
     const deleteButton = canvas.getByRole("button", { name: /delete item/i });
     await userEvent.click(deleteButton);
-    
+
     // Modal should now be visible
     await expect(canvas.getByText("Confirm Deletion")).toBeInTheDocument();
 
     // Click Cancel button
-    const cancelButton = within(canvas.getByRole("dialog")).getByRole("button", { name: /cancel/i });
+    const cancelButton = within(canvas.getByRole("dialog")).getByRole(
+      "button",
+      { name: /cancel/i },
+    );
     await userEvent.click(cancelButton);
-    
+
     // Modal should be closed
     expect(canvas.queryByText("Confirm Deletion")).not.toBeInTheDocument();
 
@@ -382,10 +391,13 @@ export const ConfirmationModal = {
     await userEvent.click(deleteButton);
 
     // Click Delete button
-    const confirmDeleteButton = within(canvas.getByRole("dialog")).getByRole("button", { name: /delete/i });
+    const confirmDeleteButton = within(canvas.getByRole("dialog")).getByRole(
+      "button",
+      { name: /delete/i },
+    );
     await userEvent.click(confirmDeleteButton);
-    
+
     // Modal should be closed
     expect(canvas.queryByText("Confirm Deletion")).not.toBeInTheDocument();
-  }
+  },
 };

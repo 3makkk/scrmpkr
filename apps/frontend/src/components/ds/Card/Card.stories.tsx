@@ -19,7 +19,7 @@ export const Basic = {
     const canvas = within(canvasElement);
     const title = canvas.getByText("Card Title");
     const content = canvas.getByText("This is card content.");
-    
+
     await expect(title).toBeInTheDocument();
     await expect(content).toBeInTheDocument();
   },
