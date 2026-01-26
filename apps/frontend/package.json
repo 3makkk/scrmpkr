@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
-    "test": "vitest run",
+    "test": "vitest run --project=unit",
     "start": "vite preview",
     "storybook": "storybook dev -p 6006",
     "test-storybook": "vitest --project=storybook",

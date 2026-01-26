@@ -53,5 +53,7 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Build shared packages
+        run: pnpm --filter ./packages/shared build
       - name: Run Storybook tests
         run: pnpm --filter frontend test-storybook
