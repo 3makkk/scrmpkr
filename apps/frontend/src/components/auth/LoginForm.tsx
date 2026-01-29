@@ -17,10 +17,10 @@ export default function LoginForm({
   secondaryButton: _secondaryButton = null,
 }: Props) {
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <Card className="max-w-md w-full text-center">
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <Card className="w-full max-w-md text-center">
         <div className="mb-12">
-          <h1 className="text-4xl font-light text-white mb-4">{title}</h1>
+          <h1 className="mb-4 font-light text-4xl text-white">{title}</h1>
           <p className="text-gray-400 text-lg">{subtitle}</p>
         </div>
 

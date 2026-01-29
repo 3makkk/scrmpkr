@@ -26,8 +26,8 @@ export default function VotingDeck() {
   if (!canUserVote) {
     return (
       <Card className="animate-fade-in-scale">
-        <div className="text-center py-12">
-          <h2 className="text-lg font-medium text-white mb-4">Observer Mode</h2>
+        <div className="py-12 text-center">
+          <h2 className="mb-4 font-medium text-lg text-white">Observer Mode</h2>
           <p className="text-gray-400">
             You're viewing this session as a visitor. You can observe but not
             participate in voting.
@@ -40,12 +40,12 @@ export default function VotingDeck() {
   return (
     <Card className="animate-fade-in-scale">
       <h2
-        className="text-lg font-medium text-white mb-8 text-center"
+        className="mb-8 text-center font-medium text-lg text-white"
         data-testid="voting-deck-title"
       >
         Choose your estimate
       </h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {DECK.map((value, index) => (
           <div
             key={value}
@@ -64,7 +64,7 @@ export default function VotingDeck() {
 
       {selectedCard !== null && (
         <div
-          className="mt-8 text-center animate-fade-in-scale"
+          className="mt-8 animate-fade-in-scale text-center"
           data-testid="vote-confirmation"
         ></div>
       )}

@@ -16,7 +16,7 @@ export default function PrimaryActionZone() {
   if (isRoundRevealed && hasVotes) {
     return (
       <div className="px-4 py-6 pb-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="mx-auto max-w-4xl">
           <VotingResults />
         </div>
       </div>
@@ -25,7 +25,7 @@ export default function PrimaryActionZone() {
 
   return (
     <div className="px-4 py-6 pb-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
         <VotingDeck />
       </div>
     </div>

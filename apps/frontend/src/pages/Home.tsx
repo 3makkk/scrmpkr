@@ -87,13 +87,13 @@ export default function Home() {
 
   return (
     <PageLayout className="flex items-center justify-center px-4">
-      <Card className="max-w-lg w-full">
-        <div className="text-center mb-10 animate-fade-in-down">
-          <h1 className="text-4xl font-light text-white mb-3 animate-fade-in-scale animation-delay-100">
+      <Card className="w-full max-w-lg">
+        <div className="mb-10 animate-fade-in-down text-center">
+          <h1 className="animation-delay-100 mb-3 animate-fade-in-scale font-light text-4xl text-white">
             Scrum Poker
           </h1>
           <p
-            className="text-gray-400 mb-4 animate-fade-in-scale animation-delay-200"
+            className="animation-delay-200 mb-4 animate-fade-in-scale text-gray-400"
             data-testid="welcome-message"
           >
             Welcome back,{" "}
@@ -101,7 +101,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="space-y-8 animate-fade-in-scale animation-delay-300">
+        <div className="animation-delay-300 animate-fade-in-scale space-y-8">
           {!showCustomForm ? (
             <div className="space-y-4">
               <Button
@@ -122,20 +122,20 @@ export default function Home() {
               >
                 Create Random Room
               </Button>
-              <p className="text-sm text-gray-500 text-center animate-fade-in-down animation-delay-150">
+              <p className="animation-delay-150 animate-fade-in-down text-center text-gray-500 text-sm">
                 Custom lets you pick a readable room name to share; Random
                 instantly creates a room with a generated ID.
               </p>
             </div>
           ) : (
-            <div className="space-y-6 animate-fade-in-scale">
-              <h2 className="text-lg font-medium text-gray-200 animate-slide-in-left animation-delay-100">
+            <div className="animate-fade-in-scale space-y-6">
+              <h2 className="animation-delay-100 animate-slide-in-left font-medium text-gray-200 text-lg">
                 Choose your room name
               </h2>
               <div className="space-y-3">
                 <label
                   htmlFor="custom-room-name"
-                  className="block text-sm text-gray-400 sr-only"
+                  className="sr-only block text-gray-400 text-sm"
                 >
                   Custom room name
                 </label>
@@ -156,19 +156,19 @@ export default function Home() {
                     if (e.key === "Enter") createNamedRoom();
                   }}
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-gray-500 text-xs">
                   Allowed: a-z, hyphen (-), underscore (_). Max 50 characters.
                 </p>
               </div>
               {createError && (
                 <p
-                  className="text-sm text-red-500 animate-bounce-in"
+                  className="animate-bounce-in text-red-500 text-sm"
                   role="alert"
                 >
                   {createError}
                 </p>
               )}
-              <div className="animate-fade-in-down animation-delay-200">
+              <div className="animation-delay-200 animate-fade-in-down">
                 <Button
                   type="button"
                   onClick={createNamedRoom}

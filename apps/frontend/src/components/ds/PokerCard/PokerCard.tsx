@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import clsx from "clsx";
 import type { UIProps } from "../uiTypes";
 
 type Value = number | "?";
@@ -19,7 +20,7 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
       isSelected = false,
       onValueClick,
       disabled = false,
-      className = "",
+      className,
       ...props
     },
     ref,
@@ -43,23 +44,13 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
     const { faint, ornament } = colorFor(value);
 
     // Base styles for the poker card with CSS transitions for hover/selection
-    const baseStyles = `
-    relative bg-gradient-to-br from-gray-800 to-gray-900 text-gray-200 font-semibold overflow-hidden
-    border border-gray-700/80 rounded-2xl shadow-lg cursor-pointer
-    transition-all duration-200 ease-out
-    focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-0
-    w-full flex items-center justify-center select-none
-    aspect-[5/7]
-  `;
-
-    // Hover and selection styles
-    const hoverStyles = disabled
-      ? ""
-      : "hover:shadow-xl hover:border-gray-600/80 hover:scale-105 hover:-translate-y-1";
-    const selectedStyles = isSelected
-      ? "scale-110 -translate-y-3 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.4),0_8px_25px_rgba(0,0,0,0.3)]"
-      : "";
-    const disabledStyles = disabled ? "opacity-50 cursor-not-allowed" : "";
+    const baseStyles = [
+      "relative bg-gradient-to-br from-gray-800 to-gray-900 text-gray-200",
+      "font-semibold overflow-hidden border border-gray-700/80 rounded-2xl",
+      "shadow-lg cursor-pointer transition-all duration-200 ease-out",
+      "focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-0",
+      "w-full flex items-center justify-center select-none aspect-[5/7]",
+    ];
 
     const handleClick = () => {
       if (!disabled) {
@@ -73,7 +64,19 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
         type="button"
         onClick={handleClick}
         disabled={disabled}
-        className={`${baseStyles} ${hoverStyles} ${selectedStyles} ${disabledStyles} ${className}`}
+        className={clsx(
+          baseStyles,
+          !disabled && [
+            "hover:border-gray-600/80 hover:shadow-xl",
+            "hover:-translate-y-1 hover:scale-105",
+          ],
+          isSelected && [
+            "-translate-y-3 scale-110 border-blue-500",
+            "shadow-[0_0_20px_rgba(59,130,246,0.4),0_8px_25px_rgba(0,0,0,0.3)]",
+          ],
+          disabled && "cursor-not-allowed opacity-50",
+          className,
+        )}
         data-testid={`vote-card-${value}`}
         style={{
           transformOrigin: "center",
@@ -82,7 +85,7 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
       >
         {/* Subtle ornament pattern overlay */}
         <div
-          className="absolute inset-0 opacity-40 pointer-events-none"
+          className="pointer-events-none absolute inset-0 opacity-40"
           style={{
             backgroundImage: `
             radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.04) 0 2px, transparent 3px),
@@ -97,39 +100,58 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
 
         {/* Ornaments */}
         <div
-          className={`absolute top-2 right-2 text-xs md:text-sm opacity-40 select-none pointer-events-none ${ornament}`}
+          className={clsx(
+            "absolute top-2 right-2 text-xs opacity-40 md:text-sm",
+            "pointer-events-none select-none",
+            ornament,
+          )}
         >
           ❖
         </div>
         <div
-          className={`absolute bottom-2 left-2 text-xs md:text-sm opacity-40 select-none pointer-events-none ${ornament} rotate-180`}
+          className={clsx(
+            "absolute bottom-2 left-2 text-xs opacity-40 md:text-sm",
+            "pointer-events-none rotate-180 select-none",
+            ornament,
+          )}
         >
           ❖
         </div>
         <div
-          className={`absolute top-1/2 left-3 -translate-y-1/2 text-xs md:text-sm opacity-40 select-none pointer-events-none ${ornament}`}
+          className={clsx(
+            "absolute top-1/2 left-3 -translate-y-1/2 text-xs md:text-sm",
+            "pointer-events-none select-none opacity-40",
+            ornament,
+          )}
         >
           ✤
         </div>
         <div
-          className={`absolute top-1/2 right-3 -translate-y-1/2 text-xs md:text-sm opacity-40 select-none pointer-events-none ${ornament} rotate-180`}
+          className={clsx(
+            "absolute top-1/2 right-3 -translate-y-1/2 text-xs md:text-sm",
+            "pointer-events-none rotate-180 select-none opacity-40",
+            ornament,
+          )}
         >
           ✤
         </div>
 
         {/* Small top-left */}
-        <div className="absolute top-2 left-2 text-xs md:text-sm font-semibold text-slate-200">
+        <div className="absolute top-2 left-2 font-semibold text-slate-200 text-xs md:text-sm">
           {value}
         </div>
 
         {/* Small bottom-right mirrored */}
-        <div className="absolute bottom-2 right-2 text-xs md:text-sm font-semibold text-slate-200 rotate-180">
+        <div className="absolute right-2 bottom-2 rotate-180 font-semibold text-slate-200 text-xs md:text-sm">
           {value}
         </div>
 
         {/* Big center translucent */}
         <div
-          className={`text-5xl md:text-6xl font-extrabold ${faint} opacity-15`}
+          className={clsx(
+            "font-extrabold text-5xl opacity-15 md:text-6xl",
+            faint,
+          )}
         >
           {value}
         </div>

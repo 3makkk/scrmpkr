@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
+import clsx from "clsx";
 import type { UIProps } from "../uiTypes";
 
 /**
@@ -84,7 +85,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       open: controlledOpen,
       onOpenChange,
       placement = "bottom-right",
-      className = "",
+      className,
       ...props
     },
     ref,
@@ -191,7 +192,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
     return (
       <div
         ref={combinedRef}
-        className={`relative inline-block ${className}`}
+        className={clsx("relative inline-block", className)}
         {...props}
       >
         {/* Trigger */}
@@ -206,7 +207,11 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
           {isOpen && (
             <div
               ref={menuRef}
-              className={`absolute bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50 animate-fade-in-scale ${getPlacementClasses()}`}
+              className={clsx(
+                "absolute rounded-lg border border-gray-700 bg-gray-800",
+                "z-50 animate-fade-in-scale shadow-lg",
+                getPlacementClasses(),
+              )}
             >
               {children}
             </div>

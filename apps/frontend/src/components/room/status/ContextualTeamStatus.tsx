@@ -38,7 +38,7 @@ export default function ContextualTeamStatus() {
 
   const getParticipantIndicator = (participant: Participant) => {
     if (participant.role === UserRole.VISITOR) {
-      return <div className="w-3 h-3 bg-purple-500 rounded-full"></div>;
+      return <div className="h-3 w-3 rounded-full bg-purple-500"></div>;
     }
     if (isRoundRevealed) {
       const vote = currentRoundState?.votes.find(
@@ -46,15 +46,15 @@ export default function ContextualTeamStatus() {
       );
       if (vote) {
         return (
-          <div className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center text-xs font-bold text-white"></div>
+          <div className="flex h-3 w-3 items-center justify-center rounded-full bg-blue-500 font-bold text-white text-xs"></div>
         );
       }
-      return <div className="w-3 h-3 bg-gray-600 rounded-full"></div>;
+      return <div className="h-3 w-3 rounded-full bg-gray-600"></div>;
     } else if (participant.hasVoted) {
-      return <div className="w-3 h-3 bg-green-500 rounded-full"></div>;
+      return <div className="h-3 w-3 rounded-full bg-green-500"></div>;
     } else {
       return (
-        <div className="w-3 h-3 bg-gray-600 rounded-full animate-pulse"></div>
+        <div className="h-3 w-3 animate-pulse rounded-full bg-gray-600"></div>
       );
     }
   };
@@ -69,11 +69,11 @@ export default function ContextualTeamStatus() {
   };
 
   return (
-    <div className="h-full p-4 lg:max-h-none max-h-64 overflow-y-auto">
+    <div className="h-full max-h-64 overflow-y-auto p-4 lg:max-h-none">
       <div className="space-y-6">
         {/* Active Participants - Only those who can vote */}
         <div className="space-y-3">
-          <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+          <h3 className="font-medium text-gray-400 text-sm uppercase tracking-wider">
             Active Participants (
             <span data-testid="active-participant-count">
               {votedActiveParticipants}/{activeParticipants.length}
@@ -83,11 +83,11 @@ export default function ContextualTeamStatus() {
               {participants.length}
             </span>
           </h3>
-          <div className="lg:space-y-3 lg:block flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 lg:block lg:space-y-3">
             {activeParticipants.map((participant, index) => (
               <div
                 key={participant.id}
-                className={`flex items-center justify-between bg-gray-800/40 border border-gray-700/40 rounded-lg p-3 lg:w-full w-auto animate-slide-in-left`}
+                className={`flex w-auto animate-slide-in-left items-center justify-between rounded-lg border border-gray-700/40 bg-gray-800/40 p-3 lg:w-full`}
                 style={{ animationDelay: `${index * 50}ms` }}
                 data-testid={`participant-${participant.name}`}
               >
@@ -95,7 +95,7 @@ export default function ContextualTeamStatus() {
                   {getParticipantIndicator(participant)}
                   <div className="flex flex-col">
                     <span
-                      className={`text-sm font-medium ${
+                      className={`font-medium text-sm ${
                         participant.id === account.id
                           ? "text-blue-400"
                           : "text-gray-300"
@@ -104,18 +104,18 @@ export default function ContextualTeamStatus() {
                     >
                       {participant.id === account.id ? "You" : participant.name}
                       {getRoleDisplay(participant) && (
-                        <span className="ml-1 text-xs text-gray-400">
+                        <span className="ml-1 text-gray-400 text-xs">
                           {getRoleDisplay(participant)}
                         </span>
                       )}
                     </span>
                     {!isRoundRevealed && (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-gray-500 text-xs">
                         {getParticipantStatus(participant)}
                       </span>
                     )}
                     {isRoundRevealed && (
-                      <span className="text-xs text-gray-400">
+                      <span className="text-gray-400 text-xs">
                         Vote: {getParticipantStatus(participant)}
                       </span>
                     )}
@@ -129,15 +129,15 @@ export default function ContextualTeamStatus() {
         {/* Visitors - Separate section */}
         {visitors.length > 0 && (
           <div className="space-y-3">
-            <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+            <h3 className="font-medium text-gray-400 text-sm uppercase tracking-wider">
               Visitors (
               <span data-testid="visitor-count">{visitors.length}</span>)
             </h3>
-            <div className="lg:space-y-3 lg:block flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 lg:block lg:space-y-3">
               {visitors.map((participant, index) => (
                 <div
                   key={participant.id}
-                  className={`flex items-center justify-between bg-purple-900/20 border border-purple-700/40 rounded-lg p-3 lg:w-full w-auto animate-slide-in-left`}
+                  className={`flex w-auto animate-slide-in-left items-center justify-between rounded-lg border border-purple-700/40 bg-purple-900/20 p-3 lg:w-full`}
                   style={{ animationDelay: `${index * 50}ms` }}
                   data-testid={`visitor-${participant.name}`}
                 >
@@ -145,7 +145,7 @@ export default function ContextualTeamStatus() {
                     {getParticipantIndicator(participant)}
                     <div className="flex flex-col">
                       <span
-                        className={`text-sm font-medium ${
+                        className={`font-medium text-sm ${
                           participant.id === account.id
                             ? "text-purple-400"
                             : "text-gray-300"
@@ -155,9 +155,9 @@ export default function ContextualTeamStatus() {
                         {participant.id === account.id
                           ? "You"
                           : participant.name}
-                        <span className="ml-1 text-xs text-purple-500">👁</span>
+                        <span className="ml-1 text-purple-500 text-xs">👁</span>
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-gray-500 text-xs">
                         {getParticipantStatus(participant)}
                       </span>
                     </div>

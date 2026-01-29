@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import clsx from "clsx";
 import type { UIProps } from "../uiTypes";
 
 export type BadgeProps = UIProps<
@@ -14,7 +15,7 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
     {
       children,
       bgClass = "bg-gray-900/70",
-      className = "",
+      className,
       rounded = "lg",
       ...rest
     },
@@ -32,7 +33,13 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
     return (
       <span
         ref={ref}
-        className={`${bgClass} inline-flex items-center text-white ${radiusClass} px-3 py-1 ${className}`}
+        className={clsx(
+          bgClass,
+          "inline-flex items-center text-white",
+          radiusClass,
+          "px-3 py-1",
+          className,
+        )}
         {...rest}
       >
         {children}

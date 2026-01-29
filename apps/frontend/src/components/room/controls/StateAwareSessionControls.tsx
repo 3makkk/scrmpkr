@@ -48,7 +48,7 @@ export default function StateAwareSessionControls() {
           key="reveal"
           type="button"
           onClick={revealVotes}
-          className="flex-1 max-w-sm"
+          className="max-w-sm flex-1"
           data-testid="reveal-votes-button"
         >
           {buttonText}
@@ -64,7 +64,7 @@ export default function StateAwareSessionControls() {
           type="button"
           onClick={clearVotes}
           variant="primary"
-          className="flex-1 max-w-sm"
+          className="max-w-sm flex-1"
           data-testid="clear-votes-button"
         >
           Start Next Round
@@ -83,19 +83,19 @@ export default function StateAwareSessionControls() {
   }
 
   return (
-    <div className="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-gray-700/50 shadow-lg">
-      <div className="max-w-4xl mx-auto px-4 py-4">
+    <div className="sticky bottom-0 border-gray-700/50 border-t bg-gray-900/95 shadow-lg backdrop-blur-sm">
+      <div className="mx-auto max-w-4xl px-4 py-4">
         <div className="flex justify-center space-x-4">{availableActions}</div>
 
         {/* Show helpful context about what the action will do */}
-        <div className="text-center mt-2">
+        <div className="mt-2 text-center">
           {!canControl && (
-            <p className="text-xs text-gray-500">
+            <p className="text-gray-500 text-xs">
               Only participants and room owners can control voting sessions
             </p>
           )}
           {canControl && !isRoundRevealed && votedActiveParticipants > 0 && (
-            <p className="text-xs text-gray-400" data-testid="voting-progress">
+            <p className="text-gray-400 text-xs" data-testid="voting-progress">
               {allActiveVoted
                 ? "All participants have voted. Ready to see the results!"
                 : `${
@@ -105,7 +105,7 @@ export default function StateAwareSessionControls() {
           )}
 
           {canControl && isRoundRevealed && hasVotes && (
-            <p className="text-xs text-gray-400">
+            <p className="text-gray-400 text-xs">
               Ready to start a new voting round with the same participants.
             </p>
           )}
