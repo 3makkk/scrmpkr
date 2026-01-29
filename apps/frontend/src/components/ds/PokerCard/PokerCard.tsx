@@ -23,7 +23,7 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
       className,
       ...props
     },
-    ref
+    ref,
   ) => {
     const colorFor = (v: Value) => {
       // Dark, muted accents for center watermark & ornaments
@@ -75,7 +75,7 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
             "shadow-[0_0_20px_rgba(59,130,246,0.4),0_8px_25px_rgba(0,0,0,0.3)]",
           ],
           disabled && "cursor-not-allowed opacity-50",
-          className
+          className,
         )}
         data-testid={`vote-card-${value}`}
         style={{
@@ -103,7 +103,7 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
           className={clsx(
             "absolute top-2 right-2 text-xs opacity-40 md:text-sm",
             "pointer-events-none select-none",
-            ornament
+            ornament,
           )}
         >
           ❖
@@ -112,7 +112,7 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
           className={clsx(
             "absolute bottom-2 left-2 text-xs opacity-40 md:text-sm",
             "pointer-events-none rotate-180 select-none",
-            ornament
+            ornament,
           )}
         >
           ❖
@@ -121,7 +121,7 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
           className={clsx(
             "absolute top-1/2 left-3 -translate-y-1/2 text-xs md:text-sm",
             "pointer-events-none select-none opacity-40",
-            ornament
+            ornament,
           )}
         >
           ✤
@@ -130,7 +130,7 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
           className={clsx(
             "absolute top-1/2 right-3 -translate-y-1/2 text-xs md:text-sm",
             "pointer-events-none rotate-180 select-none opacity-40",
-            ornament
+            ornament,
           )}
         >
           ✤
@@ -150,14 +150,14 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
         <div
           className={clsx(
             "font-extrabold text-5xl opacity-15 md:text-6xl",
-            faint
+            faint,
           )}
         >
           {value}
         </div>
       </button>
     );
-  }
+  },
 );
 
 PokerCard.displayName = "PokerCard";

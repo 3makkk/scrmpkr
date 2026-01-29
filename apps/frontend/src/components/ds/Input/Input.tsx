@@ -6,7 +6,7 @@ type InputProps = UIProps<"input">;
 
 export default forwardRef<HTMLInputElement, InputProps>(function Input(
   { className, ...props },
-  ref
+  ref,
 ) {
   return (
     <input
@@ -16,7 +16,7 @@ export default forwardRef<HTMLInputElement, InputProps>(function Input(
         "text-white placeholder-gray-400 focus:outline-none focus:ring-2",
         "transition-all duration-200 focus:border-gray-600 focus:ring-blue-400",
         "shadow-inner focus:bg-gray-800/70",
-        className
+        className,
       )}
       {...props}
     />

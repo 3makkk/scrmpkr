@@ -19,7 +19,7 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
       rounded = "lg",
       ...rest
     },
-    ref
+    ref,
   ) => {
     const radiusMap: Record<NonNullable<BadgeProps["rounded"]>, string> = {
       full: "rounded-full",
@@ -38,14 +38,14 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
           "inline-flex items-center text-white",
           radiusClass,
           "px-3 py-1",
-          className
+          className,
         )}
         {...rest}
       >
         {children}
       </span>
     );
-  }
+  },
 );
 
 Badge.displayName = "Badge";

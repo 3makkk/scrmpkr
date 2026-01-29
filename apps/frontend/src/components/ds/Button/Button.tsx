@@ -9,7 +9,7 @@ type ButtonProps = UIProps<"button", { variant?: Variant }>;
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     { variant = "primary", className, children, disabled = false, ...props },
-    ref
+    ref,
   ) => {
     const getVariantClasses = (variant: Variant) => {
       const baseClasses = [
@@ -24,19 +24,19 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           return clsx(
             baseClasses,
             "bg-gray-800/80 backdrop-blur-sm border border-gray-700/60",
-            "text-gray-200 font-medium shadow-md focus:ring-gray-400"
+            "text-gray-200 font-medium shadow-md focus:ring-gray-400",
           );
         case "danger":
           return clsx(
             baseClasses,
             "bg-gradient-to-r from-red-600 to-red-700",
-            "text-white shadow-lg focus:ring-red-400"
+            "text-white shadow-lg focus:ring-red-400",
           );
         default: // primary
           return clsx(
             baseClasses,
             "bg-gradient-to-r from-blue-600 to-blue-700",
-            "text-white shadow-lg focus:ring-blue-400"
+            "text-white shadow-lg focus:ring-blue-400",
           );
       }
     };
@@ -51,7 +51,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {children}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";

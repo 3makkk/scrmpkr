@@ -25,7 +25,7 @@ const Modal = forwardRef<HTMLDialogElement, ModalProps>(
       onKeyDown,
       ...props
     },
-    ref
+    ref,
   ) => {
     const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -110,13 +110,13 @@ const Modal = forwardRef<HTMLDialogElement, ModalProps>(
         className={clsx(
           "border-none bg-transparent p-4 outline-none backdrop:bg-black/50",
           "flex h-full max-h-none w-full max-w-none items-center justify-center",
-          "animate-fade-in-scale"
+          "animate-fade-in-scale",
         )}
       >
         {children}
       </dialog>
     );
-  }
+  },
 );
 
 Modal.displayName = "Modal";

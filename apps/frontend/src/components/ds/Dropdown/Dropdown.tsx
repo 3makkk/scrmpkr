@@ -88,7 +88,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       className,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [internalOpen, setInternalOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -210,7 +210,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
               className={clsx(
                 "absolute rounded-lg border border-gray-700 bg-gray-800",
                 "z-50 animate-fade-in-scale shadow-lg",
-                getPlacementClasses()
+                getPlacementClasses(),
               )}
             >
               {children}
@@ -219,7 +219,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 Dropdown.displayName = "Dropdown";

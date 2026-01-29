@@ -42,7 +42,7 @@ type ChartContextValue = {
 };
 
 const ChartContext = React.createContext<ChartContextValue | undefined>(
-  undefined
+  undefined,
 );
 
 const BarVoteChart: React.FC<ChartProps> & {
@@ -122,7 +122,7 @@ const Row: React.FC<RowProps> = ({ value, className, children, ...rest }) => {
     <div
       className={clsx(
         "grid w-full grid-cols-[6rem_1fr] gap-x-4 gap-y-3 md:grid-cols-[7rem_1fr]",
-        className
+        className,
       )}
       {...rest}
     >
@@ -131,7 +131,7 @@ const Row: React.FC<RowProps> = ({ value, className, children, ...rest }) => {
           "row-span-2 flex items-center justify-end self-stretch pr-1",
           "whitespace-nowrap text-right font-black leading-none",
           "drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]",
-          valueTextClass
+          valueTextClass,
         )}
         style={{ fontSize: `${valueFontRem}rem`, opacity: valueOpacity }}
       >

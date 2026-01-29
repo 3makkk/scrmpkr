@@ -25,7 +25,7 @@ const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
       className,
       ...props
     },
-    ref
+    ref,
   ) => {
     // Get user initials
     const getInitials = (name: string) => {
@@ -93,7 +93,7 @@ const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
           ],
           "flex items-center justify-center rounded-full",
           "font-medium text-white transition-colors duration-200",
-          className
+          className,
         )}
         title={title}
         {...props}
@@ -101,7 +101,7 @@ const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
         {getInitials(name)}
       </div>
     );
-  }
+  },
 );
 
 UserAvatar.displayName = "UserAvatar";

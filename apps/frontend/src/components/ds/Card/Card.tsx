@@ -11,14 +11,14 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={clsx(
           "rounded-2xl border border-gray-800/80 bg-gray-900/60 p-6 shadow-2xl backdrop-blur-xl",
-          className
+          className,
         )}
         {...props}
       >
         {children}
       </div>
     );
-  }
+  },
 );
 
 Card.displayName = "Card";
