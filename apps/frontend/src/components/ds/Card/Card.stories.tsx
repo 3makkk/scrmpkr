@@ -10,7 +10,7 @@ export const Basic = {
   render: () => (
     <div className="p-6">
       <Card>
-        <h3 className="text-white text-xl mb-2">Card Title</h3>
+        <h3 className="mb-2 text-white text-xl">Card Title</h3>
         <p className="text-white/70">This is card content.</p>
       </Card>
     </div>

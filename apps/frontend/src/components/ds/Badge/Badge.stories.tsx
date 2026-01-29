@@ -20,7 +20,7 @@ export const Basic: Story = {};
 
 export const Colors: Story = {
   render: () => (
-    <div className="p-6 text-white space-x-3">
+    <div className="space-x-3 p-6 text-white">
       <Badge bgClass="bg-blue-600">Blue</Badge>
       <Badge bgClass="bg-purple-600">Purple</Badge>
       <Badge bgClass="bg-green-600">Green</Badge>
@@ -32,8 +32,8 @@ export const Colors: Story = {
 
 export const Sizes: Story = {
   render: () => (
-    <div className="p-6 text-white space-x-3">
-      <Badge bgClass="bg-blue-600" className="text-xs px-2 py-0.5">
+    <div className="space-x-3 p-6 text-white">
+      <Badge bgClass="bg-blue-600" className="px-2 py-0.5 text-xs">
         Small
       </Badge>
       <Badge bgClass="bg-blue-600" className="text-sm">
@@ -41,7 +41,7 @@ export const Sizes: Story = {
       </Badge>
       <Badge
         bgClass="bg-blue-600"
-        className="text-base px-4 py-2 font-semibold"
+        className="px-4 py-2 font-semibold text-base"
       >
         Large
       </Badge>

@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import clsx from "clsx";
 import type { UIProps } from "../uiTypes";
 import { UserRole } from "@scrmpkr/shared";
 
@@ -21,10 +22,10 @@ const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
       size = "md",
       showTooltip = false,
       interactive = false,
-      className = "",
+      className,
       ...props
     },
-    ref,
+    ref
   ) => {
     // Get user initials
     const getInitials = (name: string) => {
@@ -73,40 +74,34 @@ const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
       }
     };
 
-    const interactiveClasses = interactive
-      ? "cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800"
-      : "";
-
     const colorClasses = getAvatarColor(role);
     const sizeClasses = getSizeClasses();
-
-    const avatarClasses = `
-      ${sizeClasses}
-      ${colorClasses}
-      ${interactiveClasses}
-      rounded-full 
-      flex 
-      items-center 
-      justify-center 
-      text-white 
-      font-medium 
-      transition-colors 
-      duration-200
-      ${className}
-    `
-      .trim()
-      .replace(/\s+/g, " ");
 
     const title = showTooltip
       ? `${name} (${getRoleDisplayText(role)})`
       : undefined;
 
     return (
-      <div ref={ref} className={avatarClasses} title={title} {...props}>
+      <div
+        ref={ref}
+        className={clsx(
+          sizeClasses,
+          colorClasses,
+          interactive && [
+            "cursor-pointer focus:outline-none focus:ring-2",
+            "focus:ring-offset-2 focus:ring-offset-gray-800",
+          ],
+          "flex items-center justify-center rounded-full",
+          "font-medium text-white transition-colors duration-200",
+          className
+        )}
+        title={title}
+        {...props}
+      >
         {getInitials(name)}
       </div>
     );
-  },
+  }
 );
 
 UserAvatar.displayName = "UserAvatar";

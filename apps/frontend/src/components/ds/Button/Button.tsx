@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import clsx from "clsx";
 import type { UIProps } from "../uiTypes";
 
 type Variant = "primary" | "secondary" | "danger";
@@ -7,40 +8,50 @@ type ButtonProps = UIProps<"button", { variant?: Variant }>;
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    {
-      variant = "primary",
-      className = "",
-      children,
-      disabled = false,
-      ...props
-    },
-    ref,
+    { variant = "primary", className, children, disabled = false, ...props },
+    ref
   ) => {
     const getVariantClasses = (variant: Variant) => {
-      const baseClasses =
-        "font-semibold px-6 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99]";
+      const baseClasses = [
+        "font-semibold px-6 py-3 rounded-lg focus:outline-none focus:ring-2",
+        "focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50",
+        "disabled:cursor-not-allowed transition-transform duration-150",
+        "hover:scale-[1.01] active:scale-[0.99]",
+      ];
 
       switch (variant) {
         case "secondary":
-          return `${baseClasses} bg-gray-800/80 backdrop-blur-sm border border-gray-700/60 text-gray-200 font-medium shadow-md focus:ring-gray-400`;
+          return clsx(
+            baseClasses,
+            "bg-gray-800/80 backdrop-blur-sm border border-gray-700/60",
+            "text-gray-200 font-medium shadow-md focus:ring-gray-400"
+          );
         case "danger":
-          return `${baseClasses} bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg focus:ring-red-400`;
+          return clsx(
+            baseClasses,
+            "bg-gradient-to-r from-red-600 to-red-700",
+            "text-white shadow-lg focus:ring-red-400"
+          );
         default: // primary
-          return `${baseClasses} bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg focus:ring-blue-400`;
+          return clsx(
+            baseClasses,
+            "bg-gradient-to-r from-blue-600 to-blue-700",
+            "text-white shadow-lg focus:ring-blue-400"
+          );
       }
     };
 
     return (
       <button
         ref={ref}
-        className={`${getVariantClasses(variant)} ${className}`.trim()}
+        className={clsx(getVariantClasses(variant), className)}
         disabled={disabled}
         {...props}
       >
         {children}
       </button>
     );
-  },
+  }
 );
 
 Button.displayName = "Button";

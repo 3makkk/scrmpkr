@@ -38,7 +38,7 @@ export default function UsernameForm({
       <div>
         <label
           htmlFor="username"
-          className="block text-gray-300 text-sm font-medium mb-3"
+          className="mb-3 block font-medium text-gray-300 text-sm"
         >
           Your name
         </label>

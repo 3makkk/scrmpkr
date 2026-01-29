@@ -6,11 +6,11 @@ export default function LoadingSpinner({
   readonly message?: string;
 }) {
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center">
       <Card className="text-center">
         <div className="animate-pulse">
-          <div className="w-10 h-10 border-3 border-gray-700 border-t-blue-500 rounded-full animate-spin mx-auto mb-6"></div>
-          <div className="text-white text-lg font-medium">{message}</div>
+          <div className="mx-auto mb-6 h-10 w-10 animate-spin rounded-full border-3 border-gray-700 border-t-blue-500"></div>
+          <div className="font-medium text-lg text-white">{message}</div>
         </div>
       </Card>
     </div>

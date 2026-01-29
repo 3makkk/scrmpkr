@@ -1,4 +1,5 @@
 import React from "react";
+import clsx from "clsx";
 import Badge from "../Badge/Badge";
 import type { UIProps } from "../uiTypes";
 
@@ -41,14 +42,14 @@ type ChartContextValue = {
 };
 
 const ChartContext = React.createContext<ChartContextValue | undefined>(
-  undefined,
+  undefined
 );
 
 const BarVoteChart: React.FC<ChartProps> & {
   Row: React.FC<RowProps>;
   Name: React.FC<NameProps>;
 } = ({
-  className = "",
+  className,
   children,
   numberOfVoters,
   minBarPct = 6,
@@ -79,19 +80,14 @@ const BarVoteChart: React.FC<ChartProps> & {
 
   return (
     <ChartContext.Provider value={ctx}>
-      <div className={`space-y-4 ${className}`} {...rest}>
+      <div className={clsx("space-y-4", className)} {...rest}>
         {children}
       </div>
     </ChartContext.Provider>
   );
 };
 
-const Row: React.FC<RowProps> = ({
-  value,
-  className = "",
-  children,
-  ...rest
-}) => {
+const Row: React.FC<RowProps> = ({ value, className, children, ...rest }) => {
   const ctx = React.useContext(ChartContext);
   // Count only Name children
   const names: Array<React.ReactElement<unknown>> = [];
@@ -124,32 +120,40 @@ const Row: React.FC<RowProps> = ({
 
   return (
     <div
-      className={`w-full grid grid-cols-[6rem_1fr] md:grid-cols-[7rem_1fr] gap-x-4 gap-y-3 ${className}`}
+      className={clsx(
+        "grid w-full grid-cols-[6rem_1fr] gap-x-4 gap-y-3 md:grid-cols-[7rem_1fr]",
+        className
+      )}
       {...rest}
     >
       <div
-        className={`row-span-2 self-stretch flex items-center justify-end pr-1 text-right whitespace-nowrap leading-none font-black ${valueTextClass} drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]`}
+        className={clsx(
+          "row-span-2 flex items-center justify-end self-stretch pr-1",
+          "whitespace-nowrap text-right font-black leading-none",
+          "drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]",
+          valueTextClass
+        )}
         style={{ fontSize: `${valueFontRem}rem`, opacity: valueOpacity }}
       >
         {value}
       </div>
-      <div className="relative h-10 rounded-xl bg-gray-800/40 border border-gray-700/40 overflow-hidden shadow-inner">
+      <div className="relative h-10 overflow-hidden rounded-xl border border-gray-700/40 bg-gray-800/40 shadow-inner">
         <div
-          className={`absolute inset-y-0 left-0 ${barColor} rounded-xl`}
+          className={clsx("absolute inset-y-0 left-0 rounded-xl", barColor)}
           style={{ width: `${pct}%` }}
         />
         {effShowCount && (
-          <div className="absolute top-1/2 -translate-y-1/2 right-2 z-10 flex items-center">
+          <div className="absolute top-1/2 right-2 z-10 flex -translate-y-1/2 items-center">
             <Badge
               bgClass="bg-gray-950/20"
-              className="px-2 py-0.5 text-xs font-bold text-white/80"
+              className="px-2 py-0.5 font-bold text-white/80 text-xs"
             >
               {count}
             </Badge>
           </div>
         )}
       </div>
-      <div className="col-start-2 flex items-center gap-2 flex-wrap text-white text-sm">
+      <div className="col-start-2 flex flex-wrap items-center gap-2 text-sm text-white">
         {names}
       </div>
     </div>
@@ -159,7 +163,7 @@ Row.displayName = "BarVoteChart.Row";
 
 const Name: React.FC<NameProps> = ({
   bgClass,
-  className = "",
+  className,
   children,
   ...rest
 }) => {
@@ -167,7 +171,7 @@ const Name: React.FC<NameProps> = ({
     <Badge
       bgClass={bgClass ?? "bg-gray-800/60"}
       rounded="lg"
-      className={`border border-gray-700/40 whitespace-nowrap ${className}`}
+      className={clsx("whitespace-nowrap border border-gray-700/40", className)}
       {...rest}
     >
       {children}

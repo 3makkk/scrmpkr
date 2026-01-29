@@ -61,7 +61,7 @@ export default function Room() {
   if (isLoading || !roomState) {
     return (
       <PageLayout>
-        <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <div className="flex min-h-[400px] flex-col items-center justify-center">
           <LoadingSpinner />
           <p className="mt-4 text-gray-600">Joining room...</p>
         </div>
@@ -72,12 +72,12 @@ export default function Room() {
   if (error) {
     return (
       <PageLayout>
-        <div className="flex flex-col items-center justify-center min-h-[400px]">
-          <h2 className="text-xl font-semibold text-red-600 mb-4">Error</h2>
+        <div className="flex min-h-[400px] flex-col items-center justify-center">
+          <h2 className="mb-4 font-semibold text-red-600 text-xl">Error</h2>
           <p className="text-gray-600">{error}</p>
           <button
             type="button"
-            className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="mt-6 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             onClick={() => navigate("/")}
           >
             Return Home
@@ -88,18 +88,18 @@ export default function Room() {
   }
 
   return (
-    <PageLayout className="flex flex-col min-h-screen">
+    <PageLayout className="flex min-h-screen flex-col">
       <ConfettiOverlay />
 
       {/* Main content area - scrollable */}
-      <div className="flex flex-col flex-1 min-h-0">
+      <div className="flex min-h-0 flex-1 flex-col">
         {/* Room Context Bar - Always visible at top */}
         <RoomContextBar />
 
         {/* Main content area with sidebar */}
-        <div className="flex flex-col lg:flex-row flex-1 min-h-0">
+        <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
           {/* Left sidebar - Contextual Team Status */}
-          <div className="lg:w-80 lg:shrink-0 border-r border-gray-700/30 bg-gray-900/20">
+          <div className="border-gray-700/30 border-r bg-gray-900/20 lg:w-80 lg:shrink-0">
             <ContextualTeamStatus />
           </div>
 

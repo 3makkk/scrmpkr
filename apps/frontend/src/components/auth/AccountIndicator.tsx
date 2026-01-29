@@ -82,19 +82,19 @@ export default function AccountIndicator() {
           </button>
         )}
       >
-        <div className="p-4 w-64" data-testid="account-menu">
+        <div className="w-64 p-4" data-testid="account-menu">
           <UserInfoSection
             name={account.name}
             role={userRole}
             className="mb-4"
           />
 
-          <hr className="border-gray-700 mb-4" />
+          <hr className="mb-4 border-gray-700" />
 
           <button
             type="button"
             onClick={handleChangeUsername}
-            className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-150"
+            className="w-full rounded-md px-3 py-2 text-left text-gray-300 text-sm transition-colors duration-150 hover:bg-gray-700 hover:text-white"
             data-testid="change-username-button"
           >
             Change username
@@ -109,7 +109,7 @@ export default function AccountIndicator() {
       >
         <Card className="w-md">
           <div className="mb-6">
-            <h2 className="text-2xl font-medium text-white mb-2">
+            <h2 className="mb-2 font-medium text-2xl text-white">
               Change Username
             </h2>
             <p className="text-gray-400">Choose a new name for this session</p>

@@ -31,11 +31,11 @@ export default function VotingResults() {
 
   return (
     <Card data-testid="voting-results">
-      <h2 className="text-2xl font-medium text-white mb-8 text-center animate-fade-in-scale">
+      <h2 className="mb-8 animate-fade-in-scale text-center font-medium text-2xl text-white">
         Voting Results
       </h2>
 
-      <div className="animate-fade-in-down animation-delay-100">
+      <div className="animation-delay-100 animate-fade-in-down">
         <BarVoteChart numberOfVoters={revealedVotes.length}>
           {Array.from(numericGroups.keys())
             .sort((a, b) => b - a)
@@ -72,32 +72,32 @@ export default function VotingResults() {
       </div>
 
       {/* Statistics */}
-      <div className="mt-8 pt-6 border-t border-gray-700/50 animate-fade-in-scale animation-delay-400">
+      <div className="animation-delay-400 mt-8 animate-fade-in-scale border-gray-700/50 border-t pt-6">
         <div className="grid grid-cols-3 gap-6 text-center">
           <div data-testid="vote-average">
-            <div className="text-gray-400 text-sm font-medium mb-1">
+            <div className="mb-1 font-medium text-gray-400 text-sm">
               Average
             </div>
-            <div className="text-2xl font-semibold text-white">
+            <div className="font-semibold text-2xl text-white">
               {stats.average}
             </div>
           </div>
           {stats.showMostCommon && (
             <div data-testid="vote-most-common">
-              <div className="text-gray-400 text-sm font-medium mb-1">
+              <div className="mb-1 font-medium text-gray-400 text-sm">
                 Most Common
               </div>
-              <div className="text-2xl font-semibold text-white">
+              <div className="font-semibold text-2xl text-white">
                 {stats.mostCommon}
               </div>
             </div>
           )}
           <div data-testid="vote-consensus">
-            <div className="text-gray-400 text-sm font-medium mb-1">
+            <div className="mb-1 font-medium text-gray-400 text-sm">
               Consensus
             </div>
             <div
-              className={`text-2xl font-semibold ${
+              className={`font-semibold text-2xl ${
                 stats.hasConsensus ? "text-green-400" : "text-red-400"
               }`}
             >

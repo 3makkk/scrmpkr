@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useRef } from "react";
+import clsx from "clsx";
 import type { UIProps } from "../uiTypes";
 
 type ModalProps = UIProps<
@@ -19,12 +20,12 @@ const Modal = forwardRef<HTMLDialogElement, ModalProps>(
       onClose,
       closeOnEscape = true,
       closeOnBackdrop = true,
-      className = "",
+      className,
       onClick,
       onKeyDown,
       ...props
     },
-    ref,
+    ref
   ) => {
     const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -106,12 +107,16 @@ const Modal = forwardRef<HTMLDialogElement, ModalProps>(
       <dialog
         ref={combinedRef}
         data-testid={dataTestId}
-        className="backdrop:bg-black/50 bg-transparent border-none outline-none p-4 max-w-none max-h-none w-full h-full flex items-center justify-center animate-fade-in-scale"
+        className={clsx(
+          "border-none bg-transparent p-4 outline-none backdrop:bg-black/50",
+          "flex h-full max-h-none w-full max-w-none items-center justify-center",
+          "animate-fade-in-scale"
+        )}
       >
         {children}
       </dialog>
     );
-  },
+  }
 );
 
 Modal.displayName = "Modal";
