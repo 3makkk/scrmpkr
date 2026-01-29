@@ -1,4 +1,6 @@
 name: Code Integrity Checks
+permissions:
+  contents: read
 
 on:
   push:
