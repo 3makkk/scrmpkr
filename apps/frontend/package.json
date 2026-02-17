@@ -35,7 +35,7 @@
     "@storybook/addon-vitest": "^10.2.7",
     "@storybook/react-vite": "10.2.7",
     "@tailwindcss/vite": "^4.1.18",
-    "@types/node": "^24.0.0",
+    "@types/node": "^25.2.3",
     "@types/react": "19.2.13",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
