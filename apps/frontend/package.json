@@ -18,7 +18,7 @@
   "license": "MIT",
   "dependencies": {
     "@sentry/react": "^10.38.0",
-    "@sentry/vite-plugin": "^4.6.1",
+    "@sentry/vite-plugin": "^4.9.1",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "react": "19.2.4",
