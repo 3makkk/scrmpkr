@@ -16,7 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/auto-instrumentations-node": "^0.69.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.70.0",
     "@opentelemetry/exporter-prometheus": "^0.212.0",
     "@opentelemetry/resources": "^2.5.1",
     "@opentelemetry/sdk-metrics": "^2.5.1",
