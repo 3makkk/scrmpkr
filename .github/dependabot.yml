@@ -2,13 +2,98 @@
 # package ecosystems to update and where the package manifests are located.
 # Please see the documentation for all configuration options:
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# Scheduling strategy:
+#   Dependabot does not support per-group schedules, so each ecosystem is split
+#   into three separate entries – one per semver update type – each with its own
+#   schedule interval:
+#     patch updates  → daily   (low risk, apply quickly)
+#     minor updates  → weekly  (moderate risk, review regularly)
+#     major updates  → monthly (high risk, review carefully)
+#
+#   Within every entry, named groups (e.g. vitest, react) are listed first so
+#   that they take priority when a dependency matches multiple groups.
+#   A general catch-all group is listed last to collect remaining packages.
 
 version: 2
 updates:
+  # ── docker ──────────────────────────────────────────────────────────────────
+  # Three entries so each update type can run on its own schedule.
+
+  # docker – patch updates (daily)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    groups:
+      patch-updates:
+        update-types:
+          - "patch"
+
+  # docker – minor updates (weekly)
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      minor-updates:
+        update-types:
+          - "minor"
+
+  # docker – major updates (monthly)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    groups:
+      major-updates:
+        update-types:
+          - "major"
+
+  # ── npm ─────────────────────────────────────────────────────────────────────
+  # Three entries so each update type can run on its own schedule.
+  # Existing named groups (vitest, react, opentelemetry, storybook) are
+  # preserved in every entry and scoped to that entry's update type so that
+  # related packages are still batched into a single PR.
+  # Named groups are listed before the catch-all group so they take priority
+  # when a dependency matches multiple groups.
+
+  # npm – patch updates (daily)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    groups:
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+        update-types:
+          - "patch"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+        update-types:
+          - "patch"
+      opentelemetry:
+        patterns:
+          - "@opentelemetry/*"
+        update-types:
+          - "patch"
+      storybook:
+        patterns:
+          - "@storybook/*"
+          - storybook
+        update-types:
+          - "patch"
+      patch-updates:
+        update-types:
+          - "patch"
+
+  # npm – minor updates (weekly)
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -18,16 +103,62 @@ updates:
         patterns:
           - "vitest"
           - "@vitest/*"
+        update-types:
+          - "minor"
       react:
         patterns:
           - "react"
           - "react-dom"
           - "@types/react"
           - "@types/react-dom"
+        update-types:
+          - "minor"
       opentelemetry:
         patterns:
           - "@opentelemetry/*"
+        update-types:
+          - "minor"
       storybook:
         patterns:
           - "@storybook/*"
           - storybook
+        update-types:
+          - "minor"
+      minor-updates:
+        update-types:
+          - "minor"
+
+  # npm – major updates (monthly)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    groups:
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+        update-types:
+          - "major"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+        update-types:
+          - "major"
+      opentelemetry:
+        patterns:
+          - "@opentelemetry/*"
+        update-types:
+          - "major"
+      storybook:
+        patterns:
+          - "@storybook/*"
+          - storybook
+        update-types:
+          - "major"
+      major-updates:
+        update-types:
+          - "major"
