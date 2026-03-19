@@ -2,18 +2,60 @@
 # package ecosystems to update and where the package manifests are located.
 # Please see the documentation for all configuration options:
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# Scheduling strategy:
+#   Dependabot requires a unique ecosystem+directory combination per entry, so
+#   per-group schedules are implemented via the `cooldown` option. Dependabot
+#   checks daily but delays raising PRs based on the semver level:
+#     patch  → 0 days cooldown  (PR raised immediately, effectively daily)
+#     minor  → 7 days cooldown  (PR raised after 7 days,  effectively weekly)
+#     major  → 30 days cooldown (PR raised after 30 days, effectively monthly)
+#
+#   Updates are additionally organized into named `groups` so that related
+#   packages are batched into a single PR. Named groups take priority over
+#   the catch-all groups (Dependabot assigns a dependency to the first
+#   matching group).
 
 version: 2
 updates:
+  # ── docker ──────────────────────────────────────────────────────────────────
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+    # cooldown delays PR creation per semver level to achieve different
+    # effective cadences without needing multiple entries for the same
+    # ecosystem+directory combination (which is not supported by Dependabot).
+    cooldown:
+      semver-patch-days: 0   # patch → raise immediately (daily)
+      semver-minor-days: 7   # minor → raise after 7 days (weekly)
+      semver-major-days: 30  # major → raise after 30 days (monthly)
+    groups:
+      patch-updates:
+        update-types:
+          - "patch"
+      minor-updates:
+        update-types:
+          - "minor"
+      major-updates:
+        update-types:
+          - "major"
+
+  # ── npm ─────────────────────────────────────────────────────────────────────
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+    # cooldown delays PR creation per semver level to achieve different
+    # effective cadences without needing multiple entries for the same
+    # ecosystem+directory combination (which is not supported by Dependabot).
+    cooldown:
+      semver-patch-days: 0   # patch → raise immediately (daily)
+      semver-minor-days: 7   # minor → raise after 7 days (weekly)
+      semver-major-days: 30  # major → raise after 30 days (monthly)
     groups:
+      # Named groups for related packages – listed first so they take
+      # priority over the catch-all update-type groups below.
       vitest:
         patterns:
           - "vitest"
@@ -31,3 +73,13 @@ updates:
         patterns:
           - "@storybook/*"
           - storybook
+      # Catch-all groups – collect any remaining packages not matched above.
+      patch-updates:
+        update-types:
+          - "patch"
+      minor-updates:
+        update-types:
+          - "minor"
+      major-updates:
+        update-types:
+          - "major"
