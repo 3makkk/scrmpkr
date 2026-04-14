@@ -5,15 +5,22 @@
 
 version: 2
 updates:
+  # ── docker ──────────────────────────────────────────────────────────────────
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
+
+  # ── npm ─────────────────────────────────────────────────────────────────────
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
     groups:
+      # Named groups batch related packages into a single PR.
+      # Named groups are listed first so they take priority over the
+      # catch-all update-type groups below (Dependabot assigns a dependency
+      # to the first matching group).
       vitest:
         patterns:
           - "vitest"
@@ -31,3 +38,14 @@ updates:
         patterns:
           - "@storybook/*"
           - storybook
+      # Catch-all groups organized by semver level – collect any remaining
+      # packages not matched by a named group above.
+      patch-updates:
+        update-types:
+          - "patch"
+      minor-updates:
+        update-types:
+          - "minor"
+      major-updates:
+        update-types:
+          - "major"
