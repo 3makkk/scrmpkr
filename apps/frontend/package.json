@@ -22,7 +22,6 @@
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "react": "19.2.5",
-    "react-canvas-confetti": "^2.0.7",
     "react-dom": "19.2.5",
     "react-router-dom": "^7.14.1",
     "socket.io-client": "^4.8.3"
