@@ -39,13 +39,15 @@ updates:
           - "@storybook/*"
           - storybook
       # Catch-all groups organized by semver level – collect any remaining
-      # packages not matched by a named group above.
-      patch-updates:
-        update-types:
-          - "patch"
-      minor-updates:
-        update-types:
-          - "minor"
+      # packages not matched by a named group above. Ordered by priority:
+      # major updates first, then minor, then patch (Dependabot assigns a
+      # dependency to the first matching group).
       major-updates:
         update-types:
           - "major"
+      minor-updates:
+        update-types:
+          - "minor"
+      patch-updates:
+        update-types:
+          - "patch"
