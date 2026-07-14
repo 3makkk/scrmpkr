@@ -38,6 +38,10 @@ interface ClientToServerEvents {
     data: { roomId: string; newName: string },
     cb?: (resp: { success: boolean } | { error: string }) => void,
   ) => void;
+  "user:updateRole": (
+    data: { roomId: string; newRole: UserRole },
+    cb?: (resp: { success: boolean } | { error: string }) => void,
+  ) => void;
   "vote:cast": (data: { roomId: string; value: number | "?" }) => void;
   "reveal:start": (data: { roomId: string }) => void;
   "vote:clear": (data: { roomId: string }) => void;
@@ -201,6 +205,29 @@ namespace.on("connection", (socket) => {
     } catch (error) {
       const e = error as Error;
       roomLogger.error({ error: e.message }, "Username update failed");
+      if (cb) cb({ error: e.message });
+    }
+  });
+
+  socket.on("user:updateRole", ({ roomId, newRole }, cb) => {
+    const roomLogger = userLogger.child({ roomId, newRole });
+    try {
+      const success = rooms.updateParticipantRole(
+        roomId,
+        socket.data.user.id,
+        newRole,
+      );
+      if (success) {
+        const state = rooms.getState(roomId);
+        if (state) namespace.to(state.id).emit("room:state", state);
+        if (cb) cb({ success: true });
+      } else {
+        roomLogger.warn("Role update failed - user not in room");
+        if (cb) cb({ error: "User not found in room" });
+      }
+    } catch (error) {
+      const e = error as Error;
+      roomLogger.error({ error: e.message }, "Role update failed");
       if (cb) cb({ error: e.message });
     }
   });
