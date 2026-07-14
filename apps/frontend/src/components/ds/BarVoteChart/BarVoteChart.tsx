@@ -59,7 +59,7 @@ const BarVoteChart: React.FC<ChartProps> & {
   // Inspect children to compute global min/max vote counts
   const counts: number[] = [];
   React.Children.forEach(children, (child) => {
-    if (!React.isValidElement(child)) return;
+    if (!React.isValidElement<{ children?: React.ReactNode }>(child)) return;
     if (child.type !== Row) return;
     let c = 0;
     React.Children.forEach(child.props.children, (sub) => {

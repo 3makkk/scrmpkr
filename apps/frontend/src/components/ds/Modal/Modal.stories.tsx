@@ -1,15 +1,19 @@
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { expect, userEvent, within } from "storybook/test";
 import Modal from "./Modal";
 import Button from "../Button/Button";
 import Card from "../Card/Card";
 
-export default {
+const meta: Meta<typeof Modal> = {
   title: "DS/Modal",
   component: Modal,
 };
 
-export const Basic = {
+export default meta;
+type Story = StoryObj<typeof Modal>;
+
+export const Basic: Story = {
   render: () => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -58,7 +62,7 @@ export const Basic = {
   },
 };
 
-export const WithForm = {
+export const WithForm: Story = {
   render: () => {
     const [isOpen, setIsOpen] = useState(false);
     const [name, setName] = useState("");
@@ -118,7 +122,7 @@ export const WithForm = {
   },
 };
 
-export const NoBackdropClose = {
+export const NoBackdropClose: Story = {
   render: () => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -174,7 +178,7 @@ export const NoBackdropClose = {
   },
 };
 
-export const NoEscapeClose = {
+export const NoEscapeClose: Story = {
   render: () => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -212,7 +216,7 @@ export const NoEscapeClose = {
   },
 };
 
-export const LargeContent = {
+export const LargeContent: Story = {
   render: () => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -276,7 +280,7 @@ export const LargeContent = {
   },
 };
 
-export const MultipleModals = {
+export const MultipleModals: Story = {
   render: () => {
     const [firstModal, setFirstModal] = useState(false);
     const [secondModal, setSecondModal] = useState(false);
@@ -335,7 +339,7 @@ export const MultipleModals = {
   },
 };
 
-export const ConfirmationModal = {
+export const ConfirmationModal: Story = {
   render: () => {
     const [isOpen, setIsOpen] = useState(false);
 
