@@ -9,9 +9,13 @@ import type { TestUser } from "./TestUser";
 export class TestParticipation {
   public readonly user: TestUser;
   public readonly room: TestRoom;
-  public readonly role: "PARTICIPANT" | "VISITOR";
+  public readonly role: "PARTICIPANT" | "VISITOR" | "FACILITATOR";
 
-  constructor(user: TestUser, room: TestRoom, role: "PARTICIPANT" | "VISITOR") {
+  constructor(
+    user: TestUser,
+    room: TestRoom,
+    role: "PARTICIPANT" | "VISITOR" | "FACILITATOR",
+  ) {
     this.user = user;
     this.room = room;
     this.role = role;

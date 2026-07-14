@@ -121,6 +121,15 @@ export class RoomAssertions {
     });
   }
 
+  async shouldHaveFacilitatorCount(observer: TestUser, expectedCount: number) {
+    await test.step(`Wait for ${expectedCount} facilitators in room`, async () => {
+      await observer.page.waitForSelector(
+        `[data-testid="facilitator-count"]:has-text("${expectedCount}")`,
+        {},
+      );
+    });
+  }
+
   async shouldShowParticipant(observer: TestUser, participantName: string) {
     await test.step(`${observer.name} verifies participant ${participantName} is visible`, async () => {
       await observer.page.waitForSelector(

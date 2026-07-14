@@ -39,7 +39,7 @@ export class TestRoom {
 
   async addUser(
     user: TestUser,
-    role: "PARTICIPANT" | "VISITOR" = "PARTICIPANT",
+    role: "PARTICIPANT" | "VISITOR" | "FACILITATOR" = "PARTICIPANT",
   ): Promise<TestParticipation> {
     await user.navigateToRoom(this.id);
     await user.selectRole(role);
