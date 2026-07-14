@@ -125,7 +125,7 @@ export class TestUser {
   async getCurrentRoomId(): Promise<string> {
     const url = this.page.url();
     const match = url.match(/\/r\/([^/?#]+)/);
-    if (!match || !match[1]) {
+    if (!match?.[1]) {
       throw new Error(`Cannot extract room ID from URL: ${url}`);
     }
     return match[1];

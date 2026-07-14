@@ -114,7 +114,9 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   const voters = roomState
     ? roomState.participants.filter((participant) => canVote(participant.role))
     : [];
-  const votedCount = voters.filter((participant) => participant.hasVoted).length;
+  const votedCount = voters.filter(
+    (participant) => participant.hasVoted,
+  ).length;
   const allVoted = voters.length > 0 && voters.every((p) => p.hasVoted);
 
   const joinRoom = useCallback(

@@ -29,7 +29,7 @@ export default function RoleOptionCard({
       data-testid={testid}
       className={`flex w-full items-center gap-3 rounded-lg border p-4 text-left transition-all ${
         selected
-          ? `${option.active} text-white${disabled ? " cursor-default" : ""}`
+          ? `${option.active} text-white ${disabled ? "cursor-default" : ""}`
           : `border-gray-600 bg-gray-800/40 text-gray-300 ${option.hover}`
       }`}
     >

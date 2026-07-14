@@ -134,7 +134,8 @@ export default function ContextualTeamStatus() {
           <div className="space-y-3">
             <h3 className="font-medium text-gray-400 text-sm uppercase tracking-wider">
               Facilitators (
-              <span data-testid="facilitator-count">{facilitators.length}</span>)
+              <span data-testid="facilitator-count">{facilitators.length}</span>
+              )
             </h3>
             <div className="flex flex-wrap gap-2 lg:block lg:space-y-3">
               {facilitators.map((participant, index) => (

@@ -823,7 +823,11 @@ describe("RoomManager", () => {
         { id: "u1", name: "Alice" },
         "participant",
       );
-      const ok = manager.updateParticipantRole("role-room", "u1", "facilitator");
+      const ok = manager.updateParticipantRole(
+        "role-room",
+        "u1",
+        "facilitator",
+      );
       expect(ok).toBe(true);
       const state = manager.getState("role-room");
       expect(state?.participants.find((p) => p.id === "u1")?.role).toBe(

@@ -154,7 +154,9 @@ export default function AccountIndicator() {
       >
         <Card className="w-md">
           <div className="mb-6">
-            <h2 className="mb-2 font-medium text-2xl text-white">Change Role</h2>
+            <h2 className="mb-2 font-medium text-2xl text-white">
+              Change Role
+            </h2>
             <p className="text-gray-400">
               Switch how you take part in this session
             </p>

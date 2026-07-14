@@ -173,7 +173,7 @@ export class VotingAssertions {
           const votingProgress = document.querySelector(
             '[data-testid="voting-progress"]',
           );
-          if (!votingProgress || !votingProgress.textContent) return false;
+          if (!votingProgress?.textContent) return false;
 
           // Extract numbers from text like "2 participants still voting..."
           // or check for "All participants have voted"
