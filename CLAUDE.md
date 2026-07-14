@@ -12,3 +12,5 @@ Other docs:
 - `apps/e2e/README.md` — end-to-end test scenarios and flow.
 
 Do not duplicate the content of those files here — link to them and keep each fact in one place.
+
+Always use Context7 when I need library/API documentation, code generation, setup or configuration steps without me having to explicitly ask.
