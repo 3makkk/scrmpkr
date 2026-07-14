@@ -29,7 +29,7 @@ export const ROLE_OPTIONS: readonly RoleOption[] = [
   {
     role: UserRole.FACILITATOR,
     title: "Facilitator",
-    desc: "Reveal results and start new rounds, but don't vote",
+    desc: "Reveal & start rounds, no voting",
     icon: "🎬",
     active: "border-amber-500 bg-amber-500/10",
     hover: "hover:border-amber-500/60 hover:bg-amber-500/5",
