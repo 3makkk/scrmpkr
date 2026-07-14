@@ -1,12 +1,16 @@
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
 import Card from "./Card";
 
-export default {
+const meta: Meta<typeof Card> = {
   title: "DS/Card",
   component: Card,
 };
 
-export const Basic = {
+export default meta;
+type Story = StoryObj<typeof Card>;
+
+export const Basic: Story = {
   render: () => (
     <div className="p-6">
       <Card>
