@@ -3,6 +3,7 @@
 export const UserRole = {
   PARTICIPANT: "participant",
   VISITOR: "visitor",
+  FACILITATOR: "facilitator",
 } as const;
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
@@ -64,6 +65,10 @@ export interface ClientToServerEvents {
   ) => void;
   "user:updateName": (
     data: { roomId: string; newName: string },
+    cb?: (resp: { success: boolean } | { error: string }) => void,
+  ) => void;
+  "user:updateRole": (
+    data: { roomId: string; newRole: UserRole },
     cb?: (resp: { success: boolean } | { error: string }) => void,
   ) => void;
   "vote:cast": (data: { roomId: string; value: number | "?" }) => void;

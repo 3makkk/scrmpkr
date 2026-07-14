@@ -1,6 +1,6 @@
 import { useRoom } from "../../../hooks/useRoom";
 import { useAuth } from "../../../AuthProvider";
-import { type Participant, UserRole } from "@scrmpkr/shared";
+import { type Participant, UserRole, canVote } from "@scrmpkr/shared";
 
 export default function ContextualTeamStatus() {
   const { roomState } = useRoom();
@@ -11,11 +11,12 @@ export default function ContextualTeamStatus() {
   const { participants, currentRoundState } = roomState;
   const isRoundRevealed = currentRoundState?.status === "revealed";
 
-  // Filter out visitors from participant counting and display
-  const activeParticipants = participants.filter(
-    (p) => p.role !== UserRole.VISITOR,
-  );
+  // Voters (participant role) are the "Active Participants" list.
+  const activeParticipants = participants.filter((p) => canVote(p.role));
   const visitors = participants.filter((p) => p.role === UserRole.VISITOR);
+  const facilitators = participants.filter(
+    (p) => p.role === UserRole.FACILITATOR,
+  );
   const votedActiveParticipants = activeParticipants.filter(
     (p) => p.hasVoted,
   ).length;
@@ -63,6 +64,8 @@ export default function ContextualTeamStatus() {
     switch (participant.role) {
       case UserRole.VISITOR:
         return "👁 Visitor";
+      case UserRole.FACILITATOR:
+        return "🎬 Facilitator";
       default:
         return "";
     }
@@ -125,6 +128,47 @@ export default function ContextualTeamStatus() {
             ))}
           </div>
         </div>
+
+        {/* Facilitators - non-voting session managers */}
+        {facilitators.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="font-medium text-gray-400 text-sm uppercase tracking-wider">
+              Facilitators (
+              <span data-testid="facilitator-count">{facilitators.length}</span>
+              )
+            </h3>
+            <div className="flex flex-wrap gap-2 lg:block lg:space-y-3">
+              {facilitators.map((participant, index) => (
+                <div
+                  key={participant.id}
+                  className="flex w-auto animate-slide-in-left items-center justify-between rounded-lg border border-amber-700/40 bg-amber-900/20 p-3 lg:w-full"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                  data-testid={`facilitator-${participant.name}`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="h-3 w-3 rounded-full bg-amber-500"></div>
+                    <div className="flex flex-col">
+                      <span
+                        className={`font-medium text-sm ${
+                          participant.id === account.id
+                            ? "text-amber-400"
+                            : "text-gray-300"
+                        }`}
+                        data-testid={`facilitator-name-${participant.name}`}
+                      >
+                        {participant.id === account.id
+                          ? "You"
+                          : participant.name}
+                        <span className="ml-1 text-amber-500 text-xs">🎬</span>
+                      </span>
+                      <span className="text-gray-500 text-xs">managing</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Visitors - Separate section */}
         {visitors.length > 0 && (

@@ -77,6 +77,21 @@ export const PERMISSION_MATRIX: Record<
     "participant:read": true,
     "session:control": false,
   },
+  facilitator: {
+    "room:create": true,
+    "room:read": true,
+    "room:update": false,
+    "room:delete": true,
+    "room:join": true,
+    "room:leave": true,
+    "vote:cast": false,
+    "vote:read": true,
+    "round:reveal": true,
+    "round:clear": true,
+    "round:read": true,
+    "participant:read": true,
+    "session:control": true,
+  },
 };
 
 // ===== CORE ACL BUSINESS LOGIC =====
@@ -167,6 +182,7 @@ export function getRolePermissions(role: UserRole): ValidPermission[] {
  */
 export const ROLE_HIERARCHY: Record<UserRole, number> = {
   visitor: 1,
+  facilitator: 2,
   participant: 2,
 };
 

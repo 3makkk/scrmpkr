@@ -278,6 +278,31 @@ export class RoomManager {
     return true;
   }
 
+  updateParticipantRole(
+    roomId: string,
+    userId: string,
+    newRole: UserRole,
+  ): boolean {
+    const normalizedId = this.normalizeRoomId(roomId);
+    const roomLogger = logger.child({ roomId: normalizedId, userId });
+    const room = this.rooms.get(normalizedId);
+    if (!room) {
+      roomLogger.warn("Update participant role was rejected, room not found");
+      return false;
+    }
+
+    const success = room.updateParticipantRole(userId, newRole);
+    if (!success) {
+      roomLogger.warn(
+        "Update participant role was rejected, participant not found",
+      );
+      return false;
+    }
+
+    roomLogger.info({ newRole }, "Participant role was updated");
+    return true;
+  }
+
   getTotalActiveUsers(): number {
     const uniqueUsers = new Set<string>();
     for (const room of this.rooms.values()) {

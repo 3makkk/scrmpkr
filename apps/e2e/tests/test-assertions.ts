@@ -121,6 +121,15 @@ export class RoomAssertions {
     });
   }
 
+  async shouldHaveFacilitatorCount(observer: TestUser, expectedCount: number) {
+    await test.step(`Wait for ${expectedCount} facilitators in room`, async () => {
+      await observer.page.waitForSelector(
+        `[data-testid="facilitator-count"]:has-text("${expectedCount}")`,
+        {},
+      );
+    });
+  }
+
   async shouldShowParticipant(observer: TestUser, participantName: string) {
     await test.step(`${observer.name} verifies participant ${participantName} is visible`, async () => {
       await observer.page.waitForSelector(
@@ -164,7 +173,7 @@ export class VotingAssertions {
           const votingProgress = document.querySelector(
             '[data-testid="voting-progress"]',
           );
-          if (!votingProgress || !votingProgress.textContent) return false;
+          if (!votingProgress?.textContent) return false;
 
           // Extract numbers from text like "2 participants still voting..."
           // or check for "All participants have voted"

@@ -16,7 +16,7 @@ import {
 describe("Permission System (ACL)", () => {
   describe("Permission Matrix", () => {
     it("should define permissions for all roles", () => {
-      const roles: UserRole[] = ["participant", "visitor"];
+      const roles: UserRole[] = ["participant", "visitor", "facilitator"];
       const permissions: ValidPermission[] = [
         "room:create",
         "room:read",
@@ -60,6 +60,19 @@ describe("Permission System (ACL)", () => {
       expect(hasPermission("visitor", "round:read")).toBe(true);
       expect(hasPermission("visitor", "participant:read")).toBe(true);
     });
+
+    it("should grant correct permissions to facilitator", () => {
+      expect(hasPermission("facilitator", "room:create")).toBe(true);
+      expect(hasPermission("facilitator", "room:delete")).toBe(true);
+      expect(hasPermission("facilitator", "vote:cast")).toBe(false);
+      expect(hasPermission("facilitator", "vote:read")).toBe(true);
+      expect(hasPermission("facilitator", "round:reveal")).toBe(true);
+      expect(hasPermission("facilitator", "round:clear")).toBe(true);
+      expect(hasPermission("facilitator", "round:read")).toBe(true);
+      expect(hasPermission("facilitator", "session:control")).toBe(true);
+      expect(hasPermission("facilitator", "participant:read")).toBe(true);
+      expect(hasPermission("facilitator", "room:update")).toBe(false);
+    });
   });
 
   describe("Helper Functions", () => {
@@ -73,6 +86,12 @@ describe("Permission System (ACL)", () => {
       expect(canControlSession("visitor")).toBe(false);
     });
 
+    it("should exclude facilitator from voting but allow control", () => {
+      expect(canVote("facilitator")).toBe(false);
+      expect(canControlSession("facilitator")).toBe(true);
+      expect(canViewResults("facilitator")).toBe(true);
+    });
+
     it("should correctly identify who can view results", () => {
       expect(canViewResults("participant")).toBe(true);
       expect(canViewResults("visitor")).toBe(true);
@@ -83,6 +102,10 @@ describe("Permission System (ACL)", () => {
     it("should define correct hierarchy levels", () => {
       expect(ROLE_HIERARCHY.visitor).toBe(1);
       expect(ROLE_HIERARCHY.participant).toBe(2);
+    });
+
+    it("should define a hierarchy level for facilitator", () => {
+      expect(ROLE_HIERARCHY.facilitator).toBe(2);
     });
 
     it("should correctly compare privilege levels", () => {

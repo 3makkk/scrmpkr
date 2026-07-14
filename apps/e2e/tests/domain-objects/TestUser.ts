@@ -75,7 +75,7 @@ export class TestUser {
     await this.page.goto(`/r/${roomId}`);
   }
 
-  async selectRole(role: "PARTICIPANT" | "VISITOR") {
+  async selectRole(role: "PARTICIPANT" | "VISITOR" | "FACILITATOR") {
     // Wait for role selection form to appear first
     await this.page.waitForSelector(
       '[data-testid="role-selection-join-button"]',
@@ -84,6 +84,8 @@ export class TestUser {
 
     if (role === "VISITOR") {
       await this.page.click('[data-testid="role-visitor-option"]');
+    } else if (role === "FACILITATOR") {
+      await this.page.click('[data-testid="role-facilitator-option"]');
     } else {
       await this.page.click('[data-testid="role-participant-option"]');
     }
@@ -123,7 +125,7 @@ export class TestUser {
   async getCurrentRoomId(): Promise<string> {
     const url = this.page.url();
     const match = url.match(/\/r\/([^/?#]+)/);
-    if (!match || !match[1]) {
+    if (!match?.[1]) {
       throw new Error(`Cannot extract room ID from URL: ${url}`);
     }
     return match[1];

@@ -814,4 +814,63 @@ describe("RoomManager", () => {
       expect(state?.currentRoundState.stats.hasConsensus).toBe(false);
     });
   });
+
+  describe("updateParticipantRole", () => {
+    it("changes a participant's role", () => {
+      const manager = new RoomManager();
+      manager.createRoom(
+        "role-room",
+        { id: "u1", name: "Alice" },
+        "participant",
+      );
+      const ok = manager.updateParticipantRole(
+        "role-room",
+        "u1",
+        "facilitator",
+      );
+      expect(ok).toBe(true);
+      const state = manager.getState("role-room");
+      expect(state?.participants.find((p) => p.id === "u1")?.role).toBe(
+        "facilitator",
+      );
+    });
+
+    it("keeps an already-cast vote when switching to a non-voting role", () => {
+      const manager = new RoomManager();
+      manager.createRoom(
+        "role-room",
+        { id: "u1", name: "Alice" },
+        "participant",
+      );
+      manager.castVote("role-room", "u1", 5);
+      manager.updateParticipantRole("role-room", "u1", "facilitator");
+      const state = manager.getState("role-room");
+      // Participant flag stays voted and the round tracker still holds the vote.
+      expect(state?.participants.find((p) => p.id === "u1")?.hasVoted).toBe(
+        true,
+      );
+      expect(
+        state?.currentRoundState.votes.find((v) => v.id === "u1")?.value,
+      ).toBe(5);
+    });
+
+    it("returns false for an unknown participant", () => {
+      const manager = new RoomManager();
+      manager.createRoom(
+        "role-room",
+        { id: "u1", name: "Alice" },
+        "participant",
+      );
+      expect(
+        manager.updateParticipantRole("role-room", "ghost", "visitor"),
+      ).toBe(false);
+    });
+
+    it("returns false for an unknown room", () => {
+      const manager = new RoomManager();
+      expect(manager.updateParticipantRole("nope", "u1", "visitor")).toBe(
+        false,
+      );
+    });
+  });
 });

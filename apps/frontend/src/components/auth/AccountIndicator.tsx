@@ -3,6 +3,8 @@ import { useAuth } from "../../AuthProvider";
 import { useRoom } from "../../hooks/useRoom";
 import { UserRole } from "@scrmpkr/shared";
 import UsernameForm from "./UsernameForm";
+import RoleOptionCard from "./RoleOptionCard";
+import { ROLE_OPTIONS } from "./roleOptions";
 import UserInfoSection from "./UserInfoSection";
 import Card from "../ds/Card/Card";
 import Modal from "../ds/Modal/Modal";
@@ -11,9 +13,10 @@ import UserAvatar from "../ds/UserAvatar/UserAvatar";
 
 export default function AccountIndicator() {
   const { account, updateName } = useAuth();
-  const { currentRoomId, roomState } = useRoom();
+  const { currentRoomId, roomState, updateRole } = useRoom();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [isEditingRole, setIsEditingRole] = useState(false);
 
   if (!account || !roomState) return null;
 
@@ -58,6 +61,16 @@ export default function AccountIndicator() {
     setIsEditingUsername(true);
   };
 
+  const handleChangeRole = () => {
+    setIsMenuOpen(false);
+    setIsEditingRole(true);
+  };
+
+  const handleRoleSelected = (newRole: UserRole) => {
+    updateRole(newRole);
+    setIsEditingRole(false);
+  };
+
   return (
     <>
       <Dropdown
@@ -99,6 +112,15 @@ export default function AccountIndicator() {
           >
             Change username
           </button>
+
+          <button
+            type="button"
+            onClick={handleChangeRole}
+            className="w-full rounded-md px-3 py-2 text-left text-gray-300 text-sm transition-colors duration-150 hover:bg-gray-700 hover:text-white"
+            data-testid="change-role-button"
+          >
+            Change role
+          </button>
         </div>
       </Dropdown>
 
@@ -122,6 +144,39 @@ export default function AccountIndicator() {
             submitText="Change Name"
             showCancel={true}
           />
+        </Card>
+      </Modal>
+
+      <Modal
+        open={isEditingRole}
+        onClose={() => setIsEditingRole(false)}
+        data-testid="role-edit-overlay"
+      >
+        <Card className="w-md">
+          <div className="mb-6">
+            <h2 className="mb-2 font-medium text-2xl text-white">
+              Change Role
+            </h2>
+            <p className="text-gray-400">
+              Switch how you take part in this session
+            </p>
+          </div>
+          <div className="space-y-3">
+            {ROLE_OPTIONS.map((opt) => {
+              const isCurrent = userRole === opt.role;
+              return (
+                <RoleOptionCard
+                  key={opt.role}
+                  option={opt}
+                  selected={isCurrent}
+                  disabled={isCurrent}
+                  badge={isCurrent ? "Current" : undefined}
+                  onSelect={() => handleRoleSelected(opt.role)}
+                  testid={`role-option-${opt.role}`}
+                />
+              );
+            })}
+          </div>
         </Card>
       </Modal>
     </>

@@ -13,4 +13,17 @@ Other docs:
 
 Do not duplicate the content of those files here — link to them and keep each fact in one place.
 
+## Before every commit
+
+Run lint and format, and stage the results, before creating any commit:
+
+```bash
+pnpm lint    # biome lint --write --unsafe .
+pnpm format  # biome format . --write
+```
+
+Review what `--unsafe` autofixes changed before staging — it can rewrite code, not just style.
+
+This is enforced by a git `pre-commit` hook in `.githooks/pre-commit` (Biome on staged files). The hook is wired up by the `prepare` script (`git config core.hooksPath .githooks`), which runs on `pnpm install`. The hook applies only safe fixes; still run `pnpm lint` (`--unsafe`) yourself for the fuller pass.
+
 Always use Context7 when I need library/API documentation, code generation, setup or configuration steps without me having to explicitly ask.

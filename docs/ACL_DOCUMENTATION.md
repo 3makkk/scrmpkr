@@ -17,11 +17,17 @@ apps/frontend/src/utils/
 
 ### Roles
 
-There are two roles (`packages/shared/src/types.ts`):
+There are three roles (`packages/shared/src/types.ts`):
 
 ```typescript
-type UserRole = "participant" | "visitor";
+type UserRole = "participant" | "visitor" | "facilitator";
 ```
+
+- **Participant** — votes and controls the session (reveal, start next round, delete room).
+- **Visitor** — observes only; cannot vote and cannot control the session.
+- **Facilitator** — manages the session (reveal votes, start next round, delete room) but cannot cast a vote. Self-selected at join time or via the account menu. Session control is **shared** with participants, not exclusive to facilitators, so a room with zero facilitators still works.
+
+A vote already cast survives when its caster switches to a non-voting role (facilitator or visitor) for the current round, consistent with a voter leaving the room. See `docs/adr/0001-votes-owned-by-round-tracker.md`.
 
 There is **no "owner" role**. Room ownership is tracked separately as `RoomState.creatorId` (the userId of the room creator), not through the permission matrix.
 
@@ -59,21 +65,21 @@ type ValidPermission =
 
 Values below are taken directly from `PERMISSION_MATRIX` in `permissions.ts`.
 
-| Permission        | Participant | Visitor | Notes                          |
-| ----------------- | ----------- | ------- | ------------------------------ |
-| `room:create`     | ✅          | ✅      | Anyone can create a room       |
-| `room:read`       | ✅          | ✅      | View room information          |
-| `room:update`     | ❌          | ❌      | Not granted to any role        |
-| `room:delete`     | ✅          | ❌      | Participants only              |
-| `room:join`       | ✅          | ✅      | Anyone can join                |
-| `room:leave`      | ✅          | ✅      | Anyone can leave               |
-| `vote:cast`       | ✅          | ❌      | Visitors cannot vote           |
-| `vote:read`       | ✅          | ✅      | View votes                     |
-| `round:reveal`    | ✅          | ❌      | Show voting results            |
-| `round:clear`     | ✅          | ❌      | Start a new round              |
-| `round:read`      | ✅          | ✅      | View round information         |
-| `participant:read`| ✅          | ✅      | View participant list          |
-| `session:control` | ✅          | ❌      | Control session flow           |
+| Permission        | Participant | Visitor | Facilitator | Notes                          |
+| ----------------- | ----------- | ------- | ----------- | ------------------------------ |
+| `room:create`     | ✅          | ✅      | ✅          | Anyone can create a room       |
+| `room:read`       | ✅          | ✅      | ✅          | View room information          |
+| `room:update`     | ❌          | ❌      | ❌          | Not granted to any role        |
+| `room:delete`     | ✅          | ❌      | ✅          | Participants and facilitators  |
+| `room:join`       | ✅          | ✅      | ✅          | Anyone can join                |
+| `room:leave`      | ✅          | ✅      | ✅          | Anyone can leave               |
+| `vote:cast`       | ✅          | ❌      | ❌          | Only participants vote         |
+| `vote:read`       | ✅          | ✅      | ✅          | View votes                     |
+| `round:reveal`    | ✅          | ❌      | ✅          | Show voting results            |
+| `round:clear`     | ✅          | ❌      | ✅          | Start a new round              |
+| `round:read`      | ✅          | ✅      | ✅          | View round information         |
+| `participant:read`| ✅          | ✅      | ✅          | View participant list          |
+| `session:control` | ✅          | ❌      | ✅          | Control session flow           |
 
 ## API Reference
 
@@ -90,7 +96,7 @@ canViewResults(role: UserRole): boolean     // round:read
 getRolePermissions(role: UserRole): ValidPermission[]
 
 // Role hierarchy (higher number = more privilege)
-ROLE_HIERARCHY: Record<UserRole, number> = { visitor: 1, participant: 2 }
+ROLE_HIERARCHY: Record<UserRole, number> = { visitor: 1, facilitator: 2, participant: 2 }
 hasHigherPrivilege(role1: UserRole, role2: UserRole): boolean
 ```
 
