@@ -1,0 +1,29 @@
+name: GHCR cleanup
+
+# Delete images older than 2 weeks, but always keep :latest and the 5 most
+# recent versions so the running and rollback images survive.
+on:
+  schedule:
+    - cron: "30 3 * * *" # nightly, after the deploy window
+  workflow_dispatch:
+
+permissions:
+  packages: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: [scrmpkr-server, scrmpkr-frontend]
+    steps:
+      - name: Prune old image versions
+        uses: snok/container-retention-policy@v3
+        with:
+          account: ${{ github.repository_owner }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          image-names: ${{ matrix.image }}
+          cut-off: 2w
+          keep-n-most-recent: 5
+          image-tags: "!latest" # never delete the :latest tag
+          delete-untagged: true
