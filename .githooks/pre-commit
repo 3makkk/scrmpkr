@@ -1,0 +1,9 @@
+#!/bin/sh
+# Run Biome (lint + format) on staged files before every commit.
+# See the "Before every commit" section in CLAUDE.md.
+# Activated via the `prepare` script: git config core.hooksPath .githooks
+
+pnpm exec biome check --write --staged --no-errors-on-unmatched --files-ignore-unknown=true || exit 1
+
+# Re-stage the files Biome just fixed (only ones already in the index).
+git update-index --again

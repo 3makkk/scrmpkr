@@ -2,6 +2,7 @@
   "name": "scrmpkr",
   "private": true,
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks",
     "dev:server": "pnpm --filter server dev",
     "dev:frontend": "pnpm --filter frontend dev",
     "dev": "pnpm -r dev",
