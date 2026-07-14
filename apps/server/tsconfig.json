@@ -4,7 +4,6 @@
     "module": "nodenext",
     "lib": ["ESNext"],
     "strict": true,
-    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "nodenext",
     "esModuleInterop": true,
