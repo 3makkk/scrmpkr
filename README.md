@@ -34,7 +34,7 @@ pnpm build
 
 ### Backend
 
-Create `server/.env` using `server/.env.example`.
+Create `apps/server/.env` using `apps/server/.env.example`.
 
 ```
 TENANT_ID=<tenant>
@@ -57,7 +57,7 @@ The server exposes a Prometheus metrics endpoint at `http://localhost:9464/metri
 
 ### Frontend
 
-Create `frontend/.env` using `frontend/.env.example`.
+Create `apps/frontend/.env` using `apps/frontend/.env.example`.
 
 ```
 VITE_AZURE_TENANT_ID=<tenant>
@@ -78,11 +78,11 @@ pnpm dev:frontend
 pnpm test
 ```
 
-Note: Jest is currently configured for JavaScript tests. To run server tests against TypeScript sources, either build first and point tests at compiled output, or add ts-jest to transpile on the fly.
+Tests run on Vitest. See `AGENTS.md` for the full command reference (single package/file, e2e, typecheck, lint).
 
 ### Deploy
 
-- Build+Push: `SHORT_SHA=$(git rev-parse --short HEAD) && docker buildx build --platform linux/amd64 -t ghcr.io/3makkk/scrmpkr-server:${SHORT_SHA} -f server/Dockerfile . --push && docker buildx build --platform linux/amd64 -t ghcr.io/3makkk/scrmpkr-frontend:${SHORT_SHA} -f frontend/Dockerfile . --push`
+- Build+Push: `SHORT_SHA=$(git rev-parse --short HEAD) && docker buildx build --platform linux/amd64 -t ghcr.io/3makkk/scrmpkr-server:${SHORT_SHA} -f apps/server/Dockerfile . --push && docker buildx build --platform linux/amd64 -t ghcr.io/3makkk/scrmpkr-frontend:${SHORT_SHA} -f apps/frontend/Dockerfile . --push`
 - Deploy: `export IMAGE_TAG=${SHORT_SHA} && docker --context friedemann.dev stack deploy -c docker-stack.yml scrmpkr`
 
 The frontend listens on port `80` and the API on `4000` internally. Traefik routes HTTPS traffic for `scrmpkr.friedemann.dev` to the services via the external `proxy` network.
