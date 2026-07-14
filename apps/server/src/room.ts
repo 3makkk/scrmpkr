@@ -72,6 +72,17 @@ export default class Room {
     return true;
   }
 
+  updateParticipantRole(userId: string, newRole: UserRole): boolean {
+    const participant = this.participants.get(userId);
+    if (!participant) return false;
+
+    // Only the role changes. hasVoted / value and the round tracker are left
+    // untouched: a vote already cast survives in the current round exactly as
+    // it does when a voter leaves.
+    participant.role = newRole;
+    return true;
+  }
+
   recordVote(userId: string, value: number | "?"): Participant | undefined {
     const participant = this.participants.get(userId);
     if (!participant) return undefined;
