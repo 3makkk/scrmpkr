@@ -41,6 +41,7 @@
     "@vitest/browser-playwright": "^4.1.10",
     "@vitest/coverage-v8": "^4.1.10",
     "babel-plugin-react-compiler": "^1.0.0",
+    "jsdom": "^29.1.1",
     "playwright": "^1.61.1",
     "postcss": "^8.5.19",
     "storybook": "^10.5.0",
