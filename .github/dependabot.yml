@@ -5,6 +5,18 @@
 
 version: 2
 updates:
+  # ── github-actions ───────────────────────────────────────────────────────────
+  # Keeps workflow action versions current (e.g. off deprecated Node 20 runtimes).
+  # Grouped into one PR to avoid a flood of individual action bumps.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions:
+        patterns:
+          - "*"
+
   # ── docker ──────────────────────────────────────────────────────────────────
   # Dockerfiles live under apps/, not the repo root. Daily so same-tag base
   # rebuilds (digest changes) are detected within 24h.
