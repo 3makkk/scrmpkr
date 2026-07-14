@@ -20,7 +20,7 @@ export const ROLE_OPTIONS: readonly RoleOption[] = [
   {
     role: UserRole.PARTICIPANT,
     title: "Participant",
-    desc: "Vote, reveal results, and start new rounds",
+    desc: "Vote, reveal & start rounds",
     icon: "🗳️",
     active: "border-blue-500 bg-blue-500/10",
     hover: "hover:border-blue-500/60 hover:bg-blue-500/5",
@@ -38,7 +38,7 @@ export const ROLE_OPTIONS: readonly RoleOption[] = [
   {
     role: UserRole.VISITOR,
     title: "Visitor",
-    desc: "Watch only — no voting or session controls",
+    desc: "Watch only, no voting or controls",
     icon: "👁",
     active: "border-purple-500 bg-purple-500/10",
     hover: "hover:border-purple-500/60 hover:bg-purple-500/5",
