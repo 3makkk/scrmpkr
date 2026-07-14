@@ -2,6 +2,8 @@ import { useState } from "react";
 import { UserRole } from "@scrmpkr/shared";
 import Button from "../ds/Button/Button";
 import Card from "../ds/Card/Card";
+import RoleOptionCard from "./RoleOptionCard";
+import { ROLE_OPTIONS } from "./roleOptions";
 
 type Props = {
   readonly roomId: string;
@@ -33,81 +35,16 @@ export default function RoleSelectionForm({ roomId, onJoin, onCancel }: Props) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-3">
-            <label className="animation-delay-200 block animate-fade-in-scale">
-              <input
-                type="radio"
-                name="role"
-                value={UserRole.PARTICIPANT}
-                checked={selectedRole === UserRole.PARTICIPANT}
-                onChange={(e) => setSelectedRole(e.target.value as UserRole)}
-                className="sr-only"
-                data-testid="role-participant-radio"
+          <div className="space-y-3 text-left">
+            {ROLE_OPTIONS.map((opt) => (
+              <RoleOptionCard
+                key={opt.role}
+                option={opt}
+                selected={selectedRole === opt.role}
+                onSelect={() => setSelectedRole(opt.role)}
+                testid={`role-${opt.role}-option`}
               />
-              <div
-                className={`cursor-pointer rounded-lg border p-4 transition-all ${
-                  selectedRole === UserRole.PARTICIPANT
-                    ? "border-blue-500 bg-blue-500/10 text-white"
-                    : "border-gray-600 bg-gray-800/40 text-gray-300 hover:border-gray-500 hover:bg-gray-800/60"
-                }`}
-                data-testid="role-participant-option"
-              >
-                <div className="mb-1 font-medium">Participant</div>
-                <div className="text-gray-400 text-sm">
-                  Vote in planning sessions and see results
-                </div>
-              </div>
-            </label>
-
-            <label className="animation-delay-300 block animate-fade-in-scale">
-              <input
-                type="radio"
-                name="role"
-                value={UserRole.VISITOR}
-                checked={selectedRole === UserRole.VISITOR}
-                onChange={(e) => setSelectedRole(e.target.value as UserRole)}
-                className="sr-only"
-                data-testid="role-visitor-radio"
-              />
-              <div
-                className={`cursor-pointer rounded-lg border p-4 transition-all ${
-                  selectedRole === UserRole.VISITOR
-                    ? "border-purple-500 bg-purple-500/10 text-white"
-                    : "border-gray-600 bg-gray-800/40 text-gray-300 hover:border-gray-500 hover:bg-gray-800/60"
-                }`}
-                data-testid="role-visitor-option"
-              >
-                <div className="mb-1 font-medium">Visitor</div>
-                <div className="text-gray-400 text-sm">
-                  Observe the session without voting
-                </div>
-              </div>
-            </label>
-
-            <label className="animation-delay-350 block animate-fade-in-scale">
-              <input
-                type="radio"
-                name="role"
-                value={UserRole.FACILITATOR}
-                checked={selectedRole === UserRole.FACILITATOR}
-                onChange={(e) => setSelectedRole(e.target.value as UserRole)}
-                className="sr-only"
-                data-testid="role-facilitator-radio"
-              />
-              <div
-                className={`cursor-pointer rounded-lg border p-4 transition-all ${
-                  selectedRole === UserRole.FACILITATOR
-                    ? "border-amber-500 bg-amber-500/10 text-white"
-                    : "border-gray-600 bg-gray-800/40 text-gray-300 hover:border-gray-500 hover:bg-gray-800/60"
-                }`}
-                data-testid="role-facilitator-option"
-              >
-                <div className="mb-1 font-medium">Facilitator</div>
-                <div className="text-gray-400 text-sm">
-                  Manage the session (reveal and start rounds) without voting
-                </div>
-              </div>
-            </label>
+            ))}
           </div>
 
           <div className="animation-delay-400 flex animate-fade-in-down flex-col gap-3 sm:flex-row sm:justify-center">
