@@ -1,52 +1,42 @@
 # Scrum Poker ACL System Documentation
 
-## 🏗️ **Architecture Overview**
+Role-Based Access Control (RBAC) for the Scrum Poker app. The permission model lives in `packages/shared` so the server and frontend share one source of truth; the frontend adds a thin UI helper layer.
 
-The ACL (Access Control List) system implements Role-Based Access Control (RBAC) with clear separation between business logic and UI concerns.
-
-### **File Structure**
+## File Structure
 
 ```
 packages/shared/src/
-├── permissions.ts           # Core RBAC business logic
-└── index.ts                # Shared package exports
+├── permissions.ts          # Roles, resources, actions, matrix, and check functions
+└── types.ts                # UserRole definition
 
 apps/frontend/src/utils/
-└── ui-permissions.ts        # Minimal UI utilities (2 functions)
+└── ui-permissions.ts       # UI helpers (shouldShowVotingControls, shouldShowSessionControls)
 ```
 
-## 🎯 **RBAC Core Elements**
+## Core Elements
 
-### **1. Roles**
+### Roles
+
+There are two roles (`packages/shared/src/types.ts`):
 
 ```typescript
-type UserRole = "owner" | "participant" | "visitor";
+type UserRole = "participant" | "visitor";
 ```
 
-### **2. Resources**
+There is **no "owner" role**. Room ownership is tracked separately as `RoomState.creatorId` (the userId of the room creator), not through the permission matrix.
+
+### Resources and Actions
 
 ```typescript
 type Resource = "room" | "vote" | "round" | "participant" | "session";
-```
 
-### **3. Actions**
-
-```typescript
 type Action =
-  | "create"
-  | "read"
-  | "update"
-  | "delete"
-  | "join"
-  | "leave"
-  | "cast"
-  | "reveal"
-  | "clear"
-  | "kick"
-  | "control";
+  | "create" | "read" | "update" | "delete"
+  | "join" | "leave" | "cast" | "reveal"
+  | "clear" | "kick" | "control";
 ```
 
-### **4. Permissions (Resource:Action)**
+`Resource` and `Action` are broad type unions; the actually-used combinations are constrained by `ValidPermission`:
 
 ```typescript
 type ValidPermission =
@@ -62,121 +52,77 @@ type ValidPermission =
   | "round:clear"
   | "round:read"
   | "participant:read"
-  | "participant:update"
-  | "participant:kick"
   | "session:control";
 ```
 
-## 📊 **Permission Matrix**
+## Permission Matrix
 
-| Permission                 | Owner | Participant | Visitor | Context Rules            |
-| -------------------------- | ----- | ----------- | ------- | ------------------------ |
-| **Room Management**        |
-| `room:create`              | ✅    | ✅          | ✅      | Anyone can create rooms  |
-| `room:read`                | ✅    | ✅          | ✅      | View room information    |
-| `room:update`              | ✅    | ❌          | ❌      | Modify room settings     |
-| `room:delete`              | ✅    | ❌          | ❌      | Only room owner          |
-| `room:join`                | ✅    | ✅          | ✅      | Anyone can join          |
-| `room:leave`               | ✅    | ✅          | ✅      | Anyone can leave         |
-| **Voting**                 |
-| `vote:cast`                | ✅    | ✅          | ❌      | Active participants only |
-| `vote:read`                | ✅    | ✅          | ✅      | View voting results      |
-| **Round Control**          |
-| `round:reveal`             | ✅    | ✅          | ❌      | Show voting results      |
-| `round:clear`              | ✅    | ✅          | ❌      | Start new round          |
-| `round:read`               | ✅    | ✅          | ✅      | View round information   |
-| **Participant Management** |
-| `participant:read`         | ✅    | ✅          | ✅      | View participant list    |
-| `participant:update`       | ✅    | ✅          | ✅      | Update own profile       |
-| `participant:kick`         | ✅    | ❌          | ❌      | Only room owner          |
-| **Session Control**        |
-| `session:control`          | ✅    | ✅          | ❌      | Control session flow     |
+Values below are taken directly from `PERMISSION_MATRIX` in `permissions.ts`.
 
-## 🔧 **Core API Reference**
+| Permission        | Participant | Visitor | Notes                          |
+| ----------------- | ----------- | ------- | ------------------------------ |
+| `room:create`     | ✅          | ✅      | Anyone can create a room       |
+| `room:read`       | ✅          | ✅      | View room information          |
+| `room:update`     | ❌          | ❌      | Not granted to any role        |
+| `room:delete`     | ✅          | ❌      | Participants only              |
+| `room:join`       | ✅          | ✅      | Anyone can join                |
+| `room:leave`      | ✅          | ✅      | Anyone can leave               |
+| `vote:cast`       | ✅          | ❌      | Visitors cannot vote           |
+| `vote:read`       | ✅          | ✅      | View votes                     |
+| `round:reveal`    | ✅          | ❌      | Show voting results            |
+| `round:clear`     | ✅          | ❌      | Start a new round              |
+| `round:read`      | ✅          | ✅      | View round information         |
+| `participant:read`| ✅          | ✅      | View participant list          |
+| `session:control` | ✅          | ❌      | Control session flow           |
 
-### **Basic Permission Checking**
+## API Reference
 
 ```typescript
-// Check if role has permission
+// Base check against the matrix
 hasPermission(role: UserRole, permission: ValidPermission): boolean
 
-// Business logic helpers
-canVote(role: UserRole): boolean
-canControlSession(role: UserRole): boolean
-canViewResults(role: UserRole): boolean
-```
+// Business-logic helpers (all thin wrappers over hasPermission)
+canVote(role: UserRole): boolean            // vote:cast
+canControlSession(role: UserRole): boolean  // session:control
+canViewResults(role: UserRole): boolean     // round:read
 
-### **Context-Aware Validation**
-
-```typescript
-// Advanced permission with context
-canPerformAction(permission: ValidPermission, context: PermissionContext): boolean
-
-interface PermissionContext {
-  userRole: UserRole;
-  userId: string;
-  roomOwnerId?: string;
-  isRoundRevealed?: boolean;
-  hasVotes?: boolean;
-}
-```
-
-### **Permission Enforcement**
-
-```typescript
-// Validate and throw error if denied
-requirePermission(permission: ValidPermission, context: PermissionContext): void
-
-// Custom error class
-class PermissionError extends Error {
-  constructor(permission: ValidPermission, userRole: UserRole, message?: string)
-}
-```
-
-### **Role Management**
-
-```typescript
-// Get all permissions for a role
+// Get every allowed permission for a role
 getRolePermissions(role: UserRole): ValidPermission[]
 
-// Role hierarchy (1=lowest, 3=highest)
-ROLE_HIERARCHY: Record<UserRole, number> = {
-  visitor: 1,
-  participant: 2,
-  owner: 3
-}
-
-// Check privilege levels
+// Role hierarchy (higher number = more privilege)
+ROLE_HIERARCHY: Record<UserRole, number> = { visitor: 1, participant: 2 }
 hasHigherPrivilege(role1: UserRole, role2: UserRole): boolean
 ```
 
-## 💡 **Usage Examples**
-
-### **Server-Side (Business Logic)**
+### Context-aware validation
 
 ```typescript
-// Room management
-import { canPerformAction, requirePermission } from "@scrmpkr/shared";
-
-// Validate room deletion
-const context = { userRole: "owner", userId: "123", roomOwnerId: "123" };
-if (canPerformAction("room:delete", context)) {
-  // Allow deletion
+interface PermissionContext {
+  userRole: UserRole;
+  userId: string;
+  isRoundRevealed?: boolean;
+  hasVotes?: boolean;
 }
 
-// Enforce permission with error
-try {
-  requirePermission("participant:kick", context);
-  // Proceed with action
-} catch (PermissionError) {
-  // Handle denied permission
-}
+canPerformAction(permission: ValidPermission, context: PermissionContext): boolean
+requirePermission(permission: ValidPermission, context: PermissionContext): void  // throws PermissionError
 ```
 
-### **Frontend (UI Logic)**
+Note: `canPerformAction` currently only performs the base matrix check via `hasPermission`. The extra `PermissionContext` fields (`isRoundRevealed`, `hasVotes`) are carried for future context-specific rules but are not yet used to grant or deny anything. If you add context rules, put them in `canPerformAction`.
+
+## Usage
+
+### Server-side enforcement
 
 ```typescript
-// Component conditional rendering
+import { requirePermission } from "@scrmpkr/shared";
+
+requirePermission("vote:cast", { userRole: role, userId }); // throws if denied
+```
+
+### Frontend conditional rendering
+
+```typescript
 import {
   shouldShowVotingControls,
   shouldShowSessionControls,
@@ -184,130 +130,11 @@ import {
 
 const canVote = shouldShowVotingControls(currentUser.role);
 const canControl = shouldShowSessionControls(currentUser.role);
-
-return (
-  <>
-    {canVote && <VotingDeck />}
-    {canControl && <SessionControls />}
-  </>
-);
 ```
 
-## 🔒 **Context-Based Rules**
+## Extending the system
 
-### **Room Deletion**
-
-- **Permission**: `room:delete`
-- **Base Rule**: Only owners have this permission
-- **Context Rule**: User must be the actual room owner (`userId === roomOwnerId`)
-
-### **Participant Kicking**
-
-- **Permission**: `participant:kick`
-- **Base Rule**: Only owners have this permission
-- **Context Rule**: User must be the actual room owner (`userId === roomOwnerId`)
-
-### **Standard Permissions**
-
-All other permissions use base permission matrix without additional context validation.
-
-## 🧪 **Testing Strategy**
-
-### **Permission Matrix Tests**
-
-- Validates all role-permission combinations
-- Ensures matrix completeness
-- Tests permission helper functions
-
-### **Context-Aware Tests**
-
-- Room deletion with ownership validation
-- Participant kicking with ownership validation
-- Basic permission scenarios
-
-### **Integration Tests**
-
-- Server-side permission enforcement in room operations
-- Frontend conditional rendering
-- End-to-end permission flows
-
-## 🚀 **Benefits**
-
-### **Security**
-
-- **Server Enforcement**: All actions validated on backend
-- **Type Safety**: TypeScript prevents permission errors
-- **Context Validation**: Additional checks for sensitive operations
-
-### **Maintainability**
-
-- **Single Source**: One permission matrix for all validations
-- **Clear Structure**: Resource:Action format is self-documenting
-- **Separation**: Business logic in shared, UI logic in frontend
-
-### **Scalability**
-
-- **Easy Extension**: Add new roles, resources, or actions
-- **Consistent**: Same permission system across all features
-- **Flexible**: Context rules handle complex scenarios
-
-## 📈 **Adding New Permissions**
-
-### **1. Add New Resource**
-
-```typescript
-type Resource =
-  | "room"
-  | "vote"
-  | "round"
-  | "participant"
-  | "session"
-  | "message";
-```
-
-### **2. Add New Action**
-
-```typescript
-type Action = "create" | "read" | "update" | "delete" | "send" | /* ... */;
-```
-
-### **3. Update Permission Matrix**
-
-```typescript
-export const PERMISSION_MATRIX = {
-  owner: {
-    // ... existing permissions
-    "message:send": true,
-    "message:delete": true,
-  },
-  participant: {
-    // ... existing permissions
-    "message:send": true,
-    "message:delete": false,
-  },
-  visitor: {
-    // ... existing permissions
-    "message:send": false,
-    "message:delete": false,
-  },
-};
-```
-
-### **4. Add Context Rules (if needed)**
-
-```typescript
-export function canPerformAction(
-  permission: ValidPermission,
-  context: PermissionContext
-) {
-  // ... existing logic
-  switch (permission) {
-    case "message:delete":
-      // Only allow deleting own messages
-      return context.userId === context.messageAuthorId;
-    // ...
-  }
-}
-```
-
-The ACL system provides **enterprise-grade access control** with **clear structure**, **type safety**, and **easy extensibility** for future growth! 🎯
+1. Add the new pairing to the `ValidPermission` union in `permissions.ts`.
+2. Set its value for both roles in `PERMISSION_MATRIX` (the matrix type requires every role to define every `ValidPermission`, so this is enforced by the compiler).
+3. If the permission needs more than a role check, add the rule in `canPerformAction` using `PermissionContext`.
+4. Add a UI helper in `ui-permissions.ts` if the frontend needs to gate rendering on it.
