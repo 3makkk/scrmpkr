@@ -164,37 +164,72 @@ export default function AccountIndicator() {
                   role: UserRole.PARTICIPANT,
                   title: "Participant",
                   desc: "Vote in planning sessions and see results",
+                  icon: "🗳️",
+                  current: "border-blue-500 bg-blue-500/10",
+                  hover: "hover:border-blue-500/60 hover:bg-blue-500/5",
+                  ring: "bg-blue-500/15 text-blue-300",
                   testid: "role-option-participant",
                 },
                 {
                   role: UserRole.FACILITATOR,
                   title: "Facilitator",
                   desc: "Manage the session (reveal and start rounds) without voting",
+                  icon: "🎬",
+                  current: "border-amber-500 bg-amber-500/10",
+                  hover: "hover:border-amber-500/60 hover:bg-amber-500/5",
+                  ring: "bg-amber-500/15 text-amber-300",
                   testid: "role-option-facilitator",
                 },
                 {
                   role: UserRole.VISITOR,
                   title: "Visitor",
                   desc: "Observe the session without voting",
+                  icon: "👁",
+                  current: "border-purple-500 bg-purple-500/10",
+                  hover: "hover:border-purple-500/60 hover:bg-purple-500/5",
+                  ring: "bg-purple-500/15 text-purple-300",
                   testid: "role-option-visitor",
                 },
               ] as const
-            ).map((opt) => (
-              <button
-                key={opt.role}
-                type="button"
-                onClick={() => handleRoleSelected(opt.role)}
-                data-testid={opt.testid}
-                className={`w-full rounded-lg border p-4 text-left transition-all ${
-                  userRole === opt.role
-                    ? "border-blue-500 bg-blue-500/10 text-white"
-                    : "border-gray-600 bg-gray-800/40 text-gray-300 hover:border-gray-500 hover:bg-gray-800/60"
-                }`}
-              >
-                <div className="mb-1 font-medium">{opt.title}</div>
-                <div className="text-gray-400 text-sm">{opt.desc}</div>
-              </button>
-            ))}
+            ).map((opt) => {
+              const isCurrent = userRole === opt.role;
+              return (
+                <button
+                  key={opt.role}
+                  type="button"
+                  onClick={() => handleRoleSelected(opt.role)}
+                  disabled={isCurrent}
+                  aria-current={isCurrent}
+                  data-testid={opt.testid}
+                  className={`flex w-full items-center gap-3 rounded-lg border p-4 text-left transition-all ${
+                    isCurrent
+                      ? `${opt.current} cursor-default text-white`
+                      : `border-gray-600 bg-gray-800/40 text-gray-300 ${opt.hover}`
+                  }`}
+                >
+                  <span
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg ${opt.ring}`}
+                    aria-hidden="true"
+                  >
+                    {opt.icon}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{opt.title}</span>
+                      {isCurrent && (
+                        <span
+                          className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-gray-200 uppercase tracking-wide"
+                          data-testid={`${opt.testid}-current`}
+                        >
+                          Current
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-gray-400 text-sm">{opt.desc}</div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </Card>
       </Modal>
