@@ -1,180 +1,65 @@
-# Design System Motion Components
+# Design System Components
 
-This document describes the motion-enabled Design System components that have been enhanced with Framer Motion animations.
+The design system (`ds`) is a set of composable, presentational React components. Two rules govern all of them (see `AGENTS.md` for the full contract):
 
-## Overview
+- **Props pass-through**: every component types its props with `UIProps<Tag, Extra>` from `uiTypes.ts`, so it accepts all attributes of the underlying HTML element (`id`, `onClick`, `data-*`, `aria-*`, `className`, …) plus a few simple extras.
+- **Inline Tailwind only**: all styling uses inline Tailwind utility classes. There are no component-specific CSS classes and no `@apply`.
 
-All DS components now support motion capabilities through a unified API. This ensures consistent animations across the application while maintaining flexibility for custom motion behaviors.
+## Animations
 
-## Motion-Enabled Components
+Animation is **pure Tailwind CSS**, not a JavaScript animation library. There is no Framer Motion dependency and no motion-prop API (`animate`, `whileHover`, `enableMotion`, etc. do not exist).
 
-### Core Components
+Animations are defined once in `apps/frontend/src/index.css` as Tailwind v4 theme variables (`--animate-*`) backed by `@keyframes`, and consumed as ordinary `animate-*` utility classes:
 
-1. **Button** - Enhanced with hover, tap, and configurable motion states
-2. **Card** - Default slide-in animation with customizable motion props
-3. **PokerCard** - Interactive card animations with selection states
-4. **Badge** - Scale-in animation with motion support
+| Utility class | Effect |
+| --- | --- |
+| `animate-fade-in-scale` | Fade in with a slight scale |
+| `animate-fade-in-down` | Fade in while sliding down |
+| `animate-bounce-in` | Scale in with a bounce |
+| `animate-slide-in-left` / `animate-slide-in-right` | Slide in horizontally |
+| `animate-rotate-in` | Rotate in |
+| `animate-float` | Continuous floating loop |
+| `animate-glow-pulse` | Continuous glow pulse |
+| `animate-shimmer` | Continuous shimmer loop |
 
-### Motion Props Interface
+Hover and press feedback is applied inline per component with Tailwind transition/transform utilities — for example `Button` uses `transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99]`, and `PokerCard` combines `transition-all` with `hover:-translate-y-1 hover:scale-105` and a lifted/selected state.
 
-All motion-enabled components support these optional props:
+### `Motion/Motion.tsx` helpers (optional)
 
-```typescript
-interface MotionProps {
-  animate?: Target;
-  initial?: Target;
-  exit?: Target;
-  transition?: Transition;
-  variants?: Variants;
-  whileHover?: Target;
-  whileTap?: Target;
-  whileFocus?: Target;
-  whileInView?: Target;
-  layout?: boolean | "position" | "size";
-  layoutId?: string;
-  enableMotion?: boolean; // Disable motion if needed
-}
-```
+`Motion.tsx` exports named class-name bundles so you can reuse the animation vocabulary without memorising the utility names:
 
-## Motion Variants Library
+- `animationClasses` — maps semantic names (`fadeIn`, `slideInFromBottom`, `scaleIn`, `float`, `glowPulse`, …) to the `animate-*` classes above.
+- `interactionClasses` — reusable hover/press bundles (`cardHover`, `cardActive`, `buttonHover`, `buttonActive`, `scaleOnHover`, `liftOnHover`).
+- `staggerDelay(index, baseDelay = 30)` — returns `{ className: "animation-delay-<n>" }` for staggering a list. The `animation-delay-*` utility is defined in `index.css`.
+- `motionVariants` / `motionInteractions` — legacy aliases kept for backwards compatibility; they are plain class-name maps, not animation-object variants.
 
-### Available Variants (`motionVariants`)
+These helpers are available but currently not used by the DS components themselves (each component inlines its own classes). Reach for them when you want consistent animation names across several call sites; otherwise inline `animate-*` classes directly.
 
-- `fadeIn` - Simple opacity and scale fade-in
-- `slideInFromBottom` - Slide up with scale
-- `slideInFromTop` - Slide down with scale
-- `slideInFromLeft` - Slide right with scale
-- `slideInFromRight` - Slide left with scale
-- `scaleIn` - Scale up with back easing
-- `staggerContainer` - Container for staggered children
-- `staggerItem` - Individual staggered item
+## Components
 
-### Interaction Variants (`motionInteractions`)
+`ds/` contains: `Badge`, `BarVoteChart`, `Button`, `Card`, `Dropdown`, `Input`, `Modal`, `PokerCard`, `UserAvatar` (plus the `Motion` helpers above). Each lives in its own folder and is imported directly (there is no barrel `index.ts`). A few of the non-obvious ones:
 
-- `cardHover` - Standard card hover effect
-- `cardTap` - Standard card tap effect
-- `buttonHover` - Button hover animation
-- `buttonTap` - Button tap animation
+### PokerCard
 
-## Usage Examples
+An estimation card rendered as a `button`.
 
-### Basic Component with Motion
-
-```tsx
-import Card from "./ds/Card/Card";
-
-<Card
-  variants={motionVariants.slideInFromBottom}
-  initial="hidden"
-  animate="visible"
->
-  Content here
-</Card>;
-```
-
-### Custom Motion Props
-
-```tsx
-import Button from "./ds/Button/Button";
-
-<Button
-  whileHover={{ scale: 1.1 }}
-  whileTap={{ scale: 0.9 }}
-  transition={{ duration: 0.2 }}
->
-  Custom Button
-</Button>;
-```
-
-### Disabling Motion
-
-```tsx
-<Card enableMotion={false}>Static content without animations</Card>
-```
-
-### Staggered Animations
-
-```tsx
-import { motionVariants } from "./ds/Motion/Motion";
-
-<motion.div
-  variants={motionVariants.staggerContainer}
-  initial="hidden"
-  animate="visible"
->
-  {items.map((item) => (
-    <motion.div key={item.id} variants={motionVariants.staggerItem}>
-      <Card enableMotion={false}>{item.content}</Card>
-    </motion.div>
-  ))}
-</motion.div>;
-```
-
-## Migration Benefits
-
-1. **Consistency** - Unified motion language across all components
-2. **Performance** - Optimized animations using Framer Motion
-3. **Flexibility** - Easy to override default animations
-4. **Accessibility** - Respects `prefers-reduced-motion`
-5. **Developer Experience** - Type-safe motion props
-6. **Maintainability** - Centralized animation definitions
-
-## Best Practices
-
-1. Use the predefined `motionVariants` for consistency
-2. Set `enableMotion={false}` when handling motion at a parent level
-3. Prefer `variants` over inline animation objects for reusability
-4. Use `layoutId` for shared element transitions
-5. Consider performance impact of complex animations on low-end devices
-
-## Future Enhancements
-
-- Add more sophisticated transition patterns
-- Implement shared element transitions between pages
-- Add scroll-triggered animations
-- Create specialized motion components for data visualization
-- Add sound feedback integration for accessibility
-
-## New Design System Components
+**Extra props:** `value: number | "?"`, `isSelected?: boolean`, `onValueClick: (value) => void`. Sets `data-testid="vote-card-<value>"` for e2e tests.
 
 ### UserAvatar
 
-A reusable avatar component that displays user initials with role-based coloring.
+Displays user initials with role-based coloring.
 
-**Props:**
-
-- `name`: User's display name
-- `role`: User's role (affects color)
-- `size`: "sm" | "md" | "lg" (default: "md")
-- `showTooltip`: Whether to show name and role in tooltip (default: false)
-- `interactive`: Whether the avatar is clickable (default: false)
+**Extra props:** `name`, `role` (affects color), `size: "sm" | "md" | "lg"` (default `"md"`), `showTooltip` (default `false`), `interactive` (default `false`).
 
 ```tsx
-<UserAvatar
-  name="John Doe"
-  role={UserRole.PARTICIPANT}
-  size="md"
-  interactive
-  showTooltip
-/>
+<UserAvatar name="John Doe" role={UserRole.PARTICIPANT} size="md" interactive showTooltip />
 ```
 
 ### Dropdown
 
-A dropdown menu component with controlled or uncontrolled state management.
+Dropdown menu with controlled or uncontrolled open state. Closes on outside click and on Escape.
 
-**Props:**
-
-- `trigger`: React node that triggers the dropdown
-- `open`: Controlled open state (optional)
-- `onOpenChange`: Callback when open state changes
-- `placement`: "bottom-left" | "bottom-right" | "top-left" | "top-right" (default: "bottom-right")
-
-**Features:**
-
-- Click outside to close
-- Escape key to close
-- Smooth animations
+**Extra props:** `trigger` (node that opens the menu), `open?`, `onOpenChange?`, `placement: "bottom-left" | "bottom-right" | "top-left" | "top-right"` (default `"bottom-right"`).
 
 ```tsx
 <Dropdown trigger={<button>Open Menu</button>} placement="bottom-right">
@@ -184,21 +69,9 @@ A dropdown menu component with controlled or uncontrolled state management.
 
 ### Modal
 
-A modal overlay component for displaying content above the main interface.
+Overlay for content above the main interface. Manages focus; closes on backdrop click and Escape (both configurable).
 
-**Props:**
-
-- `open`: Whether the modal is open
-- `onClose`: Callback when the modal should close
-- `closeOnEscape`: Whether to close on Escape key (default: true)
-- `closeOnBackdrop`: Whether to close when clicking backdrop (default: true)
-
-**Features:**
-
-- Backdrop click to close (configurable)
-- Escape key to close (configurable)
-- Focus management
-- Smooth animations
+**Extra props:** `open`, `onClose`, `closeOnEscape` (default `true`), `closeOnBackdrop` (default `true`).
 
 ```tsx
 <Modal open={isOpen} onClose={() => setIsOpen(false)}>
@@ -208,7 +81,7 @@ A modal overlay component for displaying content above the main interface.
 
 ## Component Architecture Principles
 
-- **Composition over Configuration**: Components favor children composition over complex props
-- **Type Safety**: All components use `UIProps<Tag, Extra>` to ensure they support standard HTML attributes
-- **Accessibility**: Components include proper keyboard navigation and ARIA support where appropriate
-- **Consistent Styling**: All styling uses inline Tailwind classes (no custom CSS classes or @apply)
+- **Composition over configuration**: favor `children` composition over complex props, nested config objects, or render props.
+- **Type safety and pass-through**: every component uses `UIProps<Tag, Extra>` and spreads unhandled props onto the underlying element.
+- **Accessibility**: keyboard navigation and ARIA support where appropriate.
+- **Consistent styling**: inline Tailwind classes only — no custom CSS classes, no `@apply`.
