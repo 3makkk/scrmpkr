@@ -1,7 +1,7 @@
 # Frontend Dockerfile (build with pnpm, serve via nginx)
-FROM node:26-alpine AS base
+FROM node:26-alpine@sha256:e88a35be04478413b7c71c455cd9865de9b9360e1f43456be5951032d7ac1a66 AS base
 WORKDIR /app
-RUN corepack enable
+RUN npm install -g corepack@latest && corepack enable
 
 # Build-time env passed as ARG to embed in static assets
 # These should be set during docker build via --build-arg
@@ -12,6 +12,8 @@ ENV VITE_SOCKET_PATH=${VITE_SOCKET_PATH}
 
 # Install only manifest files first for better caching
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+# Patches referenced by the lockfile must be present before install
+COPY patches/ patches/
 COPY apps/frontend/package.json apps/frontend/
 COPY packages/shared/package.json packages/shared/
 
@@ -26,7 +28,7 @@ RUN --mount=type=secret,id=sentry_auth_token \
     SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token)" \
     pnpm --filter '{./apps/frontend}...' build
 
-FROM nginx:1.27-alpine AS runner
+FROM nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10 AS runner
 COPY apps/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/apps/frontend/dist /usr/share/nginx/html
 EXPOSE 80

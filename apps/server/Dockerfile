@@ -1,10 +1,12 @@
 # Server Dockerfile (multi-stage, pnpm workspaces)
-FROM node:26-alpine AS base
+FROM node:26-alpine@sha256:e88a35be04478413b7c71c455cd9865de9b9360e1f43456be5951032d7ac1a66 AS base
 WORKDIR /app
-RUN corepack enable
+RUN npm install -g corepack@latest && corepack enable
 
 # Install only manifest files first for better caching
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+# Patches referenced by the lockfile must be present before install
+COPY patches/ patches/
 COPY apps/server/package.json apps/server/
 COPY packages/shared/package.json packages/shared/
 
@@ -19,7 +21,7 @@ RUN pnpm --filter '{./apps/server}...' build
 # Create a pruned, production-only deploy directory for the server
 RUN pnpm --filter ./apps/server deploy --prod /app/server-deploy
 
-FROM node:26-alpine AS runner
+FROM node:26-alpine@sha256:e88a35be04478413b7c71c455cd9865de9b9360e1f43456be5951032d7ac1a66 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 # The deploy directory contains server package files and pruned node_modules
