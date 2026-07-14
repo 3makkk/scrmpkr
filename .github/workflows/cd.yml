@@ -1,12 +1,18 @@
 name: Deploy
 
 on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 2 * * *" # nightly deploy (see parked firewall/window follow-up)
   workflow_dispatch:
 
 jobs:
   build:
     name: Build and Push Images
     runs-on: ubuntu-latest
+    # Build on push to main and on manual dispatch; the nightly schedule only deploys.
+    if: github.event_name != 'schedule'
     permissions:
       contents: read
       packages: write
@@ -34,6 +40,7 @@ jobs:
           platforms: linux/amd64
           tags: |
             ghcr.io/${{ github.repository_owner }}/scrmpkr-server:${{ env.SHORT_SHA }}
+            ghcr.io/${{ github.repository_owner }}/scrmpkr-server:latest
       - name: Build + Push frontend
         uses: docker/build-push-action@v5
         with:
@@ -48,6 +55,7 @@ jobs:
             VITE_SOCKET_PATH=/api/socket.io/
           tags: |
             ghcr.io/${{ github.repository_owner }}/scrmpkr-frontend:${{ env.SHORT_SHA }}
+            ghcr.io/${{ github.repository_owner }}/scrmpkr-frontend:latest
 
   deploy:
     name: Deploy Stack (Swarm)
@@ -56,12 +64,16 @@ jobs:
       contents: read
       packages: read
     needs: build
-    if: vars.DEPLOY_ENABLED == 'true'
+    # Deploy on the nightly schedule and on manual dispatch (never on push).
+    # always() lets this run when `build` is skipped (schedule).
+    if: >
+      always() &&
+      github.event_name != 'push' &&
+      needs.build.result != 'failure' &&
+      vars.DEPLOY_ENABLED == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Set SHORT_SHA
-        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
@@ -80,5 +92,8 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker --context friedemann.dev login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Deploy stack using Docker context
+        # Deploy the floating :latest tag; stack deploy re-resolves it to the
+        # current digest (--resolve-image always is the default) and updates the
+        # service when it changed.
         run: |
-          IMAGE_TAG=${SHORT_SHA} docker --context friedemann.dev stack deploy -c docker-stack.yml scrmpkr --with-registry-auth
+          IMAGE_TAG=latest docker --context friedemann.dev stack deploy -c docker-stack.yml scrmpkr --with-registry-auth

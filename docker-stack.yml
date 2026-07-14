@@ -16,7 +16,7 @@ services:
       update_config:
         order: stop-first
         failure_action: rollback
-        monitor: 5s
+        monitor: 60s
       labels:
         - "metrics.port=9464"
         - "metrics.path=/metrics"
@@ -43,7 +43,7 @@ services:
       update_config:
         order: start-first
         failure_action: rollback
-        monitor: 5s
+        monitor: 60s
       labels:
         - "traefik.enable=true"
         - "traefik.swarm.network=proxy"
