@@ -1,6 +1,6 @@
 import { useRoom } from "../../../hooks/useRoom";
 import { useAuth } from "../../../AuthProvider";
-import { UserRole } from "@scrmpkr/shared";
+import { canVote } from "@scrmpkr/shared";
 import { shouldShowSessionControls } from "../../../utils/ui-permissions";
 import Button from "../../ds/Button/Button";
 
@@ -19,9 +19,9 @@ export default function StateAwareSessionControls() {
     ? shouldShowSessionControls(currentUser.role)
     : false;
 
-  // Filter active participants (exclude visitors) for counting
-  const activeParticipants = roomState.participants.filter(
-    (p) => p.role !== UserRole.VISITOR,
+  // Only voters (participant role) count toward the reveal denominator.
+  const activeParticipants = roomState.participants.filter((p) =>
+    canVote(p.role),
   );
   const votedActiveParticipants = activeParticipants.filter(
     (p) => p.hasVoted,

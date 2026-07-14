@@ -20,6 +20,8 @@ const UserInfoSection = forwardRef<HTMLDivElement, UserInfoSectionProps>(
           return "Participant";
         case UserRole.VISITOR:
           return "Visitor";
+        case UserRole.FACILITATOR:
+          return "Facilitator";
         default:
           return "Unknown Role";
       }

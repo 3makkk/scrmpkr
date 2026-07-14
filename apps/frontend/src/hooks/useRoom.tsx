@@ -14,6 +14,7 @@ import type {
   RoomState,
   UserRole,
 } from "@scrmpkr/shared";
+import { canVote } from "@scrmpkr/shared";
 
 type RoomAction =
   | { type: "RESET_ROOM" }
@@ -109,14 +110,11 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   const { roomState, error, selectedCard } = roomData;
 
   const isLoading = !roomState && !error;
-  const votedCount = roomState
-    ? roomState.participants.filter((participant) => participant.hasVoted)
-        .length
-    : 0;
-  const allVoted = roomState
-    ? roomState.participants.length > 0 &&
-      roomState.participants.every((participant) => participant.hasVoted)
-    : false;
+  const voters = roomState
+    ? roomState.participants.filter((participant) => canVote(participant.role))
+    : [];
+  const votedCount = voters.filter((participant) => participant.hasVoted).length;
+  const allVoted = voters.length > 0 && voters.every((p) => p.hasVoted);
 
   const joinRoom = useCallback(
     (roomId: string, account: { id: string; name: string }, role: UserRole) => {
