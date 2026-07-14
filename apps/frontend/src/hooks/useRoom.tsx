@@ -94,6 +94,7 @@ type RoomContextValue = {
   castVote: (value: number | "?") => void;
   revealVotes: () => void;
   clearVotes: () => void;
+  updateRole: (newRole: UserRole) => void;
 };
 
 const RoomContext = createContext<RoomContextValue | undefined>(undefined);
@@ -243,6 +244,16 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     }
   }, [currentRoomId]);
 
+  const updateRole = useCallback(
+    (newRole: UserRole) => {
+      const socket = socketRef.current;
+      if (socket && currentRoomId) {
+        socket.emit("user:updateRole", { roomId: currentRoomId, newRole });
+      }
+    },
+    [currentRoomId],
+  );
+
   const contextValue: RoomContextValue = {
     roomState,
     error,
@@ -256,6 +267,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     castVote,
     revealVotes,
     clearVotes,
+    updateRole,
   };
 
   return (
