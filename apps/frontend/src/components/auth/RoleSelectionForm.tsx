@@ -83,6 +83,31 @@ export default function RoleSelectionForm({ roomId, onJoin, onCancel }: Props) {
                 </div>
               </div>
             </label>
+
+            <label className="animation-delay-350 block animate-fade-in-scale">
+              <input
+                type="radio"
+                name="role"
+                value={UserRole.FACILITATOR}
+                checked={selectedRole === UserRole.FACILITATOR}
+                onChange={(e) => setSelectedRole(e.target.value as UserRole)}
+                className="sr-only"
+                data-testid="role-facilitator-radio"
+              />
+              <div
+                className={`cursor-pointer rounded-lg border p-4 transition-all ${
+                  selectedRole === UserRole.FACILITATOR
+                    ? "border-amber-500 bg-amber-500/10 text-white"
+                    : "border-gray-600 bg-gray-800/40 text-gray-300 hover:border-gray-500 hover:bg-gray-800/60"
+                }`}
+                data-testid="role-facilitator-option"
+              >
+                <div className="mb-1 font-medium">Facilitator</div>
+                <div className="text-gray-400 text-sm">
+                  Manage the session (reveal and start rounds) without voting
+                </div>
+              </div>
+            </label>
           </div>
 
           <div className="animation-delay-400 flex animate-fade-in-down flex-col gap-3 sm:flex-row sm:justify-center">
