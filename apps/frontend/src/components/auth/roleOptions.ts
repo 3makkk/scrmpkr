@@ -20,7 +20,7 @@ export const ROLE_OPTIONS: readonly RoleOption[] = [
   {
     role: UserRole.PARTICIPANT,
     title: "Participant",
-    desc: "Vote in planning sessions and see results",
+    desc: "Vote, reveal results, and start new rounds",
     icon: "🗳️",
     active: "border-blue-500 bg-blue-500/10",
     hover: "hover:border-blue-500/60 hover:bg-blue-500/5",
@@ -29,7 +29,7 @@ export const ROLE_OPTIONS: readonly RoleOption[] = [
   {
     role: UserRole.FACILITATOR,
     title: "Facilitator",
-    desc: "Manage the session (reveal and start rounds) without voting",
+    desc: "Reveal results and start new rounds, but don't vote",
     icon: "🎬",
     active: "border-amber-500 bg-amber-500/10",
     hover: "hover:border-amber-500/60 hover:bg-amber-500/5",
@@ -38,7 +38,7 @@ export const ROLE_OPTIONS: readonly RoleOption[] = [
   {
     role: UserRole.VISITOR,
     title: "Visitor",
-    desc: "Observe the session without voting",
+    desc: "Watch only — no voting or session controls",
     icon: "👁",
     active: "border-purple-500 bg-purple-500/10",
     hover: "hover:border-purple-500/60 hover:bg-purple-500/5",
