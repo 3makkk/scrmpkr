@@ -1,8 +1,8 @@
 diff --git a/index.d.ts b/index.d.ts
-index a84254fa5445049ac1e15237f3e824ffe1a73c2f..aae772ff03cd575f693aae8028a971b569b5fb14 100644
+index c1f2b70fdfffd761070791068bc1a550f8a53d89..691facbc4a71d1cc91b204b51ade2f733a634d05 100644
 --- a/index.d.ts
 +++ b/index.d.ts
-@@ -86,7 +86,7 @@ declare class ThreadStream extends EventEmitter {
+@@ -93,7 +93,7 @@ declare class ThreadStream extends EventEmitter {
     * @param transferList an optional list of transferable objects to be transferred to the Worker context.
     * @returns {boolean} true if the event had listeners, false otherwise.
     */

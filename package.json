@@ -20,7 +20,7 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "thread-stream@4.0.0": "patches/thread-stream@4.0.0.patch"
+      "thread-stream@4.2.0": "patches/thread-stream@4.2.0.patch"
     }
   }
 }
