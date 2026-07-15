@@ -18,7 +18,7 @@ jobs:
         image: [scrmpkr-server, scrmpkr-frontend]
     steps:
       - name: Prune old image versions
-        uses: snok/container-retention-policy@v3
+        uses: snok/container-retention-policy@v3.1.0
         with:
           account: ${{ github.repository_owner }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -26,4 +26,3 @@ jobs:
           cut-off: 2w
           keep-n-most-recent: 5
           image-tags: "!latest" # never delete the :latest tag
-          delete-untagged: true
