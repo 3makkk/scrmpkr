@@ -20,8 +20,8 @@ jobs:
       - name: Prune old image versions
         uses: snok/container-retention-policy@v3.1.0
         with:
-          account: ${{ github.repository_owner }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          account: user # personal account (not an org)
+          token: ${{ secrets.GHCR_CLEANUP_TOKEN }} # classic PAT with delete:packages scope
           image-names: ${{ matrix.image }}
           cut-off: 2w
           keep-n-most-recent: 5
