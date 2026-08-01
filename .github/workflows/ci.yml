@@ -40,7 +40,7 @@ jobs:
     name: Storybook Tests
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/playwright:v1.61.1-noble
+      image: mcr.microsoft.com/playwright:v1.62.0-noble
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
