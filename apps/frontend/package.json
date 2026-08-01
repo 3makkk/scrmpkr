@@ -17,7 +17,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@sentry/react": "^10.66.0",
+    "@sentry/react": "^10.68.0",
     "@sentry/vite-plugin": "^5.4.0",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
@@ -42,7 +42,7 @@
     "@vitest/coverage-v8": "^4.1.10",
     "babel-plugin-react-compiler": "^1.0.0",
     "jsdom": "^29.1.1",
-    "playwright": "^1.61.1",
+    "playwright": "^1.62.0",
     "postcss": "^8.5.20",
     "storybook": "^10.5.3",
     "tailwindcss": "^4.3.3",
