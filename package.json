@@ -20,6 +20,10 @@
     "@biomejs/biome": "^2.5.6"
   },
   "pnpm": {
+    "supportedArchitectures": {
+      "os": ["current", "linux"],
+      "libc": ["glibc", "musl"]
+    },
     "patchedDependencies": {
       "thread-stream@4.2.0": "patches/thread-stream@4.2.0.patch"
     }
