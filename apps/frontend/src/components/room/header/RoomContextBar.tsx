@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useRoom } from "../../../hooks/useRoom";
 import AccountIndicator from "../../auth/AccountIndicator";
 import Button from "../../ds/Button/Button";

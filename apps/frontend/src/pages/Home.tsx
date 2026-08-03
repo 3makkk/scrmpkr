@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import { useAuth } from "../AuthProvider";
-import { useNavigate } from "react-router-dom";
+import { Input } from "../components";
 import LoginForm from "../components/auth/LoginForm";
 import PageLayout from "../components/core/layout/PageLayout";
-import Card from "../components/poker/shared/Card";
 import Button from "../components/ds/Button/Button";
+import Card from "../components/poker/shared/Card";
 import { checkRoomExists } from "../socket";
-import { Input } from "../components";
 
 export default function Home() {
   const { account, login } = useAuth();
