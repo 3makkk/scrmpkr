@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import { AuthProvider } from "./AuthProvider";
 import { RoomProvider } from "./hooks/useRoom";
 import Home from "./pages/Home";

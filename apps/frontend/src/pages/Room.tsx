@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../AuthProvider";
-import { useRoom } from "../hooks/useRoom";
 import type { UserRole } from "@scrmpkr/shared";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import { useAuth } from "../AuthProvider";
 import LoginForm from "../components/auth/LoginForm";
 import RoleSelectionForm from "../components/auth/RoleSelectionForm";
+import ConfettiOverlay from "../components/core/effects/ConfettiOverlay";
 import LoadingSpinner from "../components/core/layout/LoadingSpinner";
 import PageLayout from "../components/core/layout/PageLayout";
-import RoomContextBar from "../components/room/header/RoomContextBar";
-import ContextualTeamStatus from "../components/room/status/ContextualTeamStatus";
 import PrimaryActionZone from "../components/poker/voting/PrimaryActionZone";
 import StateAwareSessionControls from "../components/room/controls/StateAwareSessionControls";
-import ConfettiOverlay from "../components/core/effects/ConfettiOverlay";
+import RoomContextBar from "../components/room/header/RoomContextBar";
+import ContextualTeamStatus from "../components/room/status/ContextualTeamStatus";
+import { useRoom } from "../hooks/useRoom";
 
 export default function Room() {
   const { roomId } = useParams();
