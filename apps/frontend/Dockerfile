@@ -28,7 +28,7 @@ RUN --mount=type=secret,id=sentry_auth_token \
     SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token)" \
     pnpm --filter '{./apps/frontend}...' build
 
-FROM nginx:1.31-alpine@sha256:db35bfc6b2951e7f8a72db5db120288c127ffaeeb4a6d4b95a26fead017d5913 AS runner
+FROM nginx:1.31-alpine@sha256:a9ae6f6d078d477e21323310498e5196cb2b7c0aedd9e07b7306612077227d7c AS runner
 COPY apps/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/apps/frontend/dist /usr/share/nginx/html
 EXPOSE 80
