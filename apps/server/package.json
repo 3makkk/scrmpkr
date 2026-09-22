@@ -24,7 +24,7 @@
     "@opentelemetry/semantic-conventions": "^1.43.0",
     "@scrmpkr/shared": "workspace:*",
     "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.1",
     "express": "^5.2.1",
     "pino": "^10.3.1",
     "socket.io": "^4.8.3"
@@ -41,7 +41,7 @@
     "tsx": "^4.23.13",
     "typescript": "^7.0.2",
     "vite": "^8.3.0",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.1"
   },
   "packageManager": "pnpm@9.15.5+sha1.cb1f6372ef64e2ba352f2f46325adead1c99ff8f"
 }
