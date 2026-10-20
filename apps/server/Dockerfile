@@ -1,5 +1,5 @@
 # Server Dockerfile (multi-stage, pnpm workspaces)
-FROM node:26-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS base
+FROM node:26-alpine@sha256:6f08a523443ddedf52941874c203475b0ad503e859ad70cb26ab8be9a517dbd5 AS base
 WORKDIR /app
 RUN npm install -g corepack@latest && corepack enable
 
@@ -21,7 +21,7 @@ RUN pnpm --filter '{./apps/server}...' build
 # Create a pruned, production-only deploy directory for the server
 RUN pnpm --filter ./apps/server deploy --prod /app/server-deploy
 
-FROM node:26-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS runner
+FROM node:26-alpine@sha256:6f08a523443ddedf52941874c203475b0ad503e859ad70cb26ab8be9a517dbd5 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 # The deploy directory contains server package files and pruned node_modules
