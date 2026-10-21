@@ -19,13 +19,18 @@ updates:
 
   # ── docker ──────────────────────────────────────────────────────────────────
   # Dockerfiles live under apps/, not the repo root. Daily so same-tag base
-  # rebuilds (digest changes) are detected within 24h.
+  # rebuilds (digest changes) are detected within 24h. Grouped so all image
+  # bumps across both Dockerfiles land in a single PR.
   - package-ecosystem: "docker"
     directories:
       - "/apps/server"
       - "/apps/frontend"
     schedule:
       interval: "daily"
+    groups:
+      docker-images:
+        patterns:
+          - "*"
 
   # ── npm ─────────────────────────────────────────────────────────────────────
   - package-ecosystem: "npm"
