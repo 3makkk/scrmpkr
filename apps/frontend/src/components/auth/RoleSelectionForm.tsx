@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { UserRole } from "@scrmpkr/shared";
+import { useState } from "react";
 import Button from "../ds/Button/Button";
 import Card from "../ds/Card/Card";
 import RoleOptionCard from "./RoleOptionCard";
@@ -25,11 +25,11 @@ export default function RoleSelectionForm({ roomId, onJoin, onCancel }: Props) {
     <div className="flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-md text-center">
         <div className="mb-8">
-          <h1 className="mb-4 font-light text-3xl text-white">Join Room</h1>
-          <p className="mb-2 text-gray-400 text-lg">
+          <h1 className="mb-4 text-3xl font-light text-white">Join Room</h1>
+          <p className="mb-2 text-lg text-gray-400">
             Room: <span className="font-medium text-white">{roomId}</span>
           </p>
-          <p className="text-gray-400 text-sm">
+          <p className="text-sm text-gray-400">
             Choose how you'd like to participate
           </p>
         </div>
@@ -47,7 +47,7 @@ export default function RoleSelectionForm({ roomId, onJoin, onCancel }: Props) {
             ))}
           </div>
 
-          <div className="animation-delay-400 flex animate-fade-in-down flex-col gap-3 sm:flex-row sm:justify-center">
+          <div className="animation-delay-400 animate-fade-in-down flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Button
               type="submit"
               className="sm:min-w-[120px]"

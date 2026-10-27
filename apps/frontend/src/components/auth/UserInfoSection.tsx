@@ -1,7 +1,7 @@
-import { forwardRef } from "react";
-import type { UIProps } from "../ds/uiTypes";
 import { UserRole } from "@scrmpkr/shared";
+import { forwardRef } from "react";
 import UserAvatar from "../ds/UserAvatar/UserAvatar";
+import type { UIProps } from "../ds/uiTypes";
 
 type UserInfoSectionProps = UIProps<
   "div",
@@ -36,7 +36,7 @@ const UserInfoSection = forwardRef<HTMLDivElement, UserInfoSectionProps>(
         <UserAvatar name={name} role={role} size="lg" />
         <div>
           <p className="font-medium text-white">{name}</p>
-          <p className="text-gray-400 text-sm">{getRoleDisplayText(role)}</p>
+          <p className="text-sm text-gray-400">{getRoleDisplayText(role)}</p>
         </div>
       </div>
     );

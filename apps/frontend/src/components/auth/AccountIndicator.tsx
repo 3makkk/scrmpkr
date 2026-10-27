@@ -1,15 +1,15 @@
+import { UserRole } from "@scrmpkr/shared";
 import { useState } from "react";
 import { useAuth } from "../../AuthProvider";
 import { useRoom } from "../../hooks/useRoom";
-import { UserRole } from "@scrmpkr/shared";
-import UsernameForm from "./UsernameForm";
+import Card from "../ds/Card/Card";
+import Dropdown from "../ds/Dropdown/Dropdown";
+import Modal from "../ds/Modal/Modal";
+import UserAvatar from "../ds/UserAvatar/UserAvatar";
 import RoleOptionCard from "./RoleOptionCard";
 import { ROLE_OPTIONS } from "./roleOptions";
 import UserInfoSection from "./UserInfoSection";
-import Card from "../ds/Card/Card";
-import Modal from "../ds/Modal/Modal";
-import Dropdown from "../ds/Dropdown/Dropdown";
-import UserAvatar from "../ds/UserAvatar/UserAvatar";
+import UsernameForm from "./UsernameForm";
 
 export default function AccountIndicator() {
   const { account, updateName } = useAuth();
@@ -80,7 +80,7 @@ export default function AccountIndicator() {
           <button
             type="button"
             onClick={onClick}
-            className={`focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 ${
+            className={`focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-none ${
               className || ""
             }`}
             data-testid="account-indicator"
@@ -107,7 +107,7 @@ export default function AccountIndicator() {
           <button
             type="button"
             onClick={handleChangeUsername}
-            className="w-full rounded-md px-3 py-2 text-left text-gray-300 text-sm transition-colors duration-150 hover:bg-gray-700 hover:text-white"
+            className="w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 transition-colors duration-150 hover:bg-gray-700 hover:text-white"
             data-testid="change-username-button"
           >
             Change username
@@ -116,7 +116,7 @@ export default function AccountIndicator() {
           <button
             type="button"
             onClick={handleChangeRole}
-            className="w-full rounded-md px-3 py-2 text-left text-gray-300 text-sm transition-colors duration-150 hover:bg-gray-700 hover:text-white"
+            className="w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 transition-colors duration-150 hover:bg-gray-700 hover:text-white"
             data-testid="change-role-button"
           >
             Change role
@@ -131,7 +131,7 @@ export default function AccountIndicator() {
       >
         <Card className="w-md">
           <div className="mb-6">
-            <h2 className="mb-2 font-medium text-2xl text-white">
+            <h2 className="mb-2 text-2xl font-medium text-white">
               Change Username
             </h2>
             <p className="text-gray-400">Choose a new name for this session</p>
@@ -154,7 +154,7 @@ export default function AccountIndicator() {
       >
         <Card className="w-md">
           <div className="mb-6">
-            <h2 className="mb-2 font-medium text-2xl text-white">
+            <h2 className="mb-2 text-2xl font-medium text-white">
               Change Role
             </h2>
             <p className="text-gray-400">

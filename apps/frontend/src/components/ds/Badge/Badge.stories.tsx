@@ -41,7 +41,7 @@ export const Sizes: Story = {
       </Badge>
       <Badge
         bgClass="bg-blue-600"
-        className="px-4 py-2 font-semibold text-base"
+        className="px-4 py-2 text-base font-semibold"
       >
         Large
       </Badge>

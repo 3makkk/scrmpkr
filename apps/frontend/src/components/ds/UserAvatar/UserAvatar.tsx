@@ -1,7 +1,7 @@
-import { forwardRef } from "react";
-import clsx from "clsx";
-import type { UIProps } from "../uiTypes";
 import { UserRole } from "@scrmpkr/shared";
+import clsx from "clsx";
+import { forwardRef } from "react";
+import type { UIProps } from "../uiTypes";
 
 type UserAvatarProps = UIProps<
   "div",
@@ -92,7 +92,7 @@ const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
           sizeClasses,
           colorClasses,
           interactive && [
-            "cursor-pointer focus:outline-none focus:ring-2",
+            "cursor-pointer focus:ring-2 focus:outline-none",
             "focus:ring-offset-2 focus:ring-offset-gray-800",
           ],
           "flex items-center justify-center rounded-full",

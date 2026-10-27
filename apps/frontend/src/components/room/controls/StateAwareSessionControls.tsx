@@ -1,6 +1,6 @@
-import { useRoom } from "../../../hooks/useRoom";
-import { useAuth } from "../../../AuthProvider";
 import { canVote } from "@scrmpkr/shared";
+import { useAuth } from "../../../AuthProvider";
+import { useRoom } from "../../../hooks/useRoom";
 import { shouldShowSessionControls } from "../../../utils/ui-permissions";
 import Button from "../../ds/Button/Button";
 
@@ -83,19 +83,19 @@ export default function StateAwareSessionControls() {
   }
 
   return (
-    <div className="sticky bottom-0 border-gray-700/50 border-t bg-gray-900/95 shadow-lg backdrop-blur-sm">
+    <div className="sticky bottom-0 border-t border-gray-700/50 bg-gray-900/95 shadow-lg backdrop-blur-sm">
       <div className="mx-auto max-w-4xl px-4 py-4">
         <div className="flex justify-center space-x-4">{availableActions}</div>
 
         {/* Show helpful context about what the action will do */}
         <div className="mt-2 text-center">
           {!canControl && (
-            <p className="text-gray-500 text-xs">
+            <p className="text-xs text-gray-500">
               Only participants and room owners can control voting sessions
             </p>
           )}
           {canControl && !isRoundRevealed && votedActiveParticipants > 0 && (
-            <p className="text-gray-400 text-xs" data-testid="voting-progress">
+            <p className="text-xs text-gray-400" data-testid="voting-progress">
               {allActiveVoted
                 ? "All participants have voted. Ready to see the results!"
                 : `${
@@ -105,7 +105,7 @@ export default function StateAwareSessionControls() {
           )}
 
           {canControl && isRoundRevealed && hasVotes && (
-            <p className="text-gray-400 text-xs">
+            <p className="text-xs text-gray-400">
               Ready to start a new voting round with the same participants.
             </p>
           )}

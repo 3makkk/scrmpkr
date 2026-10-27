@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { expect, userEvent, within } from "storybook/test";
-import Modal from "./Modal";
 import Button from "../Button/Button";
 import Card from "../Card/Card";
+import Modal from "./Modal";
 
 const meta: Meta<typeof Modal> = {
   title: "DS/Modal",
@@ -25,7 +25,7 @@ export const Basic: Story = {
 
         <Modal open={isOpen} onClose={() => setIsOpen(false)}>
           <Card className="w-md">
-            <h2 className="mb-4 font-medium text-2xl text-white">
+            <h2 className="mb-4 text-2xl font-medium text-white">
               Basic Modal
             </h2>
             <p className="mb-6 text-gray-400">
@@ -75,7 +75,7 @@ export const WithForm: Story = {
 
         <Modal open={isOpen} onClose={() => setIsOpen(false)}>
           <Card className="w-md">
-            <h2 className="mb-2 font-medium text-2xl text-white">
+            <h2 className="mb-2 text-2xl font-medium text-white">
               Edit Profile
             </h2>
             <p className="mb-6 text-gray-400">
@@ -83,14 +83,14 @@ export const WithForm: Story = {
             </p>
 
             <div className="mb-6">
-              <label className="mb-2 block font-medium text-gray-300 text-sm">
+              <label className="mb-2 block text-sm font-medium text-gray-300">
                 Display Name
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your name"
-                  className="mt-2 w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-2 w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </label>
             </div>
@@ -138,7 +138,7 @@ export const NoBackdropClose: Story = {
           closeOnBackdrop={false}
         >
           <Card className="w-md">
-            <h2 className="mb-4 font-medium text-2xl text-white">
+            <h2 className="mb-4 text-2xl font-medium text-white">
               Important Notice
             </h2>
             <p className="mb-6 text-gray-400">
@@ -194,7 +194,7 @@ export const NoEscapeClose: Story = {
           closeOnEscape={false}
         >
           <Card className="w-md">
-            <h2 className="mb-4 font-medium text-2xl text-white">
+            <h2 className="mb-4 text-2xl font-medium text-white">
               Critical Action
             </h2>
             <p className="mb-6 text-gray-400">
@@ -228,7 +228,7 @@ export const LargeContent: Story = {
 
         <Modal open={isOpen} onClose={() => setIsOpen(false)}>
           <Card className="max-h-96 w-xl overflow-y-auto">
-            <h2 className="mb-4 font-medium text-2xl text-white">
+            <h2 className="mb-4 text-2xl font-medium text-white">
               Terms of Service
             </h2>
             <div className="mb-6 space-y-4 text-gray-400">
@@ -293,7 +293,7 @@ export const MultipleModals: Story = {
 
         <Modal open={firstModal} onClose={() => setFirstModal(false)}>
           <Card className="w-md">
-            <h2 className="mb-4 font-medium text-2xl text-white">
+            <h2 className="mb-4 text-2xl font-medium text-white">
               First Modal
             </h2>
             <p className="mb-6 text-gray-400">
@@ -312,7 +312,7 @@ export const MultipleModals: Story = {
 
         <Modal open={secondModal} onClose={() => setSecondModal(false)}>
           <Card className="w-md">
-            <h2 className="mb-4 font-medium text-2xl text-white">
+            <h2 className="mb-4 text-2xl font-medium text-white">
               Second Modal
             </h2>
             <p className="mb-6 text-gray-400">
@@ -351,7 +351,7 @@ export const ConfirmationModal: Story = {
 
         <Modal open={isOpen} onClose={() => setIsOpen(false)}>
           <Card className="w-md">
-            <h2 className="mb-4 font-medium text-2xl text-white">
+            <h2 className="mb-4 text-2xl font-medium text-white">
               Confirm Deletion
             </h2>
             <p className="mb-6 text-gray-400">

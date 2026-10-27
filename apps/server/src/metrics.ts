@@ -1,10 +1,10 @@
-import { NodeSDK } from "@opentelemetry/sdk-node";
-import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
-import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
-import { PrometheusExporter } from "@opentelemetry/exporter-prometheus";
 import { metrics } from "@opentelemetry/api";
-import logger from "./logger.js";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+import { PrometheusExporter } from "@opentelemetry/exporter-prometheus";
 import { resourceFromAttributes } from "@opentelemetry/resources";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
+import logger from "./logger.js";
 
 // Configure Prometheus exporter - it automatically creates an HTTP server
 const prometheusExporter = new PrometheusExporter(
@@ -24,7 +24,7 @@ const sdk = new NodeSDK({
   resource: resourceFromAttributes({
     [ATTR_SERVICE_NAME]: "scrmpkr-server",
   }),
-  metricReader: prometheusExporter,
+  metricReaders: [prometheusExporter],
   instrumentations: [getNodeAutoInstrumentations()],
 });
 
