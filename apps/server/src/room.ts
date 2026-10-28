@@ -44,12 +44,21 @@ export default class Room {
   private currentRoundTracker: Round;
 
   addParticipant(user: User, role: UserRole = "participant"): void {
+    // A vote cast before leaving survives in the round tracker, so a user who
+    // rejoins (e.g. after a reconnect) must get their hasVoted flag back.
+    const existingVote = this.currentRoundTracker
+      .toState()
+      .votes.find((vote) => vote.id === user.id);
     this.participants.set(user.id, {
       id: user.id,
       name: user.name,
-      hasVoted: false,
+      hasVoted: existingVote !== undefined,
+      value: existingVote?.value,
       role: role,
     });
+    if (existingVote && existingVote.name !== user.name) {
+      this.currentRoundTracker.updateParticipantName(user.id, user.name);
+    }
   }
 
   removeParticipant(userId: string): boolean {

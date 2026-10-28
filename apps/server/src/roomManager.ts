@@ -121,19 +121,19 @@ export class RoomManager {
     }
   }
 
-  clearVotes(id: string, userId: string): void {
+  clearVotes(id: string, userId: string): boolean {
     const roomId = this.normalizeRoomId(id);
     const roomLogger = logger.child({ roomId, userId });
     const room = this.rooms.get(roomId);
     if (!room) {
       roomLogger.warn("Clear votes was rejected, room not found");
-      return;
+      return false;
     }
 
     // Check if user can clear votes (only owners)
     if (!room.canClearVotes(userId)) {
       roomLogger.warn("Clear votes was rejected, insufficient permissions");
-      return;
+      return false;
     }
 
     const votedCount = Array.from(room.participants.values()).filter(
@@ -143,6 +143,7 @@ export class RoomManager {
     room.resetForNewRound();
 
     roomLogger.info({ removedVotes: votedCount }, "Votes were cleared");
+    return true;
   }
 
   hasAnyVotes(id: string): boolean {
@@ -248,6 +249,12 @@ export class RoomManager {
       }
     }
     return null;
+  }
+
+  findUserRooms(userId: string): string[] {
+    return Array.from(this.rooms.entries())
+      .filter(([, room]) => room.participants.has(userId))
+      .map(([roomId]) => roomId);
   }
 
   updateParticipantName(

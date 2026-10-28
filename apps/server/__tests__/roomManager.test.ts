@@ -347,7 +347,39 @@ describe("RoomManager", () => {
 
     it("handles clearVotes for non-existent room", () => {
       // Should not throw
-      manager.clearVotes("nonexistent-room", "owner");
+      expect(manager.clearVotes("nonexistent-room", "owner")).toBe(false);
+    });
+
+    it("reports whether clearVotes actually cleared", () => {
+      manager.joinRoom(
+        "test-room",
+        { id: "visitor", name: "Visitor" },
+        "visitor",
+      );
+      manager.castVote("test-room", "user1", 3);
+
+      expect(manager.clearVotes("test-room", "visitor")).toBe(false);
+      expect(
+        manager.getState("test-room")?.currentRoundState.votes,
+      ).toHaveLength(1);
+      expect(manager.clearVotes("test-room", "owner")).toBe(true);
+    });
+
+    it("restores hasVoted when a voter rejoins in the same round", () => {
+      manager.castVote("test-room", "user1", 5);
+      manager.leaveRoom("test-room", "user1");
+      manager.joinRoom(
+        "test-room",
+        { id: "user1", name: "User 1 renamed" },
+        "participant",
+      );
+
+      const state = manager.getState("test-room");
+      const user = state?.participants.find((p) => p.id === "user1");
+      expect(user?.hasVoted).toBe(true);
+      expect(state?.currentRoundState.votes).toEqual([
+        { id: "user1", name: "User 1 renamed", value: 5 },
+      ]);
     });
 
     it("maintains round history across multiple rounds", () => {
@@ -871,6 +903,18 @@ describe("RoomManager", () => {
       expect(manager.updateParticipantRole("nope", "u1", "visitor")).toBe(
         false,
       );
+    });
+  });
+
+  describe("findUserRooms", () => {
+    it("returns every room the user is a participant in", () => {
+      manager.createRoom("room-a", { id: "u1", name: "U1" }, "participant");
+      manager.createRoom("room-b", { id: "u2", name: "U2" }, "participant");
+      manager.joinRoom("room-b", { id: "u1", name: "U1" }, "participant");
+
+      expect(manager.findUserRooms("u1").sort()).toEqual(["room-a", "room-b"]);
+      expect(manager.findUserRooms("u2")).toEqual(["room-b"]);
+      expect(manager.findUserRooms("nobody")).toEqual([]);
     });
   });
 });

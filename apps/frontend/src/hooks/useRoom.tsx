@@ -95,7 +95,10 @@ type RoomContextValue = {
   revealVotes: () => void;
   clearVotes: () => void;
   updateRole: (newRole: UserRole) => void;
+  updateName: (newName: string) => void;
 };
+
+const LEAVE_TIMEOUT_MS = 3000;
 
 const RoomContext = createContext<RoomContextValue | undefined>(undefined);
 
@@ -137,35 +140,58 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         cleanupRef.current = null;
       }
 
-      let joinTimeout: NodeJS.Timeout | null = null;
+      // The role to (re)join with. Starts as the role picked on entry and
+      // follows the server state, so a reconnect keeps a role changed later.
+      let joinRole = role;
+      let active = true;
+
+      const handleRoomState = (newState: RoomState) => {
+        // The socket may still receive state for a room it was in before.
+        if (newState.id !== normalizedRoomId) return;
+        const self = newState.participants.find(
+          (participant) => participant.id === account.id,
+        );
+        if (self) joinRole = self.role;
+        dispatch({ type: "SET_ROOM_STATE", payload: newState });
+      };
+      // Covers the whole join, including waiting for the socket to connect.
+      let joinTimeout: ReturnType<typeof setTimeout> | null = setTimeout(() => {
+        console.log("[useRoom] Join timeout");
+        dispatch({ type: "TIMEOUT_ERROR" });
+      }, 10000);
+
+      // Runs on the first connect and again after every reconnect: the server
+      // drops the user from the room when their socket disconnects, so without
+      // rejoining the client would keep a stale room and its actions would be
+      // rejected.
       const startJoin = () => {
-        joinTimeout = setTimeout(() => {
-          console.log("[useRoom] Join timeout");
-          dispatch({ type: "TIMEOUT_ERROR" });
-        }, 10000);
-        console.log("[useRoom] Emitting room:join", { normalizedRoomId, role });
+        console.log("[useRoom] Emitting room:join", {
+          normalizedRoomId,
+          role: joinRole,
+        });
         socket.emit(
           "room:join",
-          { roomId: normalizedRoomId, role },
+          { roomId: normalizedRoomId, role: joinRole },
           (response) => {
-            if (joinTimeout) clearTimeout(joinTimeout);
+            if (!active) return;
+            if (joinTimeout) {
+              clearTimeout(joinTimeout);
+              joinTimeout = null;
+            }
 
             console.log("[useRoom] room:join response:", response);
             if ("error" in response) {
               dispatch({ type: "SET_ERROR", payload: response.error });
             } else if ("state" in response) {
-              dispatch({ type: "SET_ROOM_STATE", payload: response.state });
+              handleRoomState(response.state);
             }
           },
         );
       };
 
+      socket.on("connect", startJoin);
       if (socket.connected) startJoin();
-      else socket.once("connect", startJoin);
 
-      const handleRoomState = (newState: RoomState) => {
-        dispatch({ type: "SET_ROOM_STATE", payload: newState });
-      };
       const handleVotesCleared = () => {
         dispatch({ type: "CLEAR_SELECTED_CARD" });
       };
@@ -186,6 +212,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       socket.on("force:disconnect", handleForceDisconnect);
 
       const cleanup = () => {
+        active = false;
         if (joinTimeout) clearTimeout(joinTimeout);
         socket.off("connect", startJoin);
         socket.off("room:state", handleRoomState);
@@ -205,9 +232,17 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     (callback?: () => void) => {
       const socket = socketRef.current;
       if (socket && currentRoomId) {
-        socket.emit("room:leave", { roomId: currentRoomId }, () => {
-          if (callback) callback();
-        });
+        if (socket.connected) {
+          // Don't block navigation on an ack that may never come.
+          socket
+            .timeout(LEAVE_TIMEOUT_MS)
+            .emit("room:leave", { roomId: currentRoomId }, () => {
+              if (callback) callback();
+            });
+        } else if (callback) {
+          // The server already removed us from the room on disconnect.
+          callback();
+        }
         setCurrentRoomId(null);
         dispatch({ type: "RESET_ROOM" });
         if (cleanupRef.current) {
@@ -224,7 +259,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   const castVote = useCallback(
     (value: number | "?") => {
       const socket = socketRef.current;
-      if (socket && currentRoomId) {
+      if (socket?.connected && currentRoomId) {
         dispatch({ type: "SET_SELECTED_CARD", payload: value });
         socket.emit("vote:cast", { roomId: currentRoomId, value });
       }
@@ -234,14 +269,14 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
 
   const revealVotes = useCallback(() => {
     const socket = socketRef.current;
-    if (socket && currentRoomId) {
+    if (socket?.connected && currentRoomId) {
       socket.emit("reveal:start", { roomId: currentRoomId });
     }
   }, [currentRoomId]);
 
   const clearVotes = useCallback(() => {
     const socket = socketRef.current;
-    if (socket && currentRoomId) {
+    if (socket?.connected && currentRoomId) {
       socket.emit("vote:clear", { roomId: currentRoomId });
     }
   }, [currentRoomId]);
@@ -249,8 +284,33 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   const updateRole = useCallback(
     (newRole: UserRole) => {
       const socket = socketRef.current;
-      if (socket && currentRoomId) {
+      if (socket?.connected && currentRoomId) {
         socket.emit("user:updateRole", { roomId: currentRoomId, newRole });
+      }
+    },
+    [currentRoomId],
+  );
+
+  const updateName = useCallback(
+    (newName: string) => {
+      const socket = socketRef.current;
+      if (!socket) return;
+      // Reconnects re-send the handshake auth; keep the name there current or
+      // the server would revert to the old name after a reconnect.
+      socket.auth = { ...(socket.auth as object), name: newName };
+      if (socket.connected && currentRoomId) {
+        socket.emit(
+          "user:updateName",
+          { roomId: currentRoomId, newName },
+          (response) => {
+            if (response && "error" in response) {
+              console.error(
+                "Failed to update username in room:",
+                response.error,
+              );
+            }
+          },
+        );
       }
     },
     [currentRoomId],
@@ -270,6 +330,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     revealVotes,
     clearVotes,
     updateRole,
+    updateName,
   };
 
   return (

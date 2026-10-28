@@ -13,7 +13,7 @@ import UsernameForm from "./UsernameForm";
 
 export default function AccountIndicator() {
   const { account, updateName } = useAuth();
-  const { currentRoomId, roomState, updateRole } = useRoom();
+  const { roomState, updateRole, updateName: updateRoomName } = useRoom();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [isEditingRole, setIsEditingRole] = useState(false);
@@ -28,32 +28,7 @@ export default function AccountIndicator() {
     updateName(newName);
     setIsEditingUsername(false);
 
-    // Update username in the current room via socket
-    if (currentRoomId && account) {
-      // Import socket inside the function to avoid circular dependencies
-      import("../../socket").then(({ getCurrentSocket }) => {
-        const currentSocket = getCurrentSocket();
-        if (currentSocket) {
-          currentSocket.emit(
-            "user:updateName",
-            {
-              roomId: currentRoomId,
-              newName,
-            },
-            (
-              response: { success: boolean } | { error: string } | undefined,
-            ) => {
-              if (response && "error" in response) {
-                console.error(
-                  "Failed to update username in room:",
-                  response.error,
-                );
-              }
-            },
-          );
-        }
-      });
-    }
+    updateRoomName(newName);
   };
 
   const handleChangeUsername = () => {

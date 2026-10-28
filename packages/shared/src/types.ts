@@ -51,10 +51,6 @@ export interface ClientToServerEvents {
     data: { roomId: string },
     cb: (resp: { exists: boolean }) => void,
   ) => void;
-  "room:create": (
-    data: { roomName: string },
-    cb: (resp: { roomId: string } | { error: string }) => void,
-  ) => void;
   "room:join": (
     data: { roomId: string; role?: UserRole },
     cb: (resp: { state: RoomState } | { error: string }) => void,

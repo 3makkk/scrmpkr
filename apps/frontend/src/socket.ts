@@ -4,7 +4,9 @@ import type {
 } from "@scrmpkr/shared";
 import { io, type Socket } from "socket.io-client";
 
-type CheckRoomExistsCallback = (exists: boolean) => void;
+type CheckRoomExistsCallback = (exists: boolean | null) => void;
+
+const ROOM_EXISTS_TIMEOUT_MS = 5000;
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | undefined;
 
@@ -28,8 +30,16 @@ export function getSocket(
     window.addEventListener("beforeunload", () => {
       socket?.disconnect();
     });
-  } else if (socket.disconnected) {
-    socket.connect();
+  } else {
+    // The handshake auth is captured when the socket is created and re-sent on
+    // every reconnect, so keep it in sync with the current account. A different
+    // user needs a fresh handshake.
+    const previous = socket.auth as Partial<AuthPayload>;
+    socket.auth = auth;
+    if (previous.userId !== auth.userId && socket.connected) {
+      socket.disconnect();
+    }
+    if (socket.disconnected) socket.connect();
   }
 
   return socket;
@@ -47,7 +57,11 @@ export function checkRoomExists(
   callback: CheckRoomExistsCallback,
 ): void {
   const sock = getSocket(auth);
-  sock.emit("room:exists", { roomId }, ({ exists }) => {
-    callback(exists);
-  });
+  // Without a timeout the callback never fires while the server is
+  // unreachable; report null so the caller can show an error instead.
+  sock
+    .timeout(ROOM_EXISTS_TIMEOUT_MS)
+    .emit("room:exists", { roomId }, (err, response) => {
+      callback(err ? null : response.exists);
+    });
 }

@@ -1,7 +1,11 @@
 import "dotenv/config";
 import "./metrics.js";
 import http from "node:http";
-import type { UserRole } from "@scrmpkr/shared";
+import {
+  type ClientToServerEvents,
+  type ServerToClientEvents,
+  UserRole,
+} from "@scrmpkr/shared";
 import cors from "cors";
 import express from "express";
 import { Server } from "socket.io";
@@ -14,38 +18,6 @@ app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
 const server = http.createServer(app);
-
-interface ServerToClientEvents {
-  "room:state": (state: RoomState) => void;
-  "votes:cleared": () => void;
-  "force:disconnect": (data: { reason: string }) => void;
-}
-
-interface ClientToServerEvents {
-  "room:exists": (
-    data: { roomId: string },
-    cb: (resp: { exists: boolean }) => void,
-  ) => void;
-  "room:join": (
-    data: { roomId: string; role: UserRole },
-    cb: (resp: { state: RoomState } | { error: string }) => void,
-  ) => void;
-  "room:leave": (
-    data: { roomId: string },
-    cb?: (resp: { success: boolean }) => void,
-  ) => void;
-  "user:updateName": (
-    data: { roomId: string; newName: string },
-    cb?: (resp: { success: boolean } | { error: string }) => void,
-  ) => void;
-  "user:updateRole": (
-    data: { roomId: string; newRole: UserRole },
-    cb?: (resp: { success: boolean } | { error: string }) => void,
-  ) => void;
-  "vote:cast": (data: { roomId: string; value: number | "?" }) => void;
-  "reveal:start": (data: { roomId: string }) => void;
-  "vote:clear": (data: { roomId: string }) => void;
-}
 
 type InterServerEvents = Record<string, never>;
 
@@ -97,6 +69,39 @@ namespace.use(async (socket, next) => {
   }
 });
 
+const VALID_ROLES = new Set<string>(Object.values(UserRole));
+const MAX_NAME_LENGTH = 100;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const isRoomPayload = (data: unknown): data is { roomId: string } =>
+  isRecord(data) && typeof data.roomId === "string";
+
+const isUserRole = (value: unknown): value is UserRole =>
+  typeof value === "string" && VALID_ROLES.has(value);
+
+// Payloads come straight from the client. Socket.io does not catch errors
+// thrown in event handlers, so a single malformed packet (missing ack, wrong
+// payload shape) would otherwise crash the whole process.
+function safeHandler<Args extends unknown[]>(
+  eventLogger: typeof logger,
+  event: string,
+  handler: (...args: Args) => void,
+): (...args: Args) => void {
+  return (...args: Args) => {
+    try {
+      handler(...args);
+    } catch (error) {
+      const e = error instanceof Error ? error : new Error(String(error));
+      eventLogger.error({ event, error: e.message }, "Socket handler failed");
+    }
+  };
+}
+
+const ackOrNoop = <T>(cb: unknown): ((resp: T) => void) =>
+  typeof cb === "function" ? (cb as (resp: T) => void) : () => {};
+
 namespace.on("connection", (socket) => {
   const transport = socket.conn.transport.name; // in most cases, "polling"
   const { id: userId, name: userName } = socket.data.user;
@@ -130,59 +135,117 @@ namespace.on("connection", (socket) => {
 
   userLogger.info({ socketId: socket.id }, "User connected");
 
-  socket.on("room:exists", ({ roomId }, cb) => {
-    const exists = rooms.roomExists(roomId);
-    cb({ exists });
-  });
+  const broadcastState = (roomId: string) => {
+    const state = rooms.getState(roomId);
+    if (state) namespace.to(state.id).emit("room:state", state);
+  };
 
-  socket.on("room:join", ({ roomId, role }, cb) => {
-    const roomLogger = userLogger.child({ roomId, role });
-    try {
-      const room = rooms.roomExists(roomId)
-        ? rooms.joinRoom(roomId, socket.data.user, role)
-        : rooms.createRoom(roomId, socket.data.user, role);
-      socket.join(room.id);
-      roomLogger.info("User joined socket room");
-      const state = rooms.getState(room.id);
-      if (state) {
-        cb({ state });
-        namespace.to(room.id).emit("room:state", state);
-      } else {
-        cb({ error: "Room not found" });
-      }
-    } catch (error) {
-      const e = error as Error;
-      roomLogger.warn({ error: e.message }, "Room join failed");
-      cb({ error: e.message });
-    }
-  });
-
-  socket.on("room:leave", ({ roomId }, cb) => {
-    const roomLogger = userLogger.child({ roomId });
+  // Remove the user from a room (participant list and socket.io room) and
+  // tell the remaining participants.
+  const leaveRoomAndNotify = (roomId: string) => {
     const result = rooms.leaveRoom(roomId, socket.data.user.id);
-    if (result !== false && result.wasInRoom) {
-      const normalizedRoomId = roomId.trim().toLowerCase();
-      socket.leave(normalizedRoomId);
-      roomLogger.info("User left socket room");
-      // Notify other participants about the updated room state
-      {
-        const state = rooms.getState(roomId);
-        if (state) namespace.to(state.id).emit("room:state", state);
-      }
-      if (cb) cb({ success: true });
-    } else {
-      roomLogger.warn("Leave failed, user not in room");
-      if (cb) cb({ success: false });
-    }
-  });
+    socket.leave(roomId.trim().toLowerCase());
+    if (result && !result.roomDeleted) broadcastState(roomId);
+    return result;
+  };
 
-  socket.on("user:updateName", ({ roomId, newName }, cb) => {
-    const roomLogger = userLogger.child({
-      roomId,
-      oldName: socket.data.user.name,
-      newName,
-    });
-    try {
+  socket.on(
+    "room:exists",
+    safeHandler(userLogger, "room:exists", (data, cb) => {
+      const ack = ackOrNoop<{ exists: boolean }>(cb);
+      ack({ exists: isRoomPayload(data) && rooms.roomExists(data.roomId) });
+    }),
+  );
+
+  socket.on(
+    "room:join",
+    safeHandler(userLogger, "room:join", (data, cb) => {
+      const ack = ackOrNoop<{ state: RoomState } | { error: string }>(cb);
+      if (!isRoomPayload(data)) {
+        ack({ error: "Invalid room" });
+        return;
+      }
+      const role = data.role ?? UserRole.PARTICIPANT;
+      if (!isUserRole(role)) {
+        ack({ error: "Invalid role" });
+        return;
+      }
+      const { roomId } = data;
+      const roomLogger = userLogger.child({ roomId, role });
+      try {
+        // A user is in at most one room: drop any room they are still part of
+        // (e.g. navigated away without leaving), otherwise they stay a ghost
+        // participant there and keep receiving that room's state.
+        const normalizedRoomId = roomId.trim().toLowerCase();
+        for (const otherRoomId of rooms.findUserRooms(socket.data.user.id)) {
+          if (otherRoomId !== normalizedRoomId) leaveRoomAndNotify(otherRoomId);
+        }
+        for (const joinedRoom of socket.rooms) {
+          if (joinedRoom !== socket.id && joinedRoom !== normalizedRoomId) {
+            socket.leave(joinedRoom);
+          }
+        }
+
+        const room = rooms.roomExists(roomId)
+          ? rooms.joinRoom(roomId, socket.data.user, role)
+          : rooms.createRoom(roomId, socket.data.user, role);
+        socket.join(room.id);
+        roomLogger.info("User joined socket room");
+        const state = rooms.getState(room.id);
+        if (state) {
+          ack({ state });
+          socket.to(room.id).emit("room:state", state);
+        } else {
+          ack({ error: "Room not found" });
+        }
+      } catch (error) {
+        const e = error as Error;
+        roomLogger.warn({ error: e.message }, "Room join failed");
+        ack({ error: e.message });
+      }
+    }),
+  );
+
+  socket.on(
+    "room:leave",
+    safeHandler(userLogger, "room:leave", (data, cb) => {
+      const ack = ackOrNoop<{ success: boolean }>(cb);
+      if (!isRoomPayload(data)) {
+        ack({ success: false });
+        return;
+      }
+      const roomLogger = userLogger.child({ roomId: data.roomId });
+      const result = leaveRoomAndNotify(data.roomId);
+      if (result !== false && result.wasInRoom) {
+        roomLogger.info("User left socket room");
+        ack({ success: true });
+      } else {
+        roomLogger.warn("Leave failed, user not in room");
+        ack({ success: false });
+      }
+    }),
+  );
+
+  socket.on(
+    "user:updateName",
+    safeHandler(userLogger, "user:updateName", (data, cb) => {
+      const ack = ackOrNoop<{ success: boolean } | { error: string }>(cb);
+      if (!isRoomPayload(data) || typeof data.newName !== "string") {
+        ack({ error: "Invalid payload" });
+        return;
+      }
+      const newName = data.newName.trim();
+      if (!newName || newName.length > MAX_NAME_LENGTH) {
+        ack({ error: "Invalid name" });
+        return;
+      }
+      const { roomId } = data;
+      const roomLogger = userLogger.child({
+        roomId,
+        oldName: socket.data.user.name,
+        newName,
+      });
+
       // Update the socket's user data
       socket.data.user.name = newName;
 
@@ -193,91 +256,94 @@ namespace.on("connection", (socket) => {
         newName,
       );
       if (success) {
-        // Broadcast updated room state to all participants
-        const state = rooms.getState(roomId);
-        if (state) namespace.to(state.id).emit("room:state", state);
-
-        if (cb) cb({ success: true });
+        broadcastState(roomId);
+        ack({ success: true });
       } else {
         roomLogger.warn("Username update failed - user not in room");
-        if (cb) cb({ error: "User not found in room" });
+        ack({ error: "User not found in room" });
       }
-    } catch (error) {
-      const e = error as Error;
-      roomLogger.error({ error: e.message }, "Username update failed");
-      if (cb) cb({ error: e.message });
-    }
-  });
+    }),
+  );
 
-  socket.on("user:updateRole", ({ roomId, newRole }, cb) => {
-    const roomLogger = userLogger.child({ roomId, newRole });
-    try {
+  socket.on(
+    "user:updateRole",
+    safeHandler(userLogger, "user:updateRole", (data, cb) => {
+      const ack = ackOrNoop<{ success: boolean } | { error: string }>(cb);
+      if (!isRoomPayload(data) || !isUserRole(data.newRole)) {
+        ack({ error: "Invalid payload" });
+        return;
+      }
+      const { roomId, newRole } = data;
+      const roomLogger = userLogger.child({ roomId, newRole });
       const success = rooms.updateParticipantRole(
         roomId,
         socket.data.user.id,
         newRole,
       );
       if (success) {
-        const state = rooms.getState(roomId);
-        if (state) namespace.to(state.id).emit("room:state", state);
-        if (cb) cb({ success: true });
+        broadcastState(roomId);
+        ack({ success: true });
       } else {
         roomLogger.warn("Role update failed - user not in room");
-        if (cb) cb({ error: "User not found in room" });
+        ack({ error: "User not found in room" });
       }
-    } catch (error) {
-      const e = error as Error;
-      roomLogger.error({ error: e.message }, "Role update failed");
-      if (cb) cb({ error: e.message });
-    }
-  });
+    }),
+  );
 
-  socket.on("vote:cast", ({ roomId, value }) => {
-    rooms.castVote(roomId, socket.data.user.id, value);
-    const state = rooms.getState(roomId);
-    if (state) namespace.to(state.id).emit("room:state", state);
-  });
+  socket.on(
+    "vote:cast",
+    safeHandler(userLogger, "vote:cast", (data) => {
+      if (!isRoomPayload(data)) return;
+      rooms.castVote(data.roomId, socket.data.user.id, data.value);
+      broadcastState(data.roomId);
+    }),
+  );
 
-  socket.on("reveal:start", ({ roomId }) => {
-    const roomLogger = userLogger.child({ roomId });
-    // Check if there are votes to reveal
-    if (!rooms.hasAnyVotes(roomId)) {
-      roomLogger.warn("Reveal was denied, no votes");
-      return; // Don't allow reveal if no votes
-    }
-    rooms.startReveal(roomId, socket.data.user.id, namespace);
-  });
+  socket.on(
+    "reveal:start",
+    safeHandler(userLogger, "reveal:start", (data) => {
+      if (!isRoomPayload(data)) return;
+      const { roomId } = data;
+      const roomLogger = userLogger.child({ roomId });
+      // Check if there are votes to reveal
+      if (!rooms.hasAnyVotes(roomId)) {
+        roomLogger.warn("Reveal was denied, no votes");
+        return; // Don't allow reveal if no votes
+      }
+      rooms.startReveal(roomId, socket.data.user.id, namespace);
+    }),
+  );
 
-  socket.on("vote:clear", ({ roomId }) => {
-    rooms.clearVotes(roomId, socket.data.user.id);
-    // Notify clients that votes were cleared, and broadcast fresh state
-    const normalizedRoomId = roomId.trim().toLowerCase();
-    namespace.to(normalizedRoomId).emit("votes:cleared");
-    {
-      const state = rooms.getState(roomId);
-      if (state) namespace.to(state.id).emit("room:state", state);
-    }
-  });
+  socket.on(
+    "vote:clear",
+    safeHandler(userLogger, "vote:clear", (data) => {
+      if (!isRoomPayload(data)) return;
+      const { roomId } = data;
+      // Only tell clients to drop their selected card when the clear actually
+      // happened; a rejected clear (e.g. a visitor) must not wipe their UI.
+      if (!rooms.clearVotes(roomId, socket.data.user.id)) return;
+      const normalizedRoomId = roomId.trim().toLowerCase();
+      namespace.to(normalizedRoomId).emit("votes:cleared");
+      broadcastState(roomId);
+    }),
+  );
 
-  socket.on("disconnect", () => {
-    userLogger.info({ socketId: socket.id }, "User disconnected");
-    // Clear active socket tracking if this was the registered one for the user
-    if (activeSockets.get(socket.data.user.id) === socket.id) {
+  socket.on(
+    "disconnect",
+    safeHandler(userLogger, "disconnect", () => {
+      userLogger.info({ socketId: socket.id }, "User disconnected");
+      // Only the user's active socket owns their room membership. A stale
+      // socket that closes late (e.g. after a ping timeout) must not remove
+      // the user from a room their new socket has already rejoined.
+      if (activeSockets.get(socket.data.user.id) !== socket.id) return;
       activeSockets.delete(socket.data.user.id);
-    }
 
-    // Remove user from their room if they're in one
-    const roomId = rooms.findUserRoom(socket.data.user.id);
-    if (roomId) {
-      const result = rooms.leaveRoom(roomId, socket.data.user.id);
-      // Emit updated state if room still exists
-      if (result && !result.roomDeleted) {
+      for (const roomId of rooms.findUserRooms(socket.data.user.id)) {
+        leaveRoomAndNotify(roomId);
         userLogger.child({ roomId }).info("Room state update was sent");
-        const state = rooms.getState(roomId);
-        if (state) namespace.to(roomId).emit("room:state", state);
       }
-    }
-  });
+    }),
+  );
 });
 
 const port = process.env.PORT || 4000;
