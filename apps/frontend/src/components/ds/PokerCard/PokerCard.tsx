@@ -43,10 +43,12 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
 
     const { faint, ornament } = colorFor(value);
 
-    // Base styles for the poker card with CSS transitions for hover/selection
+    // Base styles for the poker card with CSS transitions for hover/selection.
+    // Face colors are applied separately so the selected state never competes
+    // with the default ones.
     const baseStyles = [
-      "relative bg-gradient-to-br from-gray-800 to-gray-900 text-gray-200",
-      "font-semibold overflow-hidden border border-gray-700/80 rounded-2xl",
+      "relative bg-gradient-to-br text-gray-200",
+      "font-semibold overflow-hidden border rounded-2xl",
       "shadow-lg cursor-pointer transition-all duration-200 ease-out",
       "focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-0",
       "w-full flex items-center justify-center select-none aspect-[5/7]",
@@ -66,17 +68,23 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
         disabled={disabled}
         className={clsx(
           baseStyles,
-          !disabled && [
-            "hover:border-gray-600/80 hover:shadow-xl",
-            "hover:-translate-y-1 hover:scale-105",
-          ],
-          isSelected && [
-            "-translate-y-3 scale-110 border-blue-500",
-            "shadow-[0_0_20px_rgba(59,130,246,0.4),0_8px_25px_rgba(0,0,0,0.3)]",
-          ],
+          isSelected
+            ? [
+                "-translate-y-3 scale-110",
+                "border-blue-300 from-blue-500 to-indigo-700",
+                "shadow-[0_0_24px_rgba(59,130,246,0.5),0_8px_25px_rgba(0,0,0,0.3)]",
+              ]
+            : [
+                "border-gray-700/80 from-gray-800 to-gray-900",
+                !disabled && [
+                  "hover:border-gray-600/80 hover:shadow-xl",
+                  "hover:-translate-y-1 hover:scale-105",
+                ],
+              ],
           disabled && "cursor-not-allowed opacity-50",
           className,
         )}
+        aria-pressed={isSelected}
         data-testid={`vote-card-${value}`}
         style={{
           transformOrigin: "center",
@@ -96,14 +104,19 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
         />
 
         {/* Inner frame */}
-        <div className="absolute inset-2 rounded-xl border border-gray-600/70" />
+        <div
+          className={clsx(
+            "absolute inset-2 rounded-xl border",
+            isSelected ? "border-white/40" : "border-gray-600/70",
+          )}
+        />
 
         {/* Ornaments */}
         <div
           className={clsx(
             "absolute top-2 right-2 text-xs opacity-40 md:text-sm",
             "pointer-events-none select-none",
-            ornament,
+            isSelected ? "text-white" : ornament,
           )}
         >
           ❖
@@ -112,7 +125,7 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
           className={clsx(
             "absolute bottom-2 left-2 text-xs opacity-40 md:text-sm",
             "pointer-events-none rotate-180 select-none",
-            ornament,
+            isSelected ? "text-white" : ornament,
           )}
         >
           ❖
@@ -121,7 +134,7 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
           className={clsx(
             "absolute top-1/2 left-3 -translate-y-1/2 text-xs md:text-sm",
             "pointer-events-none opacity-40 select-none",
-            ornament,
+            isSelected ? "text-white" : ornament,
           )}
         >
           ✤
@@ -130,27 +143,37 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
           className={clsx(
             "absolute top-1/2 right-3 -translate-y-1/2 text-xs md:text-sm",
             "pointer-events-none rotate-180 opacity-40 select-none",
-            ornament,
+            isSelected ? "text-white" : ornament,
           )}
         >
           ✤
         </div>
 
         {/* Small top-left */}
-        <div className="absolute top-2 left-2 text-xs font-semibold text-slate-200 md:text-sm">
+        <div
+          className={clsx(
+            "absolute top-2 left-2 text-xs font-semibold md:text-sm",
+            isSelected ? "text-white" : "text-slate-200",
+          )}
+        >
           {value}
         </div>
 
         {/* Small bottom-right mirrored */}
-        <div className="absolute right-2 bottom-2 rotate-180 text-xs font-semibold text-slate-200 md:text-sm">
+        <div
+          className={clsx(
+            "absolute right-2 bottom-2 rotate-180 text-xs font-semibold md:text-sm",
+            isSelected ? "text-white" : "text-slate-200",
+          )}
+        >
           {value}
         </div>
 
         {/* Big center translucent */}
         <div
           className={clsx(
-            "text-5xl font-extrabold opacity-15 md:text-6xl",
-            faint,
+            "text-5xl font-extrabold md:text-6xl",
+            isSelected ? "text-white" : ["opacity-15", faint],
           )}
         >
           {value}
