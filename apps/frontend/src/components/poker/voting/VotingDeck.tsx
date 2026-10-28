@@ -1,5 +1,5 @@
-import { useRoom } from "../../../hooks/useRoom";
 import { useAuth } from "../../../AuthProvider";
+import { useRoom } from "../../../hooks/useRoom";
 import { shouldShowVotingControls } from "../../../utils/ui-permissions";
 import Card from "../shared/Card";
 import PokerCard from "../shared/PokerCard";
@@ -27,7 +27,7 @@ export default function VotingDeck() {
     return (
       <Card className="animate-fade-in-scale">
         <div className="py-12 text-center">
-          <h2 className="mb-4 font-medium text-lg text-white">Observer Mode</h2>
+          <h2 className="mb-4 text-lg font-medium text-white">Observer Mode</h2>
           <p className="text-gray-400">
             You're viewing this session as a visitor. You can observe but not
             participate in voting.
@@ -40,7 +40,7 @@ export default function VotingDeck() {
   return (
     <Card className="animate-fade-in-scale">
       <h2
-        className="mb-8 text-center font-medium text-lg text-white"
+        className="mb-8 text-center text-lg font-medium text-white"
         data-testid="voting-deck-title"
       >
         Choose your estimate
@@ -64,7 +64,7 @@ export default function VotingDeck() {
 
       {selectedCard !== null && (
         <div
-          className="mt-8 animate-fade-in-scale text-center"
+          className="animate-fade-in-scale mt-8 text-center"
           data-testid="vote-confirmation"
         ></div>
       )}

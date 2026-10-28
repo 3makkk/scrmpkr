@@ -73,7 +73,7 @@ export default function Room() {
     return (
       <PageLayout>
         <div className="flex min-h-[400px] flex-col items-center justify-center">
-          <h2 className="mb-4 font-semibold text-red-600 text-xl">Error</h2>
+          <h2 className="mb-4 text-xl font-semibold text-red-600">Error</h2>
           <p className="text-gray-600">{error}</p>
           <button
             type="button"
@@ -99,7 +99,7 @@ export default function Room() {
         {/* Main content area with sidebar */}
         <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
           {/* Left sidebar - Contextual Team Status */}
-          <div className="border-gray-700/30 border-r bg-gray-900/20 lg:w-80 lg:shrink-0">
+          <div className="border-r border-gray-700/30 bg-gray-900/20 lg:w-80 lg:shrink-0">
             <ContextualTeamStatus />
           </div>
 

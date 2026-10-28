@@ -1,5 +1,5 @@
-import React from "react";
 import clsx from "clsx";
+import React from "react";
 import Badge from "../Badge/Badge";
 import type { UIProps } from "../uiTypes";
 
@@ -129,7 +129,7 @@ const Row: React.FC<RowProps> = ({ value, className, children, ...rest }) => {
       <div
         className={clsx(
           "row-span-2 flex items-center justify-end self-stretch pr-1",
-          "whitespace-nowrap text-right font-black leading-none",
+          "text-right leading-none font-black whitespace-nowrap",
           "drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]",
           valueTextClass,
         )}
@@ -146,7 +146,7 @@ const Row: React.FC<RowProps> = ({ value, className, children, ...rest }) => {
           <div className="absolute top-1/2 right-2 z-10 flex -translate-y-1/2 items-center">
             <Badge
               bgClass="bg-gray-950/20"
-              className="px-2 py-0.5 font-bold text-white/80 text-xs"
+              className="px-2 py-0.5 text-xs font-bold text-white/80"
             >
               {count}
             </Badge>
@@ -171,7 +171,7 @@ const Name: React.FC<NameProps> = ({
     <Badge
       bgClass={bgClass ?? "bg-gray-800/60"}
       rounded="lg"
-      className={clsx("whitespace-nowrap border border-gray-700/40", className)}
+      className={clsx("border border-gray-700/40 whitespace-nowrap", className)}
       {...rest}
     >
       {children}

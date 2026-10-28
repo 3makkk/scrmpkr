@@ -1,6 +1,6 @@
-import { useRoom } from "../../../hooks/useRoom";
+import { canVote, type Participant, UserRole } from "@scrmpkr/shared";
 import { useAuth } from "../../../AuthProvider";
-import { type Participant, UserRole, canVote } from "@scrmpkr/shared";
+import { useRoom } from "../../../hooks/useRoom";
 
 export default function ContextualTeamStatus() {
   const { roomState } = useRoom();
@@ -47,7 +47,7 @@ export default function ContextualTeamStatus() {
       );
       if (vote) {
         return (
-          <div className="flex h-3 w-3 items-center justify-center rounded-full bg-blue-500 font-bold text-white text-xs"></div>
+          <div className="flex h-3 w-3 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white"></div>
         );
       }
       return <div className="h-3 w-3 rounded-full bg-gray-600"></div>;
@@ -76,7 +76,7 @@ export default function ContextualTeamStatus() {
       <div className="space-y-6">
         {/* Active Participants - Only those who can vote */}
         <div className="space-y-3">
-          <h3 className="font-medium text-gray-400 text-sm uppercase tracking-wider">
+          <h3 className="text-sm font-medium tracking-wider text-gray-400 uppercase">
             Active Participants (
             <span data-testid="active-participant-count">
               {votedActiveParticipants}/{activeParticipants.length}
@@ -90,7 +90,7 @@ export default function ContextualTeamStatus() {
             {activeParticipants.map((participant, index) => (
               <div
                 key={participant.id}
-                className={`flex w-auto animate-slide-in-left items-center justify-between rounded-lg border border-gray-700/40 bg-gray-800/40 p-3 lg:w-full`}
+                className={`animate-slide-in-left flex w-auto items-center justify-between rounded-lg border border-gray-700/40 bg-gray-800/40 p-3 lg:w-full`}
                 style={{ animationDelay: `${index * 50}ms` }}
                 data-testid={`participant-${participant.name}`}
               >
@@ -98,7 +98,7 @@ export default function ContextualTeamStatus() {
                   {getParticipantIndicator(participant)}
                   <div className="flex flex-col">
                     <span
-                      className={`font-medium text-sm ${
+                      className={`text-sm font-medium ${
                         participant.id === account.id
                           ? "text-blue-400"
                           : "text-gray-300"
@@ -107,18 +107,18 @@ export default function ContextualTeamStatus() {
                     >
                       {participant.id === account.id ? "You" : participant.name}
                       {getRoleDisplay(participant) && (
-                        <span className="ml-1 text-gray-400 text-xs">
+                        <span className="ml-1 text-xs text-gray-400">
                           {getRoleDisplay(participant)}
                         </span>
                       )}
                     </span>
                     {!isRoundRevealed && (
-                      <span className="text-gray-500 text-xs">
+                      <span className="text-xs text-gray-500">
                         {getParticipantStatus(participant)}
                       </span>
                     )}
                     {isRoundRevealed && (
-                      <span className="text-gray-400 text-xs">
+                      <span className="text-xs text-gray-400">
                         Vote: {getParticipantStatus(participant)}
                       </span>
                     )}
@@ -132,7 +132,7 @@ export default function ContextualTeamStatus() {
         {/* Facilitators - non-voting session managers */}
         {facilitators.length > 0 && (
           <div className="space-y-3">
-            <h3 className="font-medium text-gray-400 text-sm uppercase tracking-wider">
+            <h3 className="text-sm font-medium tracking-wider text-gray-400 uppercase">
               Facilitators (
               <span data-testid="facilitator-count">{facilitators.length}</span>
               )
@@ -141,7 +141,7 @@ export default function ContextualTeamStatus() {
               {facilitators.map((participant, index) => (
                 <div
                   key={participant.id}
-                  className="flex w-auto animate-slide-in-left items-center justify-between rounded-lg border border-amber-700/40 bg-amber-900/20 p-3 lg:w-full"
+                  className="animate-slide-in-left flex w-auto items-center justify-between rounded-lg border border-amber-700/40 bg-amber-900/20 p-3 lg:w-full"
                   style={{ animationDelay: `${index * 50}ms` }}
                   data-testid={`facilitator-${participant.name}`}
                 >
@@ -149,7 +149,7 @@ export default function ContextualTeamStatus() {
                     <div className="h-3 w-3 rounded-full bg-amber-500"></div>
                     <div className="flex flex-col">
                       <span
-                        className={`font-medium text-sm ${
+                        className={`text-sm font-medium ${
                           participant.id === account.id
                             ? "text-amber-400"
                             : "text-gray-300"
@@ -159,9 +159,9 @@ export default function ContextualTeamStatus() {
                         {participant.id === account.id
                           ? "You"
                           : participant.name}
-                        <span className="ml-1 text-amber-500 text-xs">🎬</span>
+                        <span className="ml-1 text-xs text-amber-500">🎬</span>
                       </span>
-                      <span className="text-gray-500 text-xs">managing</span>
+                      <span className="text-xs text-gray-500">managing</span>
                     </div>
                   </div>
                 </div>
@@ -173,7 +173,7 @@ export default function ContextualTeamStatus() {
         {/* Visitors - Separate section */}
         {visitors.length > 0 && (
           <div className="space-y-3">
-            <h3 className="font-medium text-gray-400 text-sm uppercase tracking-wider">
+            <h3 className="text-sm font-medium tracking-wider text-gray-400 uppercase">
               Visitors (
               <span data-testid="visitor-count">{visitors.length}</span>)
             </h3>
@@ -181,7 +181,7 @@ export default function ContextualTeamStatus() {
               {visitors.map((participant, index) => (
                 <div
                   key={participant.id}
-                  className={`flex w-auto animate-slide-in-left items-center justify-between rounded-lg border border-purple-700/40 bg-purple-900/20 p-3 lg:w-full`}
+                  className={`animate-slide-in-left flex w-auto items-center justify-between rounded-lg border border-purple-700/40 bg-purple-900/20 p-3 lg:w-full`}
                   style={{ animationDelay: `${index * 50}ms` }}
                   data-testid={`visitor-${participant.name}`}
                 >
@@ -189,7 +189,7 @@ export default function ContextualTeamStatus() {
                     {getParticipantIndicator(participant)}
                     <div className="flex flex-col">
                       <span
-                        className={`font-medium text-sm ${
+                        className={`text-sm font-medium ${
                           participant.id === account.id
                             ? "text-purple-400"
                             : "text-gray-300"
@@ -199,9 +199,9 @@ export default function ContextualTeamStatus() {
                         {participant.id === account.id
                           ? "You"
                           : participant.name}
-                        <span className="ml-1 text-purple-500 text-xs">👁</span>
+                        <span className="ml-1 text-xs text-purple-500">👁</span>
                       </span>
-                      <span className="text-gray-500 text-xs">
+                      <span className="text-xs text-gray-500">
                         {getParticipantStatus(participant)}
                       </span>
                     </div>

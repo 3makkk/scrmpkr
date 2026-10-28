@@ -44,14 +44,14 @@ export default function RoleOptionCard({
           <span className="font-medium">{option.title}</span>
           {badge && (
             <span
-              className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-gray-200 uppercase tracking-wide"
+              className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] tracking-wide text-gray-200 uppercase"
               data-testid={`${testid}-badge`}
             >
               {badge}
             </span>
           )}
         </div>
-        <div className="text-gray-400 text-sm">{option.desc}</div>
+        <div className="text-sm text-gray-400">{option.desc}</div>
       </div>
     </button>
   );

@@ -1,5 +1,5 @@
-import { forwardRef } from "react";
 import clsx from "clsx";
+import { forwardRef } from "react";
 import type { UIProps } from "../uiTypes";
 
 type Value = number | "?";
@@ -120,7 +120,7 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
         <div
           className={clsx(
             "absolute top-1/2 left-3 -translate-y-1/2 text-xs md:text-sm",
-            "pointer-events-none select-none opacity-40",
+            "pointer-events-none opacity-40 select-none",
             ornament,
           )}
         >
@@ -129,7 +129,7 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
         <div
           className={clsx(
             "absolute top-1/2 right-3 -translate-y-1/2 text-xs md:text-sm",
-            "pointer-events-none rotate-180 select-none opacity-40",
+            "pointer-events-none rotate-180 opacity-40 select-none",
             ornament,
           )}
         >
@@ -137,19 +137,19 @@ const PokerCard = forwardRef<HTMLButtonElement, PokerCardProps>(
         </div>
 
         {/* Small top-left */}
-        <div className="absolute top-2 left-2 font-semibold text-slate-200 text-xs md:text-sm">
+        <div className="absolute top-2 left-2 text-xs font-semibold text-slate-200 md:text-sm">
           {value}
         </div>
 
         {/* Small bottom-right mirrored */}
-        <div className="absolute right-2 bottom-2 rotate-180 font-semibold text-slate-200 text-xs md:text-sm">
+        <div className="absolute right-2 bottom-2 rotate-180 text-xs font-semibold text-slate-200 md:text-sm">
           {value}
         </div>
 
         {/* Big center translucent */}
         <div
           className={clsx(
-            "font-extrabold text-5xl opacity-15 md:text-6xl",
+            "text-5xl font-extrabold opacity-15 md:text-6xl",
             faint,
           )}
         >

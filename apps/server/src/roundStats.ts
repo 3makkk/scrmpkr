@@ -39,7 +39,7 @@ export default class RoundStatsModel implements RoundStats {
       {},
     );
     const maxCount = Object.values(frequency).reduce(
-      (maxValue, count) => (count > maxValue ? count : maxValue),
+      (maxValue, count) => Math.max(count, maxValue),
       0,
     );
     const modes = Object.entries(frequency)

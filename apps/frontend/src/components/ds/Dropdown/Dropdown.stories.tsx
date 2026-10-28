@@ -1,8 +1,8 @@
+import { UserRole } from "@scrmpkr/shared";
 import { useState } from "react";
-import Dropdown from "./Dropdown";
 import Button from "../Button/Button";
 import UserAvatar from "../UserAvatar/UserAvatar";
-import { UserRole } from "@scrmpkr/shared";
+import Dropdown from "./Dropdown";
 
 export default {
   title: "DS/Dropdown",
@@ -35,19 +35,19 @@ export const Basic = {
           <div className="space-y-2">
             <button
               type="button"
-              className="block w-full rounded-md px-3 py-2 text-left text-gray-300 text-sm hover:bg-gray-700 hover:text-white"
+              className="block w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
             >
               Menu Item 1
             </button>
             <button
               type="button"
-              className="block w-full rounded-md px-3 py-2 text-left text-gray-300 text-sm hover:bg-gray-700 hover:text-white"
+              className="block w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
             >
               Menu Item 2
             </button>
             <button
               type="button"
-              className="block w-full rounded-md px-3 py-2 text-left text-gray-300 text-sm hover:bg-gray-700 hover:text-white"
+              className="block w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
             >
               Menu Item 3
             </button>
@@ -75,7 +75,7 @@ export const BottomStart = {
       >
         <div className="w-48 p-4">
           <p className="text-sm text-white">Positioned below trigger</p>
-          <p className="text-gray-400 text-xs">Left edges aligned</p>
+          <p className="text-xs text-gray-400">Left edges aligned</p>
         </div>
       </Dropdown>
     </div>
@@ -99,7 +99,7 @@ export const BottomEnd = {
       >
         <div className="w-48 p-4">
           <p className="text-sm text-white">Positioned below trigger</p>
-          <p className="text-gray-400 text-xs">Right edges aligned</p>
+          <p className="text-xs text-gray-400">Right edges aligned</p>
         </div>
       </Dropdown>
     </div>
@@ -123,7 +123,7 @@ export const BottomCenter = {
       >
         <div className="w-48 p-4">
           <p className="text-sm text-white">Positioned below trigger</p>
-          <p className="text-gray-400 text-xs">Centered horizontally</p>
+          <p className="text-xs text-gray-400">Centered horizontally</p>
         </div>
       </Dropdown>
     </div>
@@ -147,7 +147,7 @@ export const TopStart = {
       >
         <div className="w-48 p-4">
           <p className="text-sm text-white">Positioned above trigger</p>
-          <p className="text-gray-400 text-xs">Left edges aligned</p>
+          <p className="text-xs text-gray-400">Left edges aligned</p>
         </div>
       </Dropdown>
     </div>
@@ -171,7 +171,7 @@ export const TopEnd = {
       >
         <div className="w-48 p-4">
           <p className="text-sm text-white">Positioned above trigger</p>
-          <p className="text-gray-400 text-xs">Right edges aligned</p>
+          <p className="text-xs text-gray-400">Right edges aligned</p>
         </div>
       </Dropdown>
     </div>
@@ -195,7 +195,7 @@ export const TopCenter = {
       >
         <div className="w-48 p-4">
           <p className="text-sm text-white">Positioned above trigger</p>
-          <p className="text-gray-400 text-xs">Centered horizontally</p>
+          <p className="text-xs text-gray-400">Centered horizontally</p>
         </div>
       </Dropdown>
     </div>
@@ -233,14 +233,14 @@ export const Controlled = {
             <div className="space-y-2">
               <button
                 type="button"
-                className="block w-full rounded-md px-3 py-2 text-left text-gray-300 text-sm hover:bg-gray-700 hover:text-white"
+                className="block w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
                 onClick={() => setIsOpen(false)}
               >
                 Close Menu
               </button>
               <button
                 type="button"
-                className="block w-full rounded-md px-3 py-2 text-left text-gray-300 text-sm hover:bg-gray-700 hover:text-white"
+                className="block w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
               >
                 Keep Menu Open
               </button>
@@ -264,7 +264,7 @@ export const WithUserAvatar = {
           <button
             type="button"
             onClick={onClick}
-            className={`focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 ${
+            className={`focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-none ${
               className || ""
             }`}
           >
@@ -290,7 +290,7 @@ export const WithUserAvatar = {
 
           <button
             type="button"
-            className="w-full rounded-md px-3 py-2 text-left text-gray-300 text-sm hover:bg-gray-700 hover:text-white"
+            className="w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
           >
             Change username
           </button>

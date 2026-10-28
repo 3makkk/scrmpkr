@@ -1,5 +1,5 @@
-import { forwardRef } from "react";
 import clsx from "clsx";
+import { forwardRef } from "react";
 import type { UIProps } from "../uiTypes";
 
 type Variant = "primary" | "secondary" | "danger";
@@ -23,8 +23,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         case "secondary":
           return clsx(
             baseClasses,
-            "bg-gray-800/80 backdrop-blur-sm border border-gray-700/60",
-            "text-gray-200 font-medium shadow-md focus:ring-gray-400",
+            "border border-gray-700/60 bg-gray-800/80 backdrop-blur-sm",
+            "font-medium text-gray-200 shadow-md focus:ring-gray-400",
           );
         case "danger":
           return clsx(

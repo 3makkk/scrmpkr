@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import clsx from "clsx";
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import type { UIProps } from "../uiTypes";
 
 /**
@@ -209,7 +209,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
               ref={menuRef}
               className={clsx(
                 "absolute rounded-lg border border-gray-700 bg-gray-800",
-                "z-50 animate-fade-in-scale shadow-lg",
+                "animate-fade-in-scale z-50 shadow-lg",
                 getPlacementClasses(),
               )}
             >
