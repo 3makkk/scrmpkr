@@ -1,14 +1,14 @@
-import logger from "./logger.js";
-import Room from "./room.js";
-import { FIB_DECK, type User } from "./types.js";
 import type {
   RoomState,
   RoundState,
   RoundStatus,
   RoundVote,
+  UserRole,
 } from "@scrmpkr/shared";
-import type { UserRole } from "@scrmpkr/shared";
+import logger from "./logger.js";
+import Room from "./room.js";
 import type { PokerNamespace } from "./roomManagerTypes.js";
+import { FIB_DECK, type User } from "./types.js";
 
 export type RevealedVote = RoundVote;
 export type { RoomState, RoundState, RoundStatus, User };

@@ -1,5 +1,5 @@
-import UserAvatar from "./UserAvatar";
 import { UserRole } from "@scrmpkr/shared";
+import UserAvatar from "./UserAvatar";
 
 export default {
   title: "DS/UserAvatar",

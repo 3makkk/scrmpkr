@@ -1,5 +1,5 @@
-import { forwardRef } from "react";
 import clsx from "clsx";
+import { forwardRef } from "react";
 import type { UIProps } from "../uiTypes";
 
 type CardProps = UIProps<"div">;

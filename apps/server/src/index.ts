@@ -1,13 +1,13 @@
 import "dotenv/config";
 import "./metrics.js";
-import express from "express";
 import http from "node:http";
-import cors from "cors";
-import { Server } from "socket.io";
-import { RoomManager, type User, type RoomState } from "./roomManager.js";
 import type { UserRole } from "@scrmpkr/shared";
+import cors from "cors";
+import express from "express";
+import { Server } from "socket.io";
 import logger from "./logger.js";
 import { setMetricCallbacks } from "./metrics.js";
+import { RoomManager, type RoomState, type User } from "./roomManager.js";
 
 const app = express();
 app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));

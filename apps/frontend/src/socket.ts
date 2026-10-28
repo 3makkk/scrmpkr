@@ -1,8 +1,8 @@
-import { io, type Socket } from "socket.io-client";
 import type {
-  ServerToClientEvents,
   ClientToServerEvents,
+  ServerToClientEvents,
 } from "@scrmpkr/shared";
+import { io, type Socket } from "socket.io-client";
 
 type CheckRoomExistsCallback = (exists: boolean) => void;
 

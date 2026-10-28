@@ -1,8 +1,8 @@
-import { test, expect } from "@playwright/test";
-import { UserAssertions, RoomAssertions } from "./test-assertions";
+import { expect, test } from "@playwright/test";
 import type { TestParticipation } from "./domain-objects/TestParticipation";
-import { TestUser } from "./domain-objects/TestUser";
 import { TestRoom } from "./domain-objects/TestRoom";
+import { TestUser } from "./domain-objects/TestUser";
+import { RoomAssertions, UserAssertions } from "./test-assertions";
 
 test.describe("Facilitator Role Functionality", () => {
   const users: TestUser[] = [];

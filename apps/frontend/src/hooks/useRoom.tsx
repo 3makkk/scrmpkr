@@ -1,20 +1,20 @@
+import type {
+  ClientToServerEvents,
+  RoomState,
+  ServerToClientEvents,
+  UserRole,
+} from "@scrmpkr/shared";
+import { canVote } from "@scrmpkr/shared";
 import {
   createContext,
+  useCallback,
   useContext,
   useReducer,
   useRef,
   useState,
-  useCallback,
 } from "react";
 import type { Socket } from "socket.io-client";
 import { getSocket } from "../socket";
-import type {
-  ServerToClientEvents,
-  ClientToServerEvents,
-  RoomState,
-  UserRole,
-} from "@scrmpkr/shared";
-import { canVote } from "@scrmpkr/shared";
 
 type RoomAction =
   | { type: "RESET_ROOM" }

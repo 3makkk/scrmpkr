@@ -1,13 +1,13 @@
 // Re-export domain objects and test utilities for convenience
 export {
-  TestUser,
+  FIBONACCI_DECK,
+  Player,
   Room,
   TestParticipation,
-  Player,
-  FIBONACCI_DECK,
+  TestUser,
 } from "./domain-objects";
 export {
-  UserAssertions,
   RoomAssertions,
+  UserAssertions,
   VotingAssertions,
 } from "./test-assertions";

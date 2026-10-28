@@ -1,8 +1,8 @@
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
-import React from "react";
 import * as Sentry from "@sentry/react";
+import React from "react";
 
 Sentry.init({
   dsn: "https://6f2afb7439faac05535aa70414c9462e@o4510325216575488.ingest.de.sentry.io/4510325224177744",

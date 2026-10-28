@@ -1,7 +1,7 @@
-import { useRoom } from "../../../hooks/useRoom";
 import { useAuth } from "../../../AuthProvider";
-import VotingDeck from "./VotingDeck";
+import { useRoom } from "../../../hooks/useRoom";
 import VotingResults from "../results/VotingResults";
+import VotingDeck from "./VotingDeck";
 
 export default function PrimaryActionZone() {
   const { roomState } = useRoom();
