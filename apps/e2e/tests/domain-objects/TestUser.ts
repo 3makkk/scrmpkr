@@ -1,4 +1,9 @@
-import type { Browser, BrowserContext, Page } from "@playwright/test";
+import type {
+  Browser,
+  BrowserContext,
+  Page,
+  WebSocketRoute,
+} from "@playwright/test";
 
 export type Player = {
   page: Page;
@@ -17,6 +22,7 @@ export class TestUser {
   public context: BrowserContext;
   public name: string;
   public readonly id: string;
+  private socketRoutes: WebSocketRoute[] = [];
 
   constructor(page: Page, context: BrowserContext, name: string, id: string) {
     this.page = page;
@@ -31,6 +37,35 @@ export class TestUser {
     const id = `user-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
     return new TestUser(page, context, name, id);
+  }
+
+  /**
+   * Route the page's Socket.io websockets through Playwright (passed through
+   * to the real server) so the test can cut them. Call before navigating.
+   */
+  async interceptSocketConnections() {
+    await this.page.routeWebSocket(/socket\.io/, (ws) => {
+      this.socketRoutes.push(ws);
+      ws.connectToServer();
+    });
+  }
+
+  /** Number of websockets opened since interception started. */
+  get socketConnectionCount(): number {
+    return this.socketRoutes.length;
+  }
+
+  /**
+   * Simulate a network drop: go offline (so reconnect attempts fail) and
+   * close the open websockets, which also closes them on the server.
+   */
+  async dropConnection() {
+    await this.context.setOffline(true);
+    for (const ws of this.socketRoutes) await ws.close();
+  }
+
+  async restoreConnection() {
+    await this.context.setOffline(false);
   }
 
   async navigateToHome() {

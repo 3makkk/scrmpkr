@@ -43,6 +43,10 @@ Additional test coverage includes:
 - Single player rooms
 - Voting and revealing with minimal participants
 
+### Reconnect Test: `reconnect.spec.ts`
+
+Bob renames himself and votes, then loses his connection: his websocket is routed through Playwright (`page.routeWebSocket`) and cut while the browser is offline. The owner sees him leave. After he comes back online, the test verifies that he rejoins automatically under his new name, still shows as voted, and that his actions (revealing) reach the room.
+
 ## Running Tests
 
 ### From workspace root:
@@ -91,7 +95,8 @@ apps/e2e/
 ├── playwright.config.ts   # Playwright configuration
 ├── tests/
 │   ├── helpers.ts         # Reusable test utilities
-│   └── scrum-poker-game.spec.ts  # Main test suite
+│   ├── scrum-poker-game.spec.ts  # Main test suite
+│   └── reconnect.spec.ts  # Connection drop and automatic rejoin
 └── README.md             # This file
 ```
 
