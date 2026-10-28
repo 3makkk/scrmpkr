@@ -1,17 +1,17 @@
-import { describe, it, expect } from "vitest";
 import {
-  hasPermission,
-  canVote,
   canControlSession,
-  canViewResults,
   canPerformAction,
+  canViewResults,
+  canVote,
   hasHigherPrivilege,
+  hasPermission,
   PERMISSION_MATRIX,
+  type PermissionContext,
   ROLE_HIERARCHY,
   type UserRole,
   type ValidPermission,
-  type PermissionContext,
 } from "@scrmpkr/shared";
+import { describe, expect, it } from "vitest";
 
 describe("Permission System (ACL)", () => {
   describe("Permission Matrix", () => {

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import RoomManager from "../src/roomManager";
 import type { PokerNamespace } from "../src/roomManagerTypes";
 import { FIB_DECK } from "../src/types";

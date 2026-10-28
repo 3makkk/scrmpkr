@@ -1,5 +1,5 @@
-import { forwardRef, useEffect, useRef } from "react";
 import clsx from "clsx";
+import { forwardRef, useEffect, useRef } from "react";
 import type { UIProps } from "../uiTypes";
 
 type ModalProps = UIProps<

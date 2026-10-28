@@ -1,7 +1,7 @@
 // UI Logic and Display Utilities for Permission System
 // Frontend-specific utilities for conditional rendering and user interface
 
-import { type UserRole, hasPermission } from "@scrmpkr/shared";
+import { hasPermission, type UserRole } from "@scrmpkr/shared";
 
 // ===== UI PERMISSION HELPERS =====
 

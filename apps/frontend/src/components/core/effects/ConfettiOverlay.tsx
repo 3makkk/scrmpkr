@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
+import { useEffect, useRef } from "react";
 import { useRoom } from "../../../hooks/useRoom";
 
 function randomInRange(min: number, max: number) {

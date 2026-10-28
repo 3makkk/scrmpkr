@@ -1,6 +1,6 @@
-import { test, expect } from "@playwright/test";
-import { TestUser } from "./domain-objects/TestUser";
+import { expect, test } from "@playwright/test";
 import { TestRoom } from "./domain-objects/TestRoom";
+import { TestUser } from "./domain-objects/TestUser";
 
 test.describe("Username Change Functionality", () => {
   const users: TestUser[] = [];

@@ -1,6 +1,6 @@
-import { test, expect } from "@playwright/test";
-import type { TestUser } from "./domain-objects/TestUser";
+import { expect, test } from "@playwright/test";
 import type { TestRoom } from "./domain-objects/TestRoom";
+import type { TestUser } from "./domain-objects/TestUser";
 
 /**
  * Test-specific assertions and expectations for User interactions

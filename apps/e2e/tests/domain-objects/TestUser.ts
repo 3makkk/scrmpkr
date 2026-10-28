@@ -1,4 +1,4 @@
-import type { Page, BrowserContext, Browser } from "@playwright/test";
+import type { Browser, BrowserContext, Page } from "@playwright/test";
 
 export type Player = {
   page: Page;
