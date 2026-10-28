@@ -1,3 +1,4 @@
+import { MAX_NAME_LENGTH } from "@scrmpkr/shared";
 import { useState } from "react";
 import Button from "../ds/Button/Button";
 import Input from "../ds/Input/Input";
@@ -48,6 +49,7 @@ export default function UsernameForm({
           id="username"
           data-testid="user-name-input"
           value={name}
+          maxLength={MAX_NAME_LENGTH}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter your name"
           className="w-full"

@@ -16,3 +16,6 @@ export const FIB_DECK: Array<number | "?"> = [
   55,
   "?",
 ];
+
+export const isVoteValue = (value: unknown): value is number | "?" =>
+  FIB_DECK.includes(value as number | "?");

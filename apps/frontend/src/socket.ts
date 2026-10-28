@@ -8,46 +8,45 @@ type CheckRoomExistsCallback = (exists: boolean | null) => void;
 
 const ROOM_EXISTS_TIMEOUT_MS = 5000;
 
-let socket: Socket<ServerToClientEvents, ClientToServerEvents> | undefined;
+export type PokerSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
+
+let socket: PokerSocket | undefined;
 
 export type AuthPayload = { name: string; userId: string };
 
-export function getSocket(
-  auth: AuthPayload,
-): Socket<ServerToClientEvents, ClientToServerEvents> {
+// Read on every (re)connect handshake, so the server always gets the current
+// account, including a name changed after the socket was created.
+let currentAuth: AuthPayload | undefined;
+
+export function setSocketAuthName(name: string): void {
+  if (currentAuth) currentAuth = { ...currentAuth, name };
+}
+
+export function getSocket(auth: AuthPayload): PokerSocket {
+  const userChanged = currentAuth?.userId !== auth.userId;
+  currentAuth = auth;
+
   if (!socket) {
     const apiUrl = import.meta.env.VITE_API_URL;
     const path = import.meta.env.VITE_SOCKET_PATH;
 
     socket = io(`${apiUrl}/poker`, {
-      auth,
+      auth: (cb) => cb(currentAuth ?? {}),
       path,
       autoConnect: true,
       reconnection: true,
       withCredentials: !!import.meta.env.PROD,
-    }) as Socket<ServerToClientEvents, ClientToServerEvents>;
+    }) as PokerSocket;
 
     window.addEventListener("beforeunload", () => {
       socket?.disconnect();
     });
   } else {
-    // The handshake auth is captured when the socket is created and re-sent on
-    // every reconnect, so keep it in sync with the current account. A different
-    // user needs a fresh handshake.
-    const previous = socket.auth as Partial<AuthPayload>;
-    socket.auth = auth;
-    if (previous.userId !== auth.userId && socket.connected) {
-      socket.disconnect();
-    }
+    // A different user needs a fresh handshake.
+    if (userChanged && socket.connected) socket.disconnect();
     if (socket.disconnected) socket.connect();
   }
 
-  return socket;
-}
-
-export function getCurrentSocket():
-  | Socket<ServerToClientEvents, ClientToServerEvents>
-  | undefined {
   return socket;
 }
 

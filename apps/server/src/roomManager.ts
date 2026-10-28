@@ -7,8 +7,7 @@ import type {
 } from "@scrmpkr/shared";
 import logger from "./logger.js";
 import Room from "./room.js";
-import type { PokerNamespace } from "./roomManagerTypes.js";
-import { FIB_DECK, type User } from "./types.js";
+import { isVoteValue, type User } from "./types.js";
 
 export type RevealedVote = RoundVote;
 export type { RoomState, RoundState, RoundStatus, User };
@@ -50,12 +49,7 @@ export class RoomManager {
       throw new Error("Room already exists");
     }
 
-    const room = new Room(id, {
-      id: user.id,
-      name: user.name,
-      hasVoted: false,
-      role,
-    });
+    const room = new Room(id, { id: user.id, name: user.name, role });
     this.rooms.set(id, room);
 
     roomLogger.info("Room was created");
@@ -93,32 +87,33 @@ export class RoomManager {
     return room;
   }
 
-  castVote(id: string, userId: string, value: number | "?"): void {
+  castVote(id: string, userId: string, value: unknown): boolean {
     const roomId = this.normalizeRoomId(id);
     const roomLogger = logger.child({ roomId, userId });
     const room = this.rooms.get(roomId);
     if (!room) {
       roomLogger.warn({ value }, "Vote was rejected, room not found");
-      return;
+      return false;
     }
 
     // Check if user can vote (only owners and participants, not visitors)
     if (!room.canVote(userId)) {
       roomLogger.warn({ value }, "Vote was rejected, insufficient permissions");
-      return;
+      return false;
     }
 
-    if (!FIB_DECK.includes(value)) {
+    if (!isVoteValue(value)) {
       roomLogger.warn({ value }, "Vote was rejected, invalid value");
-      return;
+      return false;
     }
 
     const participant = room.recordVote(userId, value);
-    if (participant) {
-      roomLogger.info({ userName: participant.name }, "User cast vote");
-    } else {
+    if (!participant) {
       roomLogger.warn("Vote was rejected, user not found");
+      return false;
     }
+    roomLogger.info({ userName: participant.name }, "User cast vote");
+    return true;
   }
 
   clearVotes(id: string, userId: string): boolean {
@@ -136,9 +131,7 @@ export class RoomManager {
       return false;
     }
 
-    const votedCount = Array.from(room.participants.values()).filter(
-      (participant) => participant.hasVoted,
-    ).length;
+    const votedCount = room.getCurrentRoundState().votes.length;
 
     room.resetForNewRound();
 
@@ -162,49 +155,37 @@ export class RoomManager {
     return room.toState();
   }
 
-  startReveal(id: string, userId: string, namespace: PokerNamespace): void {
+  startReveal(id: string, userId: string): boolean {
     const roomId = this.normalizeRoomId(id);
     const roomLogger = logger.child({ roomId, userId });
     const room = this.rooms.get(roomId);
     if (!room) {
       roomLogger.warn("Reveal was rejected, room not found");
-      return;
+      return false;
     }
 
     // Check if user can reveal votes (only owners)
     if (!room.canRevealVotes(userId)) {
       roomLogger.warn("Reveal was rejected, insufficient permissions");
-      return;
+      return false;
     }
 
-    if (!this.hasAnyVotes(roomId)) {
+    if (!room.hasAnyVotes()) {
       roomLogger.warn("Reveal was blocked, no votes");
-      return;
+      return false;
     }
-
-    const votedCount = Array.from(room.participants.values()).filter(
-      (participant) => participant.hasVoted,
-    ).length;
-    roomLogger.info(
-      {
-        votedCount,
-        totalParticipants: room.participants.size,
-      },
-      "Reveal was started",
-    );
 
     const unanimousValue = room.revealCurrentRound();
 
     roomLogger.info(
       {
         votesRevealed: room.getCurrentRoundState().votes.length,
+        totalParticipants: room.participants.size,
         unanimousValue: unanimousValue ?? "none",
       },
-      "Reveal was completed",
+      "Votes were revealed",
     );
-
-    const updatedState = this.getState(roomId);
-    if (updatedState) namespace.to(roomId).emit("room:state", updatedState);
+    return true;
   }
 
   leaveRoom(
@@ -240,21 +221,6 @@ export class RoomManager {
       "Room participant count was updated",
     );
     return { roomDeleted: false, wasInRoom };
-  }
-
-  findUserRoom(userId: string): string | null {
-    for (const [roomId, room] of this.rooms.entries()) {
-      if (room.participants.has(userId)) {
-        return roomId;
-      }
-    }
-    return null;
-  }
-
-  findUserRooms(userId: string): string[] {
-    return Array.from(this.rooms.entries())
-      .filter(([, room]) => room.participants.has(userId))
-      .map(([roomId]) => roomId);
   }
 
   updateParticipantName(

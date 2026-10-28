@@ -28,6 +28,14 @@ export default class Round {
     this.status = "voting";
   }
 
+  getVotes(): readonly RoundVote[] {
+    return this.votes;
+  }
+
+  hasVoted(userId: string): boolean {
+    return this.votes.some((vote) => vote.id === userId);
+  }
+
   markRevealed(): void {
     this.status = "revealed";
   }

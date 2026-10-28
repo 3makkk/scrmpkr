@@ -1,19 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import RoomManager from "../src/roomManager";
-import type { PokerNamespace } from "../src/roomManagerTypes";
 import { FIB_DECK } from "../src/types";
 
 describe("RoomManager", () => {
   let manager: RoomManager;
-  let mockNamespace: PokerNamespace;
 
   beforeEach(() => {
     manager = new RoomManager();
-    mockNamespace = {
-      to: vi.fn(() => ({
-        emit: vi.fn().mockReturnValue(true),
-      })),
-    };
   });
 
   describe("Room Creation", () => {
@@ -212,7 +205,7 @@ describe("RoomManager", () => {
       manager.castVote("test-room", "user1", 5);
       manager.castVote("test-room", "owner", 5);
 
-      manager.startReveal("test-room", "owner", mockNamespace);
+      manager.startReveal("test-room", "owner");
 
       const state = manager.getState("test-room");
       expect(state?.currentRoundState.status).toBe("revealed");
@@ -288,7 +281,7 @@ describe("RoomManager", () => {
       manager.castVote("test-room", "user1", 3);
       manager.castVote("test-room", "user2", "?");
 
-      manager.startReveal("test-room", "owner", mockNamespace);
+      manager.startReveal("test-room", "owner");
 
       const state = manager.getState("test-room");
       expect(state?.currentRoundState.stats.average).toBe("2.0"); // (1+3)/2
@@ -299,7 +292,7 @@ describe("RoomManager", () => {
       manager.castVote("test-room", "owner", "?");
       manager.castVote("test-room", "user1", "?");
 
-      manager.startReveal("test-room", "owner", mockNamespace);
+      manager.startReveal("test-room", "owner");
 
       const state = manager.getState("test-room");
       expect(state?.currentRoundState.stats.average).toBe("N/A");
@@ -311,7 +304,7 @@ describe("RoomManager", () => {
       manager.castVote("test-room", "user1", 5);
       manager.castVote("test-room", "user2", 5);
 
-      manager.startReveal("test-room", "owner", mockNamespace);
+      manager.startReveal("test-room", "owner");
 
       const state = manager.getState("test-room");
       expect(state?.currentRoundState.stats.hasConsensus).toBe(true);
@@ -386,7 +379,7 @@ describe("RoomManager", () => {
       // Round 1
       manager.castVote("test-room", "owner", 3);
       manager.castVote("test-room", "user1", 5);
-      manager.startReveal("test-room", "owner", mockNamespace);
+      manager.startReveal("test-room", "owner");
 
       let state = manager.getState("test-room");
       expect(state?.currentRound).toBe(1);
@@ -415,34 +408,29 @@ describe("RoomManager", () => {
       );
     });
 
-    it("emits room state when reveal starts", () => {
+    it("reports success when reveal starts", () => {
       manager.castVote("test-room", "owner", 5);
       manager.castVote("test-room", "user1", 5);
 
-      manager.startReveal("test-room", "owner", mockNamespace);
-
-      expect(mockNamespace.to).toHaveBeenCalledWith("test-room");
+      expect(manager.startReveal("test-room", "owner")).toBe(true);
     });
 
     it("prevents reveal when no votes exist", () => {
-      manager.startReveal("test-room", "owner", mockNamespace);
+      expect(manager.startReveal("test-room", "owner")).toBe(false);
 
       const state = manager.getState("test-room");
       expect(state?.currentRoundState.status).toBe("voting");
-      expect(mockNamespace.to).not.toHaveBeenCalled();
     });
 
     it("handles reveal for non-existent room", () => {
-      // Should not throw
-      manager.startReveal("nonexistent-room", "owner", mockNamespace);
-      expect(mockNamespace.to).not.toHaveBeenCalled();
+      expect(manager.startReveal("nonexistent-room", "owner")).toBe(false);
     });
 
     it("returns unanimous value when all votes are the same", () => {
       manager.castVote("test-room", "owner", 8);
       manager.castVote("test-room", "user1", 8);
 
-      manager.startReveal("test-room", "owner", mockNamespace);
+      manager.startReveal("test-room", "owner");
 
       const state = manager.getState("test-room");
       expect(state?.currentRoundState.stats.hasConsensus).toBe(true);
@@ -504,7 +492,7 @@ describe("RoomManager", () => {
     });
   });
 
-  describe("Find User Room", () => {
+  describe("Leaving on disconnect", () => {
     beforeEach(() => {
       manager.createRoom(
         "room-one",
@@ -523,25 +511,10 @@ describe("RoomManager", () => {
       );
     });
 
-    it("finds the room a user is in", () => {
-      const roomId = manager.findUserRoom("user2");
-      expect(roomId).toBe("room-one");
-    });
-
-    it("returns null for user not in any room", () => {
-      const roomId = manager.findUserRoom("nonexistent-user");
-      expect(roomId).toBeNull();
-    });
-
     it("user can leave their room via disconnect flow", () => {
       // Simulate disconnect: find room and leave
-      const roomId = manager.findUserRoom("user2");
-      expect(roomId).toBe("room-one");
-
-      if (roomId) {
-        const result = manager.leaveRoom(roomId, "user2");
-        expect(result).toEqual({ roomDeleted: false, wasInRoom: true });
-      }
+      const result = manager.leaveRoom("room-one", "user2");
+      expect(result).toEqual({ roomDeleted: false, wasInRoom: true });
 
       const roomState = manager.getState("room-one");
       expect(roomState?.participants.map((p) => p.id)).not.toContain("user2");
@@ -555,13 +528,8 @@ describe("RoomManager", () => {
         "participant",
       );
 
-      const roomId = manager.findUserRoom("solo-user");
-      expect(roomId).toBe("solo-room");
-
-      if (roomId) {
-        const result = manager.leaveRoom(roomId, "solo-user");
-        expect(result).toEqual({ roomDeleted: true, wasInRoom: true });
-      }
+      const result = manager.leaveRoom("solo-room", "solo-user");
+      expect(result).toEqual({ roomDeleted: true, wasInRoom: true });
 
       expect(manager.getState("solo-room")).toBeNull();
     });
@@ -726,7 +694,7 @@ describe("RoomManager", () => {
       manager.castVote("test-room", "user1", 5);
 
       // Start reveal
-      manager.startReveal("test-room", "owner", mockNamespace);
+      manager.startReveal("test-room", "owner");
 
       let state = manager.getState("test-room");
       expect(state?.currentRoundState.status).toBe("revealed");
@@ -757,9 +725,9 @@ describe("RoomManager", () => {
       manager.castVote("test-room", "user1", 3);
 
       // Multiple reveals should be safe
-      manager.startReveal("test-room", "owner", mockNamespace);
-      manager.startReveal("test-room", "owner", mockNamespace);
-      manager.startReveal("test-room", "owner", mockNamespace);
+      manager.startReveal("test-room", "owner");
+      manager.startReveal("test-room", "owner");
+      manager.startReveal("test-room", "owner");
 
       const state = manager.getState("test-room");
       expect(state?.currentRoundState.status).toBe("revealed");
@@ -822,7 +790,7 @@ describe("RoomManager", () => {
 
       // Test with only "?" votes
       manager.castVote("stats-room", "owner", "?");
-      manager.startReveal("stats-room", "owner", mockNamespace);
+      manager.startReveal("stats-room", "owner");
 
       let state = manager.getState("stats-room");
       expect(state?.currentRoundState.stats.average).toBe("N/A");
@@ -839,7 +807,7 @@ describe("RoomManager", () => {
       // Test with mixed numeric and "?" votes
       manager.castVote("stats-room", "owner", 5);
       manager.castVote("stats-room", "user1", "?");
-      manager.startReveal("stats-room", "owner", mockNamespace);
+      manager.startReveal("stats-room", "owner");
 
       state = manager.getState("stats-room");
       expect(state?.currentRoundState.stats.average).toBe("5.0");
@@ -903,18 +871,6 @@ describe("RoomManager", () => {
       expect(manager.updateParticipantRole("nope", "u1", "visitor")).toBe(
         false,
       );
-    });
-  });
-
-  describe("findUserRooms", () => {
-    it("returns every room the user is a participant in", () => {
-      manager.createRoom("room-a", { id: "u1", name: "U1" }, "participant");
-      manager.createRoom("room-b", { id: "u2", name: "U2" }, "participant");
-      manager.joinRoom("room-b", { id: "u1", name: "U1" }, "participant");
-
-      expect(manager.findUserRooms("u1").sort()).toEqual(["room-a", "room-b"]);
-      expect(manager.findUserRooms("u2")).toEqual(["room-b"]);
-      expect(manager.findUserRooms("nobody")).toEqual([]);
     });
   });
 });
