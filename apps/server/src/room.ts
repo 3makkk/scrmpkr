@@ -12,8 +12,6 @@ import Round from "./round.js";
 export type Participant = {
   id: string;
   name: string;
-  hasVoted: boolean;
-  value?: number | "?";
   role: UserRole;
 };
 
@@ -44,12 +42,10 @@ export default class Room {
   private currentRoundTracker: Round;
 
   addParticipant(user: User, role: UserRole = "participant"): void {
-    this.participants.set(user.id, {
-      id: user.id,
-      name: user.name,
-      hasVoted: false,
-      role: role,
-    });
+    this.participants.set(user.id, { id: user.id, name: user.name, role });
+    // A vote cast before leaving survives in the round tracker; keep its name
+    // in sync when the voter rejoins under a new name.
+    this.currentRoundTracker.updateParticipantName(user.id, user.name);
   }
 
   removeParticipant(userId: string): boolean {
@@ -63,12 +59,7 @@ export default class Room {
     if (!participant) return false;
 
     participant.name = newName;
-
-    // Also update the name in the current round tracker if they have voted
-    if (participant.hasVoted) {
-      this.currentRoundTracker.updateParticipantName(userId, newName);
-    }
-
+    this.currentRoundTracker.updateParticipantName(userId, newName);
     return true;
   }
 
@@ -76,9 +67,9 @@ export default class Room {
     const participant = this.participants.get(userId);
     if (!participant) return false;
 
-    // Only the role changes. hasVoted / value and the round tracker are left
-    // untouched: a vote already cast survives in the current round exactly as
-    // it does when a voter leaves.
+    // Only the role changes. The round tracker is left untouched: a vote
+    // already cast survives in the current round exactly as it does when a
+    // voter leaves.
     participant.role = newRole;
     return true;
   }
@@ -86,8 +77,6 @@ export default class Room {
   recordVote(userId: string, value: number | "?"): Participant | undefined {
     const participant = this.participants.get(userId);
     if (!participant) return undefined;
-    participant.hasVoted = true;
-    participant.value = value;
     this.currentRoundTracker.addOrUpdateVote(
       { id: participant.id, name: participant.name },
       value,
@@ -98,17 +87,13 @@ export default class Room {
   resetForNewRound(): void {
     this.currentRound += 1;
     this.currentRoundTracker = new Round(this.currentRound);
-    for (const participant of this.participants.values()) {
-      participant.hasVoted = false;
-      delete participant.value;
-    }
   }
 
   revealCurrentRound(): number | undefined {
     this.currentRoundTracker.markRevealed();
     const numericValues = this.currentRoundTracker
-      .toState()
-      .votes.filter((vote) => typeof vote.value === "number")
+      .getVotes()
+      .filter((vote) => typeof vote.value === "number")
       .map((vote) => vote.value as number);
     const unique = [...new Set(numericValues)];
     return unique.length === 1 && numericValues.length > 0
@@ -117,12 +102,7 @@ export default class Room {
   }
 
   hasAnyVotes(): boolean {
-    return (
-      this.currentRoundTracker.toState().votes.length > 0 ||
-      Array.from(this.participants.values()).some(
-        (participant) => participant.hasVoted,
-      )
-    );
+    return this.currentRoundTracker.getVotes().length > 0;
   }
 
   getCurrentRoundState(): RoundState {
@@ -141,7 +121,7 @@ export default class Room {
         (participant) => ({
           id: participant.id,
           name: participant.name,
-          hasVoted: participant.hasVoted,
+          hasVoted: this.currentRoundTracker.hasVoted(participant.id),
           role: participant.role,
         }),
       ),

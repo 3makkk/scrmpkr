@@ -5,7 +5,7 @@ This is the main entry point for working in this repository. `README.md` covers 
 ## Project Structure & Module Organization
 
 - `apps/frontend/`: React 19 + Vite + TypeScript app (`src/` with `components/`, `pages/`, `hooks/`, `AuthProvider.tsx`, `socket.ts`). Tests in `apps/frontend/__tests__/`.
-- `apps/server/`: Express + Socket.io TypeScript API (`index.ts`, `roomManager.ts`, `room.ts`, `round.ts`, `roundStats.ts`, `metrics.ts`, `logger.ts`). Tests in `apps/server/__tests__/`.
+- `apps/server/`: Express + Socket.io TypeScript API (`index.ts`, `socketHandlers.ts`, `roomManager.ts`, `room.ts`, `round.ts`, `roundStats.ts`, `metrics.ts`, `logger.ts`). Tests in `apps/server/__tests__/`.
 - `apps/e2e/`: Playwright end-to-end tests simulating user interactions. Tests in `apps/e2e/tests/`.
 - `packages/shared/` (`@scrmpkr/shared`): shared TypeScript types, the typed Socket.io event contracts, and the RBAC permission system (`permissions.ts`). Built to `dist/`; the apps import the compiled output.
 - Workspace: root `package.json` (pnpm scripts), `pnpm-workspace.yaml`, shared lockfile. Env examples: `apps/frontend/.env.example`, `apps/server/.env.example`.
@@ -25,7 +25,7 @@ The `apps/frontend/src/components/` directory follows a **hybrid domain + type o
 Realtime Scrum Poker app: three apps plus one shared package, wired over Socket.io.
 
 - **`packages/shared`** is the contract shared by client and server: domain types (`RoomState`, `RoundState`, `Participant`, `UserRole`), the typed Socket.io event interfaces (`ServerToClientEvents`, `ClientToServerEvents`), and the RBAC permission system. See `docs/ACL_DOCUMENTATION.md` for the role/resource/action model.
-- **`apps/server`** sets up the typed Socket.io server in `index.ts` and manages the connection lifecycle (including enforcing a single active socket per userId). Authentication is a **placeholder**: the server reads `name`/`userId` from the socket handshake auth — it does not verify a token. Room state lives in memory (`RoomManager` → `Room` → `Round`; `roundStats.ts` computes vote statistics), so rooms disappear on restart. OpenTelemetry metrics are exported via Prometheus at `:9464/metrics`; logging is `pino`.
+- **`apps/server`** sets up the typed Socket.io server in `index.ts`; `socketHandlers.ts` registers the event handlers and manages the connection lifecycle (including enforcing a single active socket per userId). The server tracks each socket's room in `socket.data.roomId`, so in-room events carry no `roomId`. Authentication is a **placeholder**: the server reads `name`/`userId` from the socket handshake auth — it does not verify a token. Room state lives in memory (`RoomManager` → `Room` → `Round`; `roundStats.ts` computes vote statistics), so rooms disappear on restart. OpenTelemetry metrics are exported via Prometheus at `:9464/metrics`; logging is `pino`.
 - **`apps/frontend`** is React 19 + Vite + Tailwind v4 + React Router. `socket.ts` is the typed Socket.io client; `AuthProvider.tsx` handles the placeholder Azure AD auth and name-based login (stored in the browser). Sentry and React Compiler are enabled.
 - **`apps/e2e`** drives the full app with Playwright, using page/domain objects in `tests/domain-objects` and `tests/helpers.ts`.
 

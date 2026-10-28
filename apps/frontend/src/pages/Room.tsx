@@ -57,18 +57,6 @@ export default function Room() {
     );
   }
 
-  // Show loading while joining room
-  if (isLoading || !roomState) {
-    return (
-      <PageLayout>
-        <div className="flex min-h-[400px] flex-col items-center justify-center">
-          <LoadingSpinner />
-          <p className="mt-4 text-gray-600">Joining room...</p>
-        </div>
-      </PageLayout>
-    );
-  }
-
   if (error) {
     return (
       <PageLayout>
@@ -82,6 +70,18 @@ export default function Room() {
           >
             Return Home
           </button>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // Show loading while joining room
+  if (isLoading || !roomState) {
+    return (
+      <PageLayout>
+        <div className="flex min-h-[400px] flex-col items-center justify-center">
+          <LoadingSpinner />
+          <p className="mt-4 text-gray-600">Joining room...</p>
         </div>
       </PageLayout>
     );

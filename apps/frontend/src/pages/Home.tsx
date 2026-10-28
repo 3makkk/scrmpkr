@@ -56,7 +56,9 @@ export default function Home() {
       },
       sanitized,
       (exists) => {
-        if (exists) {
+        if (exists === null) {
+          setCreateError("Could not reach the server. Please try again.");
+        } else if (exists) {
           setCreateError(`Room "${sanitized}" already exists.`);
         } else {
           navigate(`/r/${sanitized}`);
