@@ -170,7 +170,6 @@ const Name: React.FC<NameProps> = ({
   return (
     <Badge
       bgClass={bgClass ?? "bg-gray-800/60"}
-      rounded="lg"
       className={clsx("border border-gray-700/40 whitespace-nowrap", className)}
       {...rest}
     >

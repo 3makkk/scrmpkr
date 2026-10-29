@@ -9,8 +9,8 @@ export default function LoadingSpinner({
     <div className="flex min-h-screen items-center justify-center">
       <Card className="text-center">
         <div className="animate-pulse">
-          <div className="mx-auto mb-6 h-10 w-10 animate-spin rounded-full border-3 border-gray-700 border-t-blue-500"></div>
-          <div className="text-lg font-medium text-white">{message}</div>
+          <div className="border-line border-t-fg mx-auto mb-6 h-10 w-10 animate-spin rounded-full border-3"></div>
+          <div className="text-fg text-lg font-medium">{message}</div>
         </div>
       </Card>
     </div>

@@ -5,39 +5,18 @@ import type { UIProps } from "../uiTypes";
 export type BadgeProps = UIProps<
   "span",
   {
-    bgClass?: string; // Tailwind background utilities e.g. "bg-blue-600"
-    rounded?: "full" | "lg" | "md" | "sm" | "none";
+    bgClass?: string; // Tailwind background utility, e.g. "bg-accent"
   }
 >;
 
 const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
-  (
-    {
-      children,
-      bgClass = "bg-gray-900/70",
-      className,
-      rounded = "lg",
-      ...rest
-    },
-    ref,
-  ) => {
-    const radiusMap: Record<NonNullable<BadgeProps["rounded"]>, string> = {
-      full: "rounded-full",
-      lg: "rounded-lg",
-      md: "rounded-md",
-      sm: "rounded-sm",
-      none: "rounded-none",
-    };
-    const radiusClass = radiusMap[rounded];
-
+  ({ children, bgClass = "bg-surface-inset", className, ...rest }, ref) => {
     return (
       <span
         ref={ref}
         className={clsx(
           bgClass,
-          "inline-flex items-center text-white",
-          radiusClass,
-          "px-3 py-1",
+          "rounded-chip text-fg inline-flex items-center px-3 py-1",
           className,
         )}
         {...rest}

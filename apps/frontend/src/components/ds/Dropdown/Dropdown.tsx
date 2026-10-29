@@ -208,8 +208,8 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
             <div
               ref={menuRef}
               className={clsx(
-                "absolute rounded-lg border border-gray-700 bg-gray-800",
-                "animate-fade-in-scale z-50 shadow-lg",
+                "rounded-card border-line bg-surface-raised absolute border backdrop-blur-xl",
+                "animate-fade-in-scale z-50 shadow-lg shadow-black/40",
                 getPlacementClasses(),
               )}
             >
