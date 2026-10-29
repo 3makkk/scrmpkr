@@ -4,9 +4,10 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-// Guards the visual system (docs/DESIGN_PRINCIPLES.md): components use the
-// design tokens from index.css instead of raw palette classes and one-off
-// state styles.
+// Guards the visual system (docs/DESIGN_PRINCIPLES.md): components and their
+// stories use the design tokens from index.css instead of raw palette classes
+// and one-off state styles. Stories are included because they are the
+// examples people copy.
 
 const SRC = fileURLToPath(new URL("../src", import.meta.url));
 
@@ -18,6 +19,9 @@ const RULES: Record<string, RegExp> = {
   "old-focus": /focus:(ring|outline-none)/g,
   weights: /font-(light|extrabold|black)/g,
   emoji: /[🗳🎬👁]/gu,
+  // White/black washes bypass the surface tokens (the modal backdrop is the
+  // one exception).
+  "untokened-fill": /(?<!backdrop:)\bbg-(white|black)\/\d+/g,
 };
 
 // Files not yet migrated to the tokens. Must stay empty: migrate a file
@@ -26,7 +30,7 @@ const PENDING: string[] = [];
 
 function sourceFiles(): string[] {
   return (readdirSync(SRC, { recursive: true }) as string[])
-    .filter((file) => /\.tsx?$/.test(file) && !file.endsWith(".stories.tsx"))
+    .filter((file) => /\.tsx?$/.test(file))
     .sort();
 }
 

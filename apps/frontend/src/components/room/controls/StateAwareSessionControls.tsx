@@ -50,7 +50,7 @@ export default function StateAwareSessionControls() {
         >
           Reveal votes
           <span
-            className="rounded-full bg-white/20 px-2 py-0.5 text-xs tabular-nums"
+            className="bg-surface-page/40 rounded-full px-2 py-0.5 text-xs tabular-nums"
             data-testid="voting-progress"
           >
             {votedActiveParticipants}/{activeParticipants.length}

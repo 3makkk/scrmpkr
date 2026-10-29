@@ -49,7 +49,7 @@ export default function ContextualTeamStatus() {
             isYou={isYou}
             status={statusFor(participant)}
             nameTestId={`${testIdPrefix}-name-${participant.name}`}
-            className="animate-slide-in-left lg:w-full"
+            className="animate-slide-in-left max-w-full lg:w-full"
             style={{ animationDelay: `${index * 50}ms` }}
             data-testid={`${testIdPrefix}-${participant.name}`}
           />

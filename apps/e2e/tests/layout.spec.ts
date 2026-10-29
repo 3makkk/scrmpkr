@@ -71,4 +71,41 @@ test.describe("Room layout on phones", () => {
       await expect(lastCard).toHaveAttribute("aria-pressed", "true");
     });
   });
+
+  test("a long name truncates instead of pushing the status off a phone screen", async ({
+    browser,
+  }) => {
+    const longName = "x".repeat(50);
+    const host = await TestUser.create(browser, "Host");
+    const longNamed = await TestUser.create(browser, longName);
+    users.push(host, longNamed);
+    // Viewed by someone else: your own row reads "You".
+    await host.page.setViewportSize({ width: 390, height: 844 });
+
+    await host.navigateToHome();
+    await host.fillLoginForm();
+    const room = await TestRoom.createByUser(
+      host,
+      `layout-longname-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+    );
+    await room.addUser(host, "FACILITATOR");
+    await longNamed.navigateToHome();
+    await longNamed.fillLoginForm();
+    await room.addUser(longNamed, "PARTICIPANT");
+
+    const row = host.page.locator(`[data-testid="participant-${longName}"]`);
+    await expect(row).toBeVisible();
+    const fits = await row.evaluate((element) => {
+      const sidebar = element.closest("aside");
+      const status = element.lastElementChild?.getBoundingClientRect();
+      return {
+        rowWidth: element.getBoundingClientRect().width,
+        sidebarWidth: sidebar?.clientWidth ?? 0,
+        statusRight: status?.right ?? Number.POSITIVE_INFINITY,
+        viewport: window.innerWidth,
+      };
+    });
+    expect(fits.rowWidth).toBeLessThanOrEqual(fits.sidebarWidth);
+    expect(fits.statusRight).toBeLessThanOrEqual(fits.viewport);
+  });
 });
