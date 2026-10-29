@@ -7,6 +7,7 @@ import RoleSelectionForm from "../components/auth/RoleSelectionForm";
 import ConfettiOverlay from "../components/core/effects/ConfettiOverlay";
 import LoadingSpinner from "../components/core/layout/LoadingSpinner";
 import PageLayout from "../components/core/layout/PageLayout";
+import Button from "../components/ds/Button/Button";
 import PrimaryActionZone from "../components/poker/voting/PrimaryActionZone";
 import StateAwareSessionControls from "../components/room/controls/StateAwareSessionControls";
 import RoomContextBar from "../components/room/header/RoomContextBar";
@@ -61,15 +62,11 @@ export default function Room() {
     return (
       <PageLayout>
         <div className="flex min-h-[400px] flex-col items-center justify-center">
-          <h2 className="mb-4 text-xl font-semibold text-red-600">Error</h2>
-          <p className="text-gray-600">{error}</p>
-          <button
-            type="button"
-            className="mt-6 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-            onClick={() => navigate("/")}
-          >
+          <h2 className="text-danger mb-4 text-xl font-medium">Error</h2>
+          <p className="text-fg-muted">{error}</p>
+          <Button type="button" className="mt-6" onClick={() => navigate("/")}>
             Return Home
-          </button>
+          </Button>
         </div>
       </PageLayout>
     );
@@ -81,7 +78,7 @@ export default function Room() {
       <PageLayout>
         <div className="flex min-h-[400px] flex-col items-center justify-center">
           <LoadingSpinner />
-          <p className="mt-4 text-gray-600">Joining room...</p>
+          <p className="text-fg-muted mt-4">Joining room...</p>
         </div>
       </PageLayout>
     );

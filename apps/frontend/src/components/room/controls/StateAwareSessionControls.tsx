@@ -43,7 +43,7 @@ export default function StateAwareSessionControls() {
           type="button"
           onClick={revealVotes}
           className={clsx(
-            "flex items-center gap-3 rounded-full! shadow-xl shadow-blue-950/50",
+            "flex items-center gap-3 rounded-full! shadow-xl shadow-black/40",
             allActiveVoted && "animate-glow-pulse",
           )}
           data-testid="reveal-votes-button"
@@ -67,7 +67,7 @@ export default function StateAwareSessionControls() {
           type="button"
           onClick={clearVotes}
           variant="primary"
-          className="rounded-full! shadow-xl shadow-blue-950/50"
+          className="rounded-full! shadow-xl shadow-black/40"
           data-testid="clear-votes-button"
         >
           Start Next Round

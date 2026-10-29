@@ -1,50 +1,39 @@
 import clsx from "clsx";
 import { forwardRef } from "react";
+import { focusRing } from "../states";
 import type { UIProps } from "../uiTypes";
 
-type Variant = "primary" | "secondary" | "danger";
+type Variant = "primary" | "secondary" | "tertiary" | "danger";
 
 type ButtonProps = UIProps<"button", { variant?: Variant }>;
+
+// One action hierarchy built on one accent colour:
+// primary = solid accent, secondary = outline, tertiary = text,
+// danger = outline in red. At most one primary per view.
+const variantClasses: Record<Variant, string> = {
+  primary: "bg-accent text-white hover:bg-accent-hover",
+  secondary:
+    "border border-line-strong bg-transparent text-fg hover:border-fg-muted hover:bg-surface-hover",
+  tertiary: "bg-transparent text-fg-muted hover:text-fg",
+  danger:
+    "border border-danger bg-transparent text-danger hover:bg-surface-hover",
+};
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     { variant = "primary", className, children, disabled = false, ...props },
     ref,
   ) => {
-    const getVariantClasses = (variant: Variant) => {
-      const baseClasses = [
-        "font-semibold px-6 py-3 rounded-lg focus:outline-none focus:ring-2",
-        "focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50",
-        "disabled:cursor-not-allowed transition-transform duration-150",
-        "hover:scale-[1.01] active:scale-[0.99]",
-      ];
-
-      switch (variant) {
-        case "secondary":
-          return clsx(
-            baseClasses,
-            "border border-gray-700/60 bg-gray-800/80 backdrop-blur-sm",
-            "font-medium text-gray-200 shadow-md focus:ring-gray-400",
-          );
-        case "danger":
-          return clsx(
-            baseClasses,
-            "bg-gradient-to-r from-red-600 to-red-700",
-            "text-white shadow-lg focus:ring-red-400",
-          );
-        default: // primary
-          return clsx(
-            baseClasses,
-            "bg-gradient-to-r from-blue-600 to-blue-700",
-            "text-white shadow-lg focus:ring-blue-400",
-          );
-      }
-    };
-
     return (
       <button
         ref={ref}
-        className={clsx(getVariantClasses(variant), className)}
+        className={clsx(
+          "rounded-control px-4 py-2.5 text-sm font-medium transition-colors duration-150",
+          "disabled:cursor-not-allowed disabled:opacity-50",
+          focusRing,
+          variantClasses[variant],
+          className,
+        )}
         disabled={disabled}
         {...props}
       >

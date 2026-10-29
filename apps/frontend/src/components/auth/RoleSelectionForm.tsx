@@ -58,7 +58,7 @@ export default function RoleSelectionForm({ roomId, onJoin, onCancel }: Props) {
             {onCancel && (
               <Button
                 type="button"
-                variant="secondary"
+                variant="tertiary"
                 onClick={onCancel}
                 className="sm:min-w-[120px]"
                 data-testid="role-selection-cancel-button"
