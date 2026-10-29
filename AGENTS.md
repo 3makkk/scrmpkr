@@ -72,6 +72,7 @@ Run from the repo root with **pnpm**:
 
 ## UI Component Patterns
 
+- Visual rules (colour tokens, button hierarchy, states, radii, type) are in `docs/DESIGN_PRINCIPLES.md` and enforced by `apps/frontend/__tests__/design-tokens.test.ts`. Use token utilities (`bg-accent`, `text-fg-muted`, …), never raw palette classes.
 - Props typing: all DS components must support every prop of their underlying HTML element. Use `UIProps<Tag, Extra>` from `apps/frontend/src/components/ds/uiTypes.ts`. Example: `type ButtonProps = UIProps<'button', { variant?: 'primary' | 'secondary' }>`.
 - Composition only: prefer children composition over complex props. Avoid nested config objects, render props, or bespoke APIs. Keep extras to simple flags or strings when necessary.
 - Pass-through: always spread unhandled props onto the underlying element to enable `id`, `title`, `onClick`, `data-*`, and `aria-*`.
