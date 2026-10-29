@@ -41,8 +41,11 @@ Use the token utilities, never raw palette classes (`bg-blue-600`,
 | `text-fg` | primary text | — |
 | `text-fg-muted` | secondary text, labels, placeholders | — |
 
-There is no dimmer text token on purpose: `text-fg-muted` (gray-400) is the
-lowest level that still meets WCAG AA on raised surfaces.
+The theme is dim, not black: a blue-grey page (`#18202f`) with lighter raised
+and inset surfaces. There is no dimmer text token on purpose: `text-fg-muted`
+(`#aab1bc`, between gray-400 and gray-300) is the lowest level that still meets
+WCAG AA on every surface, including the selected wash and the "you" row
+(measured ≥ 4.98:1). Re-measure if you change a surface token.
 
 Roles (Participant, Facilitator, Visitor) carry no colour. They are told apart
 by grouping and line icons.
@@ -88,8 +91,8 @@ Do not use `focus:ring-*` or `focus:outline-none`. In Tailwind v4,
 
 ## Surfaces and layout
 
-- Every page sits on `bg-mesh`: the page surface with a faint blue/violet/sky
-  gradient mesh and a fine grain.
+- Every page sits on `bg-mesh`: the blue-grey page surface with a soft
+  blue/violet/sky gradient mesh and a fine grain.
 - Room page: header and participant sidebar sit directly on the background as
   one frame. The voting area (deck, results, observer notice) is one raised
   card (`rounded-card border-line bg-surface-raised`). Do not nest bordered
