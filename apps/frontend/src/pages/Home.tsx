@@ -5,6 +5,7 @@ import { Input } from "../components";
 import LoginForm from "../components/auth/LoginForm";
 import PageLayout from "../components/core/layout/PageLayout";
 import Button from "../components/ds/Button/Button";
+import { AlertIcon } from "../components/ds/Icon/Icon";
 import Card from "../components/poker/shared/Card";
 import { checkRoomExists } from "../socket";
 
@@ -91,15 +92,15 @@ export default function Home() {
     <PageLayout className="flex items-center justify-center px-4">
       <Card className="w-full max-w-lg">
         <div className="animate-fade-in-down mb-10 text-center">
-          <h1 className="animation-delay-100 animate-fade-in-scale mb-3 text-4xl font-light text-white">
+          <h1 className="animation-delay-100 animate-fade-in-scale text-fg mb-3 text-3xl font-medium">
             Scrum Poker
           </h1>
           <p
-            className="animation-delay-200 animate-fade-in-scale mb-4 text-gray-400"
+            className="animation-delay-200 animate-fade-in-scale text-fg-muted mb-4"
             data-testid="welcome-message"
           >
             Welcome back,{" "}
-            <span className="font-semibold text-blue-400">{account.name}</span>
+            <span className="text-fg font-medium">{account.name}</span>
           </p>
         </div>
 
@@ -124,20 +125,20 @@ export default function Home() {
               >
                 Create Random Room
               </Button>
-              <p className="animation-delay-150 animate-fade-in-down text-center text-sm text-gray-500">
+              <p className="animation-delay-150 animate-fade-in-down text-fg-muted text-center text-sm">
                 Custom lets you pick a readable room name to share; Random
                 instantly creates a room with a generated ID.
               </p>
             </div>
           ) : (
             <div className="animate-fade-in-scale space-y-6">
-              <h2 className="animation-delay-100 animate-slide-in-left text-lg font-medium text-gray-200">
+              <h2 className="animation-delay-100 animate-slide-in-left text-fg text-xl font-medium">
                 Choose your room name
               </h2>
               <div className="space-y-3">
                 <label
                   htmlFor="custom-room-name"
-                  className="sr-only block text-sm text-gray-400"
+                  className="text-fg-muted sr-only block text-sm"
                 >
                   Custom room name
                 </label>
@@ -158,15 +159,16 @@ export default function Home() {
                     if (e.key === "Enter") createNamedRoom();
                   }}
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-fg-muted text-xs">
                   Allowed: a-z, hyphen (-), underscore (_). Max 50 characters.
                 </p>
               </div>
               {createError && (
                 <p
-                  className="animate-bounce-in text-sm text-red-500"
+                  className="animate-bounce-in text-danger flex items-center gap-2 text-sm"
                   role="alert"
                 >
+                  <AlertIcon />
                   {createError}
                 </p>
               )}

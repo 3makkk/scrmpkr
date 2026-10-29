@@ -18,12 +18,10 @@ export default function RoomContextBar() {
       <div className="mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-6">
           <div className="flex items-center space-x-2">
-            <h1 className="text-xl font-medium text-white">
-              Room {roomState.id}
-            </h1>
+            <h1 className="text-fg text-xl font-medium">Room {roomState.id}</h1>
           </div>
 
-          <div className="flex items-center space-x-4 text-sm text-gray-400">
+          <div className="text-fg-muted flex items-center space-x-4 text-sm">
             <span>Round {roomState.currentRound}</span>
           </div>
         </div>

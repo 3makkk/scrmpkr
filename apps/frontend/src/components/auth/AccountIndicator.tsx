@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { useState } from "react";
 import { useAuth } from "../../AuthProvider";
 import { useRoom } from "../../hooks/useRoom";
+import Button from "../ds/Button/Button";
 import Card from "../ds/Card/Card";
 import Dropdown from "../ds/Dropdown/Dropdown";
 import Modal from "../ds/Modal/Modal";
@@ -77,25 +78,27 @@ export default function AccountIndicator() {
             className="mb-4"
           />
 
-          <hr className="mb-4 border-gray-700" />
+          <hr className="border-line mb-4" />
 
-          <button
+          <Button
             type="button"
+            variant="tertiary"
             onClick={handleChangeUsername}
-            className="w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 transition-colors duration-150 hover:bg-gray-700 hover:text-white"
+            className="hover:bg-surface-hover w-full px-3 py-2 text-left"
             data-testid="change-username-button"
           >
             Change username
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
+            variant="tertiary"
             onClick={handleChangeRole}
-            className="w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 transition-colors duration-150 hover:bg-gray-700 hover:text-white"
+            className="hover:bg-surface-hover w-full px-3 py-2 text-left"
             data-testid="change-role-button"
           >
             Change role
-          </button>
+          </Button>
         </div>
       </Dropdown>
 
@@ -106,10 +109,10 @@ export default function AccountIndicator() {
       >
         <Card className="w-md">
           <div className="mb-6">
-            <h2 className="mb-2 text-2xl font-medium text-white">
+            <h2 className="text-fg mb-2 text-xl font-medium">
               Change Username
             </h2>
-            <p className="text-gray-400">Choose a new name for this session</p>
+            <p className="text-fg-muted">Choose a new name for this session</p>
           </div>
 
           <UsernameForm
@@ -129,10 +132,8 @@ export default function AccountIndicator() {
       >
         <Card className="w-md">
           <div className="mb-6">
-            <h2 className="mb-2 text-2xl font-medium text-white">
-              Change Role
-            </h2>
-            <p className="text-gray-400">
+            <h2 className="text-fg mb-2 text-xl font-medium">Change Role</h2>
+            <p className="text-fg-muted">
               Switch how you take part in this session
             </p>
           </div>

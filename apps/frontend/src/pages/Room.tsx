@@ -99,7 +99,7 @@ export default function Room() {
         </aside>
 
         {/* Right content - Primary Action Zone as the raised main card */}
-        <main className="relative mx-3 mb-3 flex min-h-0 flex-1 flex-col rounded-2xl border border-gray-700/50 bg-gray-900/75 shadow-2xl shadow-black/40 lg:ml-0">
+        <main className="rounded-card border-line bg-surface-raised relative mx-3 mb-3 flex min-h-0 flex-1 flex-col border lg:ml-0">
           <div className="min-h-0 flex-1 overflow-y-auto pb-20">
             <PrimaryActionZone />
           </div>

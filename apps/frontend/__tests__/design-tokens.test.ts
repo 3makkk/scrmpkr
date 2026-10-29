@@ -20,19 +20,9 @@ const RULES: Record<string, RegExp> = {
   emoji: /[🗳🎬👁]/gu,
 };
 
-// Files not yet migrated to the tokens. Each migration task removes its files;
-// the list must end up empty.
-const PENDING: string[] = [
-  "components/auth/AccountIndicator.tsx",
-  "components/auth/LoginForm.tsx",
-  "components/auth/UserInfoSection.tsx",
-  "components/ds/Motion/Motion.tsx",
-  "components/poker/results/VotingResults.tsx",
-  "components/poker/voting/VotingDeck.tsx",
-  "components/room/header/RoomContextBar.tsx",
-  "pages/Home.tsx",
-  "pages/Room.tsx",
-];
+// Files not yet migrated to the tokens. Must stay empty: migrate a file
+// instead of listing it here.
+const PENDING: string[] = [];
 
 function sourceFiles(): string[] {
   return (readdirSync(SRC, { recursive: true }) as string[])
@@ -58,6 +48,10 @@ describe("design tokens", () => {
     for (const file of PENDING) {
       expect(violations(file).length, file).toBeGreaterThan(0);
     }
+  });
+
+  it("nothing is pending", () => {
+    expect(PENDING).toEqual([]);
   });
 
   it("index.css defines the token set", () => {

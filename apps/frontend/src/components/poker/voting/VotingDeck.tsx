@@ -26,8 +26,8 @@ export default function VotingDeck() {
     return (
       <div className="animate-fade-in-scale p-6">
         <div className="py-12 text-center">
-          <h2 className="mb-4 text-lg font-medium text-white">Observer Mode</h2>
-          <p className="text-gray-400">
+          <h2 className="text-fg mb-4 text-xl font-medium">Observer Mode</h2>
+          <p className="text-fg-muted">
             You're viewing this session as a visitor. You can observe but not
             participate in voting.
           </p>
