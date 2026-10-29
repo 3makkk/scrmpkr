@@ -30,7 +30,6 @@ const PENDING: string[] = [
   "components/poker/results/VotingResults.tsx",
   "components/poker/voting/VotingDeck.tsx",
   "components/room/header/RoomContextBar.tsx",
-  "components/room/status/ContextualTeamStatus.tsx",
   "pages/Home.tsx",
   "pages/Room.tsx",
 ];

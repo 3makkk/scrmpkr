@@ -1,6 +1,7 @@
 import { canVote, type Participant, UserRole } from "@scrmpkr/shared";
 import { useAuth } from "../../../AuthProvider";
 import { useRoom } from "../../../hooks/useRoom";
+import ParticipantRow, { type RowStatus } from "./ParticipantRow";
 
 export default function ContextualTeamStatus() {
   const { roomState } = useRoom();
@@ -21,62 +22,51 @@ export default function ContextualTeamStatus() {
     (p) => p.hasVoted,
   ).length;
 
-  const getParticipantStatus = (participant: Participant) => {
-    if (participant.role === UserRole.VISITOR) {
-      return "observing";
-    }
+  const getStatus = (participant: Participant): RowStatus => {
     if (isRoundRevealed) {
       const vote = currentRoundState?.votes.find(
         (v) => v.id === participant.id,
       );
-      return vote ? String(vote.value) : "—";
-    } else if (participant.hasVoted) {
-      return "voted";
-    } else {
-      return "thinking";
+      return { kind: "revealed", value: vote ? String(vote.value) : null };
     }
+    return participant.hasVoted ? { kind: "voted" } : { kind: "thinking" };
   };
 
-  const getParticipantIndicator = (participant: Participant) => {
-    if (participant.role === UserRole.VISITOR) {
-      return <div className="h-3 w-3 rounded-full bg-purple-500"></div>;
-    }
-    if (isRoundRevealed) {
-      const vote = currentRoundState?.votes.find(
-        (v) => v.id === participant.id,
-      );
-      if (vote) {
+  const renderRows = (
+    group: Participant[],
+    testIdPrefix: string,
+    statusFor: (participant: Participant) => RowStatus,
+  ) => (
+    <div className="flex flex-wrap gap-2 lg:block lg:space-y-1">
+      {group.map((participant, index) => {
+        const isYou = participant.id === account.id;
         return (
-          <div className="flex h-3 w-3 items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white"></div>
+          <ParticipantRow
+            key={participant.id}
+            name={participant.name}
+            displayName={isYou ? "You" : participant.name}
+            role={participant.role}
+            isYou={isYou}
+            status={statusFor(participant)}
+            nameTestId={`${testIdPrefix}-name-${participant.name}`}
+            className="animate-slide-in-left lg:w-full"
+            style={{ animationDelay: `${index * 50}ms` }}
+            data-testid={`${testIdPrefix}-${participant.name}`}
+          />
         );
-      }
-      return <div className="h-3 w-3 rounded-full bg-gray-600"></div>;
-    } else if (participant.hasVoted) {
-      return <div className="h-3 w-3 rounded-full bg-green-500"></div>;
-    } else {
-      return (
-        <div className="h-3 w-3 animate-pulse rounded-full bg-gray-600"></div>
-      );
-    }
-  };
+      })}
+    </div>
+  );
 
-  const getRoleDisplay = (participant: Participant) => {
-    switch (participant.role) {
-      case UserRole.VISITOR:
-        return "👁 Visitor";
-      case UserRole.FACILITATOR:
-        return "🎬 Facilitator";
-      default:
-        return "";
-    }
-  };
+  const headingClass =
+    "text-xs font-medium tracking-wider text-fg-muted uppercase";
 
   return (
     <div className="h-full max-h-64 overflow-y-auto p-4 lg:max-h-none">
       <div className="space-y-6">
         {/* Active Participants - Only those who can vote */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium tracking-wider text-gray-400 uppercase">
+        <div className="space-y-2">
+          <h3 className={headingClass}>
             Active Participants (
             <span data-testid="active-participant-count">
               {votedActiveParticipants}/{activeParticipants.length}
@@ -86,129 +76,31 @@ export default function ContextualTeamStatus() {
               {participants.length}
             </span>
           </h3>
-          <div className="flex flex-wrap gap-2 lg:block lg:space-y-3">
-            {activeParticipants.map((participant, index) => (
-              <div
-                key={participant.id}
-                className={`animate-slide-in-left flex w-auto items-center justify-between rounded-lg border border-gray-700/40 bg-gray-800/40 p-3 lg:w-full`}
-                style={{ animationDelay: `${index * 50}ms` }}
-                data-testid={`participant-${participant.name}`}
-              >
-                <div className="flex items-center space-x-3">
-                  {getParticipantIndicator(participant)}
-                  <div className="flex flex-col">
-                    <span
-                      className={`text-sm font-medium ${
-                        participant.id === account.id
-                          ? "text-blue-400"
-                          : "text-gray-300"
-                      }`}
-                      data-testid={`participant-name-${participant.name}`}
-                    >
-                      {participant.id === account.id ? "You" : participant.name}
-                      {getRoleDisplay(participant) && (
-                        <span className="ml-1 text-xs text-gray-400">
-                          {getRoleDisplay(participant)}
-                        </span>
-                      )}
-                    </span>
-                    {!isRoundRevealed && (
-                      <span className="text-xs text-gray-500">
-                        {getParticipantStatus(participant)}
-                      </span>
-                    )}
-                    {isRoundRevealed && (
-                      <span className="text-xs text-gray-400">
-                        Vote: {getParticipantStatus(participant)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          {renderRows(activeParticipants, "participant", getStatus)}
         </div>
 
         {/* Facilitators - non-voting session managers */}
         {facilitators.length > 0 && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium tracking-wider text-gray-400 uppercase">
+          <div className="space-y-2">
+            <h3 className={headingClass}>
               Facilitators (
               <span data-testid="facilitator-count">{facilitators.length}</span>
               )
             </h3>
-            <div className="flex flex-wrap gap-2 lg:block lg:space-y-3">
-              {facilitators.map((participant, index) => (
-                <div
-                  key={participant.id}
-                  className="animate-slide-in-left flex w-auto items-center justify-between rounded-lg border border-amber-700/40 bg-amber-900/20 p-3 lg:w-full"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                  data-testid={`facilitator-${participant.name}`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="h-3 w-3 rounded-full bg-amber-500"></div>
-                    <div className="flex flex-col">
-                      <span
-                        className={`text-sm font-medium ${
-                          participant.id === account.id
-                            ? "text-amber-400"
-                            : "text-gray-300"
-                        }`}
-                        data-testid={`facilitator-name-${participant.name}`}
-                      >
-                        {participant.id === account.id
-                          ? "You"
-                          : participant.name}
-                        <span className="ml-1 text-xs text-amber-500">🎬</span>
-                      </span>
-                      <span className="text-xs text-gray-500">managing</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {renderRows(facilitators, "facilitator", () => ({
+              kind: "managing",
+            }))}
           </div>
         )}
 
         {/* Visitors - Separate section */}
         {visitors.length > 0 && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium tracking-wider text-gray-400 uppercase">
+          <div className="space-y-2">
+            <h3 className={headingClass}>
               Visitors (
               <span data-testid="visitor-count">{visitors.length}</span>)
             </h3>
-            <div className="flex flex-wrap gap-2 lg:block lg:space-y-3">
-              {visitors.map((participant, index) => (
-                <div
-                  key={participant.id}
-                  className={`animate-slide-in-left flex w-auto items-center justify-between rounded-lg border border-purple-700/40 bg-purple-900/20 p-3 lg:w-full`}
-                  style={{ animationDelay: `${index * 50}ms` }}
-                  data-testid={`visitor-${participant.name}`}
-                >
-                  <div className="flex items-center space-x-3">
-                    {getParticipantIndicator(participant)}
-                    <div className="flex flex-col">
-                      <span
-                        className={`text-sm font-medium ${
-                          participant.id === account.id
-                            ? "text-purple-400"
-                            : "text-gray-300"
-                        }`}
-                        data-testid={`visitor-name-${participant.name}`}
-                      >
-                        {participant.id === account.id
-                          ? "You"
-                          : participant.name}
-                        <span className="ml-1 text-xs text-purple-500">👁</span>
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {getParticipantStatus(participant)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {renderRows(visitors, "visitor", () => ({ kind: "observing" }))}
           </div>
         )}
       </div>
