@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { forwardRef } from "react";
-import { focusRing } from "../states";
+import { controlHeight, focusRing } from "../states";
 import type { UIProps } from "../uiTypes";
 
 type Variant = "primary" | "secondary" | "tertiary" | "danger";
@@ -28,7 +28,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={clsx(
-          "rounded-control px-4 py-2.5 text-sm font-medium transition-colors duration-150",
+          "rounded-control px-5 text-sm font-medium transition-colors duration-150",
+          controlHeight,
           "disabled:cursor-not-allowed disabled:opacity-50",
           focusRing,
           variantClasses[variant],

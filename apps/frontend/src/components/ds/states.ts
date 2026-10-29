@@ -10,3 +10,6 @@ export const selectedSurface = "border-accent-strong bg-accent-soft text-fg";
 
 /** Hover on rows, menu items and unselected options. */
 export const hoverSurface = "hover:bg-surface-hover";
+
+/** One height for buttons and inputs, so they line up side by side. */
+export const controlHeight = "h-12";

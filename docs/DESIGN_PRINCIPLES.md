@@ -59,6 +59,9 @@ by grouping and line icons.
 | `danger` | red outline | destructive actions | (none today) |
 
 - At most one primary per view.
+- Buttons and inputs share one height (`controlHeight` in `ds/states.ts`,
+  48px), so they line up in forms. Only menu items inside a dropdown are
+  compact.
 - No shadows, no scaling on hover or press — only colour changes.
 - Every clickable element is a `Button` or uses `focusRing`; never a bare
   styled `<button>`.

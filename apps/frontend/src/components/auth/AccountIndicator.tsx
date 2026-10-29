@@ -84,7 +84,7 @@ export default function AccountIndicator() {
             type="button"
             variant="tertiary"
             onClick={handleChangeUsername}
-            className="hover:bg-surface-hover w-full px-3 py-2 text-left"
+            className="hover:bg-surface-hover h-auto! w-full px-3! py-2 text-left"
             data-testid="change-username-button"
           >
             Change username
@@ -94,7 +94,7 @@ export default function AccountIndicator() {
             type="button"
             variant="tertiary"
             onClick={handleChangeRole}
-            className="hover:bg-surface-hover w-full px-3 py-2 text-left"
+            className="hover:bg-surface-hover h-auto! w-full px-3! py-2 text-left"
             data-testid="change-role-button"
           >
             Change role
