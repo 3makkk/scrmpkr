@@ -25,10 +25,7 @@ const RULES: Record<string, RegExp> = {
 const PENDING: string[] = [
   "components/auth/AccountIndicator.tsx",
   "components/auth/LoginForm.tsx",
-  "components/auth/RoleOptionCard.tsx",
-  "components/auth/RoleSelectionForm.tsx",
   "components/auth/UserInfoSection.tsx",
-  "components/auth/roleOptions.ts",
   "components/ds/Motion/Motion.tsx",
   "components/poker/results/VotingResults.tsx",
   "components/poker/voting/VotingDeck.tsx",

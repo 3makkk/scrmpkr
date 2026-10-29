@@ -25,11 +25,11 @@ export default function RoleSelectionForm({ roomId, onJoin, onCancel }: Props) {
     <div className="flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-md text-center">
         <div className="mb-8">
-          <h1 className="mb-4 text-3xl font-light text-white">Join Room</h1>
-          <p className="mb-2 text-lg text-gray-400">
-            Room: <span className="font-medium text-white">{roomId}</span>
+          <h1 className="text-fg mb-4 text-3xl font-medium">Join Room</h1>
+          <p className="text-fg-muted mb-2 text-lg">
+            Room: <span className="text-fg font-medium">{roomId}</span>
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-fg-muted text-sm">
             Choose how you'd like to participate
           </p>
         </div>

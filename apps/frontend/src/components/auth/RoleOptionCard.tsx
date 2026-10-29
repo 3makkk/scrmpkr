@@ -1,3 +1,5 @@
+import clsx from "clsx";
+import { focusRing, hoverSurface, selectedSurface } from "../ds/states";
 import type { RoleOption } from "./roleOptions";
 
 type Props = {
@@ -20,6 +22,8 @@ export default function RoleOptionCard({
   onSelect,
   testid,
 }: Props) {
+  const { Icon } = option;
+
   return (
     <button
       type="button"
@@ -27,31 +31,40 @@ export default function RoleOptionCard({
       disabled={disabled}
       aria-current={selected}
       data-testid={testid}
-      className={`flex w-full items-center gap-3 rounded-lg border p-4 text-left transition-all ${
+      className={clsx(
+        "rounded-control flex w-full items-center gap-3 border p-4 text-left transition-colors duration-150",
+        focusRing,
         selected
-          ? `${option.active} text-white ${disabled ? "cursor-default" : ""}`
-          : `border-gray-600 bg-gray-800/40 text-gray-300 ${option.hover}`
-      }`}
+          ? ["border-2", selectedSurface, disabled && "cursor-default"]
+          : [
+              "border-line-strong text-fg-muted",
+              disabled
+                ? "cursor-not-allowed opacity-50"
+                : [hoverSurface, "hover:border-fg-muted"],
+            ],
+      )}
     >
       <span
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg ${option.ring}`}
-        aria-hidden="true"
+        className={clsx(
+          "bg-surface-inset flex size-10 shrink-0 items-center justify-center rounded-full",
+          selected ? "text-fg" : "text-fg-muted",
+        )}
       >
-        {option.icon}
+        <Icon className="size-5" />
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="font-medium">{option.title}</span>
+          <span className="text-fg font-medium">{option.title}</span>
           {badge && (
             <span
-              className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] tracking-wide text-gray-200 uppercase"
+              className="rounded-chip bg-surface-inset text-fg px-2 py-0.5 text-[10px] tracking-wide uppercase"
               data-testid={`${testid}-badge`}
             >
               {badge}
             </span>
           )}
         </div>
-        <div className="text-sm text-gray-400">{option.desc}</div>
+        <div className="text-fg-muted text-sm">{option.desc}</div>
       </div>
     </button>
   );
