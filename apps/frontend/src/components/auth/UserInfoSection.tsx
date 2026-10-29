@@ -35,8 +35,8 @@ const UserInfoSection = forwardRef<HTMLDivElement, UserInfoSectionProps>(
       >
         <UserAvatar name={name} role={role} size="lg" />
         <div>
-          <p className="font-medium text-white">{name}</p>
-          <p className="text-sm text-gray-400">{getRoleDisplayText(role)}</p>
+          <p className="text-fg font-medium">{name}</p>
+          <p className="text-fg-muted text-sm">{getRoleDisplayText(role)}</p>
         </div>
       </div>
     );

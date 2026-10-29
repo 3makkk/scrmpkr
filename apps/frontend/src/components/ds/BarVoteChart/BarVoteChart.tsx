@@ -87,7 +87,13 @@ const BarVoteChart: React.FC<ChartProps> & {
   );
 };
 
-const Row: React.FC<RowProps> = ({ value, className, children, ...rest }) => {
+const Row: React.FC<RowProps> = ({
+  value,
+  colorClass,
+  className,
+  children,
+  ...rest
+}) => {
   const ctx = React.useContext(ChartContext);
   // Count only Name children
   const names: Array<React.ReactElement<unknown>> = [];
@@ -103,11 +109,9 @@ const Row: React.FC<RowProps> = ({ value, className, children, ...rest }) => {
   const effShowCount = ctx?.showCount ?? true;
   let pct = Math.round((count / total) * 100);
   pct = Math.min(100, Math.max(effMinBarPct, pct));
-  const isUnknown = value === "?";
-  const valueTextClass = isUnknown ? "text-purple-300" : "text-blue-300";
-  const barColor = isNumber(value)
-    ? "bg-gradient-to-r from-blue-500 to-blue-600"
-    : "bg-gradient-to-r from-purple-500 to-purple-600";
+  // Numeric votes use the accent; "?" stays neutral and is told apart by its label.
+  const barColor =
+    colorClass ?? (isNumber(value) ? "bg-accent" : "bg-fg-muted/40");
 
   // Visual scaling based on min/max across rows (only affects the value label)
   const minV = typeof effMinVotes === "number" ? effMinVotes : count;
@@ -129,31 +133,32 @@ const Row: React.FC<RowProps> = ({ value, className, children, ...rest }) => {
       <div
         className={clsx(
           "row-span-2 flex items-center justify-end self-stretch pr-1",
-          "text-right leading-none font-black whitespace-nowrap",
-          "drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]",
-          valueTextClass,
+          "text-fg text-right leading-none font-bold whitespace-nowrap",
         )}
         style={{ fontSize: `${valueFontRem}rem`, opacity: valueOpacity }}
       >
         {value}
       </div>
-      <div className="relative h-10 overflow-hidden rounded-xl border border-gray-700/40 bg-gray-800/40 shadow-inner">
+      <div className="rounded-control border-line bg-surface-inset relative h-10 overflow-hidden border">
         <div
-          className={clsx("absolute inset-y-0 left-0 rounded-xl", barColor)}
+          className={clsx(
+            "rounded-control absolute inset-y-0 left-0",
+            barColor,
+          )}
           style={{ width: `${pct}%` }}
         />
         {effShowCount && (
           <div className="absolute top-1/2 right-2 z-10 flex -translate-y-1/2 items-center">
             <Badge
-              bgClass="bg-gray-950/20"
-              className="px-2 py-0.5 text-xs font-bold text-white/80"
+              bgClass="bg-surface-page/40"
+              className="px-2 py-0.5 text-xs font-medium"
             >
               {count}
             </Badge>
           </div>
         )}
       </div>
-      <div className="col-start-2 flex flex-wrap items-center gap-2 text-sm text-white">
+      <div className="text-fg col-start-2 flex flex-wrap items-center gap-2 text-sm">
         {names}
       </div>
     </div>
@@ -169,9 +174,8 @@ const Name: React.FC<NameProps> = ({
 }) => {
   return (
     <Badge
-      bgClass={bgClass ?? "bg-gray-800/60"}
-      rounded="lg"
-      className={clsx("border border-gray-700/40 whitespace-nowrap", className)}
+      bgClass={bgClass ?? "bg-surface-inset"}
+      className={clsx("border-line border whitespace-nowrap", className)}
       {...rest}
     >
       {children}

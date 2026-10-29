@@ -1,6 +1,56 @@
 @import "tailwindcss";
 
+/* Design tokens. See docs/DESIGN_PRINCIPLES.md for what each role may be used for. */
 @theme {
+  /* Accent: primary actions, selected state, focus ring, links, result bars. */
+  --color-accent: var(--color-blue-600);
+  --color-accent-hover: var(--color-blue-700);
+  --color-accent-strong: var(--color-blue-500);
+  --color-accent-soft: color-mix(
+    in oklab,
+    var(--color-blue-500) 14%,
+    transparent
+  );
+  --color-focus: var(--color-blue-400);
+
+  /* Status: "done / good" and errors only. */
+  --color-success: var(--color-green-400);
+  --color-danger: var(--color-red-400);
+
+  /* Surfaces: page, raised (cards, menus, modals), inset (inside a card). */
+  --color-surface-page: var(--color-gray-900);
+  --color-surface-raised: color-mix(
+    in oklab,
+    var(--color-gray-800) 72%,
+    transparent
+  );
+  --color-surface-inset: color-mix(
+    in oklab,
+    var(--color-gray-700) 45%,
+    transparent
+  );
+  --color-surface-hover: color-mix(
+    in oklab,
+    var(--color-white) 6%,
+    transparent
+  );
+
+  /* Lines: dividers and card borders; control outlines. */
+  --color-line: color-mix(in oklab, var(--color-gray-600) 55%, transparent);
+  --color-line-strong: color-mix(
+    in oklab,
+    var(--color-gray-400) 35%,
+    transparent
+  );
+
+  /* Text: primary and muted. No dimmer level, to keep AA contrast. */
+  --color-fg: var(--color-gray-100);
+  --color-fg-muted: var(--color-gray-400);
+
+  --radius-chip: 0.375rem;
+  --radius-control: 0.625rem;
+  --radius-card: 1rem;
+
   --animate-fade-in-scale: fade-in-scale 0.3s ease-out both;
   --animate-fade-in-down: fade-in-down 0.3s ease-out both;
   --animate-bounce-in: bounce-in 0.5s ease-out both;
@@ -121,4 +171,37 @@
 
 @utility animation-duration-* {
   animation-duration: calc(--value(integer) * 1ms);
+}
+
+/* Slight gradient mesh with a grain overlay behind every page. */
+@utility bg-mesh {
+  isolation: isolate;
+  background-color: var(--color-surface-page);
+  background-image:
+    radial-gradient(
+      ellipse 60% 50% at 8% 0%,
+      rgb(59 130 246 / 0.18),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 50% 45% at 95% 12%,
+      rgb(139 92 246 / 0.13),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 70% 100%,
+      rgb(14 165 233 / 0.1),
+      transparent 70%
+    );
+  background-attachment: fixed;
+
+  &::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.08;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
 }

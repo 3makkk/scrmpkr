@@ -1,6 +1,5 @@
 import { useRoom } from "../../../hooks/useRoom";
 import BarVoteChart from "../../ds/BarVoteChart/BarVoteChart";
-import Card from "../shared/Card";
 
 export default function VotingResults() {
   const { roomState } = useRoom();
@@ -30,8 +29,8 @@ export default function VotingResults() {
   }
 
   return (
-    <Card data-testid="voting-results">
-      <h2 className="animate-fade-in-scale mb-8 text-center text-2xl font-medium text-white">
+    <div className="p-6" data-testid="voting-results">
+      <h2 className="animate-fade-in-scale text-fg mb-8 text-center text-xl font-medium">
         Voting Results
       </h2>
 
@@ -72,33 +71,33 @@ export default function VotingResults() {
       </div>
 
       {/* Statistics */}
-      <div className="animation-delay-400 animate-fade-in-scale mt-8 border-t border-gray-700/50 pt-6">
+      <div className="animation-delay-400 animate-fade-in-scale border-line mt-8 border-t pt-6">
         <div className="grid grid-cols-3 gap-6 text-center">
           <div data-testid="vote-average">
-            <div className="mb-1 text-sm font-medium text-gray-400">
+            <div className="text-fg-muted mb-1 text-xs font-medium tracking-wider uppercase">
               Average
             </div>
-            <div className="text-2xl font-semibold text-white">
+            <div className="text-fg text-2xl font-semibold">
               {stats.average}
             </div>
           </div>
           {stats.showMostCommon && (
             <div data-testid="vote-most-common">
-              <div className="mb-1 text-sm font-medium text-gray-400">
+              <div className="text-fg-muted mb-1 text-xs font-medium tracking-wider uppercase">
                 Most Common
               </div>
-              <div className="text-2xl font-semibold text-white">
+              <div className="text-fg text-2xl font-semibold">
                 {stats.mostCommon}
               </div>
             </div>
           )}
           <div data-testid="vote-consensus">
-            <div className="mb-1 text-sm font-medium text-gray-400">
+            <div className="text-fg-muted mb-1 text-xs font-medium tracking-wider uppercase">
               Consensus
             </div>
             <div
               className={`text-2xl font-semibold ${
-                stats.hasConsensus ? "text-green-400" : "text-red-400"
+                stats.hasConsensus ? "text-success" : "text-danger"
               }`}
             >
               {stats.hasConsensus ? "Yes" : "No"}
@@ -106,6 +105,6 @@ export default function VotingResults() {
           </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

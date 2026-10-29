@@ -37,20 +37,6 @@ const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
         .toUpperCase();
     };
 
-    // Get user avatar color based on role
-    const getAvatarColor = (role: UserRole) => {
-      switch (role) {
-        case UserRole.PARTICIPANT:
-          return "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500";
-        case UserRole.VISITOR:
-          return "bg-purple-600 hover:bg-purple-700 focus:ring-purple-500";
-        case UserRole.FACILITATOR:
-          return "bg-amber-600 hover:bg-amber-700 focus:ring-amber-500";
-        default:
-          return "bg-gray-600 hover:bg-gray-700 focus:ring-gray-500";
-      }
-    };
-
     // Get role display text
     const getRoleDisplayText = (role: UserRole) => {
       switch (role) {
@@ -78,7 +64,6 @@ const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
       }
     };
 
-    const colorClasses = getAvatarColor(role);
     const sizeClasses = getSizeClasses();
 
     const title = showTooltip
@@ -90,13 +75,10 @@ const UserAvatar = forwardRef<HTMLDivElement, UserAvatarProps>(
         ref={ref}
         className={clsx(
           sizeClasses,
-          colorClasses,
-          interactive && [
-            "cursor-pointer focus:ring-2 focus:outline-none",
-            "focus:ring-offset-2 focus:ring-offset-gray-800",
-          ],
-          "flex items-center justify-center rounded-full",
-          "font-medium text-white transition-colors duration-200",
+          // One neutral style for every role: roles carry no colour.
+          "border-line-strong flex items-center justify-center rounded-full border",
+          "bg-surface-inset text-fg font-medium transition-colors duration-150",
+          interactive && "hover:border-fg-muted cursor-pointer",
           className,
         )}
         title={title}

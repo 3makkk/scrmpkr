@@ -21,3 +21,7 @@ export const Danger = {
 export const Disabled = {
   args: { disabled: true },
 };
+
+export const Tertiary = {
+  args: { variant: "tertiary", children: "Tertiary" },
+};

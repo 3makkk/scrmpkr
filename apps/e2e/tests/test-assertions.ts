@@ -175,25 +175,14 @@ export class VotingAssertions {
           );
           if (!votingProgress?.textContent) return false;
 
-          // Extract numbers from text like "2 participants still voting..."
-          // or check for "All participants have voted"
-          if (
-            expectedVoted === expectedTotal &&
-            votingProgress.textContent.includes("All participants have voted")
-          ) {
-            return true;
-          }
-
-          // Look for pattern like "2 participants still voting..."
-          const match = votingProgress.textContent.match(
-            /(\d+)\s+participants\s+still\s+voting/,
-          );
+          // The reveal button badge reads like "2/6 voted"
+          const match = votingProgress.textContent.match(/(\d+)\/(\d+)/);
           if (!match) return false;
 
-          const stillVoting = parseInt(match[1], 10);
-          const actualVoted = expectedTotal - stillVoting;
+          const actualVoted = parseInt(match[1], 10);
+          const actualTotal = parseInt(match[2], 10);
 
-          return actualVoted === expectedVoted;
+          return actualVoted === expectedVoted && actualTotal === expectedTotal;
         },
         [voted, total],
       );

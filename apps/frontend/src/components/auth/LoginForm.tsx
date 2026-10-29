@@ -20,8 +20,8 @@ export default function LoginForm({
     <div className="flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-md text-center">
         <div className="mb-12">
-          <h1 className="mb-4 text-4xl font-light text-white">{title}</h1>
-          <p className="text-lg text-gray-400">{subtitle}</p>
+          <h1 className="text-fg mb-4 text-3xl font-medium">{title}</h1>
+          <p className="text-fg-muted text-lg">{subtitle}</p>
         </div>
 
         <div className="space-y-8">

@@ -1,7 +1,6 @@
 import { useAuth } from "../../../AuthProvider";
 import { useRoom } from "../../../hooks/useRoom";
 import { shouldShowVotingControls } from "../../../utils/ui-permissions";
-import Card from "../shared/Card";
 import PokerCard from "../shared/PokerCard";
 
 const DECK: Array<number | "?"> = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, "?"];
@@ -25,20 +24,20 @@ export default function VotingDeck() {
   // If user is a visitor, show observer message
   if (!canUserVote) {
     return (
-      <Card className="animate-fade-in-scale">
+      <div className="animate-fade-in-scale p-6">
         <div className="py-12 text-center">
-          <h2 className="mb-4 text-lg font-medium text-white">Observer Mode</h2>
-          <p className="text-gray-400">
+          <h2 className="text-fg mb-4 text-xl font-medium">Observer Mode</h2>
+          <p className="text-fg-muted">
             You're viewing this session as a visitor. You can observe but not
             participate in voting.
           </p>
         </div>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="animate-fade-in-scale">
+    <div className="animate-fade-in-scale p-6">
       <h2
         className="mb-8 text-center text-lg font-medium text-white"
         data-testid="voting-deck-title"
@@ -68,6 +67,6 @@ export default function VotingDeck() {
           data-testid="vote-confirmation"
         ></div>
       )}
-    </Card>
+    </div>
   );
 }

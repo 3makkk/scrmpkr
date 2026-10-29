@@ -25,10 +25,8 @@ export const Basic: Story = {
 
         <Modal open={isOpen} onClose={() => setIsOpen(false)}>
           <Card className="w-md">
-            <h2 className="mb-4 text-2xl font-medium text-white">
-              Basic Modal
-            </h2>
-            <p className="mb-6 text-gray-400">
+            <h2 className="text-fg mb-4 text-xl font-medium">Basic Modal</h2>
+            <p className="text-fg-muted mb-6">
               This is a basic modal with content.
             </p>
             <div className="flex justify-end gap-3">
@@ -75,22 +73,20 @@ export const WithForm: Story = {
 
         <Modal open={isOpen} onClose={() => setIsOpen(false)}>
           <Card className="w-md">
-            <h2 className="mb-2 text-2xl font-medium text-white">
-              Edit Profile
-            </h2>
-            <p className="mb-6 text-gray-400">
+            <h2 className="text-fg mb-2 text-xl font-medium">Edit Profile</h2>
+            <p className="text-fg-muted mb-6">
               Update your profile information
             </p>
 
             <div className="mb-6">
-              <label className="mb-2 block text-sm font-medium text-gray-300">
+              <label className="text-fg mb-2 block text-sm font-medium">
                 Display Name
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your name"
-                  className="mt-2 w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="rounded-control border-line-strong bg-surface-inset text-fg placeholder:text-fg-muted focus-visible:outline-focus mt-2 w-full border px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2"
                 />
               </label>
             </div>
@@ -138,10 +134,10 @@ export const NoBackdropClose: Story = {
           closeOnBackdrop={false}
         >
           <Card className="w-md">
-            <h2 className="mb-4 text-2xl font-medium text-white">
+            <h2 className="text-fg mb-4 text-xl font-medium">
               Important Notice
             </h2>
-            <p className="mb-6 text-gray-400">
+            <p className="text-fg-muted mb-6">
               This modal cannot be closed by clicking outside. You must use the
               buttons below.
             </p>
@@ -194,10 +190,10 @@ export const NoEscapeClose: Story = {
           closeOnEscape={false}
         >
           <Card className="w-md">
-            <h2 className="mb-4 text-2xl font-medium text-white">
+            <h2 className="text-fg mb-4 text-xl font-medium">
               Critical Action
             </h2>
-            <p className="mb-6 text-gray-400">
+            <p className="text-fg-muted mb-6">
               This modal cannot be closed with the Escape key. You must
               explicitly confirm or cancel.
             </p>
@@ -228,10 +224,10 @@ export const LargeContent: Story = {
 
         <Modal open={isOpen} onClose={() => setIsOpen(false)}>
           <Card className="max-h-96 w-xl overflow-y-auto">
-            <h2 className="mb-4 text-2xl font-medium text-white">
+            <h2 className="text-fg mb-4 text-xl font-medium">
               Terms of Service
             </h2>
-            <div className="mb-6 space-y-4 text-gray-400">
+            <div className="text-fg-muted mb-6 space-y-4">
               <p>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
                 eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -293,10 +289,8 @@ export const MultipleModals: Story = {
 
         <Modal open={firstModal} onClose={() => setFirstModal(false)}>
           <Card className="w-md">
-            <h2 className="mb-4 text-2xl font-medium text-white">
-              First Modal
-            </h2>
-            <p className="mb-6 text-gray-400">
+            <h2 className="text-fg mb-4 text-xl font-medium">First Modal</h2>
+            <p className="text-fg-muted mb-6">
               This modal can open another modal on top of it.
             </p>
             <div className="flex justify-end gap-3">
@@ -312,10 +306,8 @@ export const MultipleModals: Story = {
 
         <Modal open={secondModal} onClose={() => setSecondModal(false)}>
           <Card className="w-md">
-            <h2 className="mb-4 text-2xl font-medium text-white">
-              Second Modal
-            </h2>
-            <p className="mb-6 text-gray-400">
+            <h2 className="text-fg mb-4 text-xl font-medium">Second Modal</h2>
+            <p className="text-fg-muted mb-6">
               This is a modal on top of another modal.
             </p>
             <div className="flex justify-end gap-3">
@@ -351,10 +343,10 @@ export const ConfirmationModal: Story = {
 
         <Modal open={isOpen} onClose={() => setIsOpen(false)}>
           <Card className="w-md">
-            <h2 className="mb-4 text-2xl font-medium text-white">
+            <h2 className="text-fg mb-4 text-xl font-medium">
               Confirm Deletion
             </h2>
-            <p className="mb-6 text-gray-400">
+            <p className="text-fg-muted mb-6">
               Are you sure you want to delete this item? This action cannot be
               undone.
             </p>

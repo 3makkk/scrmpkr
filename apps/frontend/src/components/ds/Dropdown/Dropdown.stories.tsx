@@ -35,19 +35,19 @@ export const Basic = {
           <div className="space-y-2">
             <button
               type="button"
-              className="block w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+              className="rounded-control text-fg-muted hover:bg-surface-hover hover:text-fg focus-visible:outline-focus block w-full px-3 py-2 text-left text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               Menu Item 1
             </button>
             <button
               type="button"
-              className="block w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+              className="rounded-control text-fg-muted hover:bg-surface-hover hover:text-fg focus-visible:outline-focus block w-full px-3 py-2 text-left text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               Menu Item 2
             </button>
             <button
               type="button"
-              className="block w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+              className="rounded-control text-fg-muted hover:bg-surface-hover hover:text-fg focus-visible:outline-focus block w-full px-3 py-2 text-left text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               Menu Item 3
             </button>
@@ -74,8 +74,8 @@ export const BottomStart = {
         placement="bottom-start"
       >
         <div className="w-48 p-4">
-          <p className="text-sm text-white">Positioned below trigger</p>
-          <p className="text-xs text-gray-400">Left edges aligned</p>
+          <p className="text-fg text-sm">Positioned below trigger</p>
+          <p className="text-fg-muted text-xs">Left edges aligned</p>
         </div>
       </Dropdown>
     </div>
@@ -98,8 +98,8 @@ export const BottomEnd = {
         placement="bottom-end"
       >
         <div className="w-48 p-4">
-          <p className="text-sm text-white">Positioned below trigger</p>
-          <p className="text-xs text-gray-400">Right edges aligned</p>
+          <p className="text-fg text-sm">Positioned below trigger</p>
+          <p className="text-fg-muted text-xs">Right edges aligned</p>
         </div>
       </Dropdown>
     </div>
@@ -122,8 +122,8 @@ export const BottomCenter = {
         placement="bottom-center"
       >
         <div className="w-48 p-4">
-          <p className="text-sm text-white">Positioned below trigger</p>
-          <p className="text-xs text-gray-400">Centered horizontally</p>
+          <p className="text-fg text-sm">Positioned below trigger</p>
+          <p className="text-fg-muted text-xs">Centered horizontally</p>
         </div>
       </Dropdown>
     </div>
@@ -146,8 +146,8 @@ export const TopStart = {
         placement="top-start"
       >
         <div className="w-48 p-4">
-          <p className="text-sm text-white">Positioned above trigger</p>
-          <p className="text-xs text-gray-400">Left edges aligned</p>
+          <p className="text-fg text-sm">Positioned above trigger</p>
+          <p className="text-fg-muted text-xs">Left edges aligned</p>
         </div>
       </Dropdown>
     </div>
@@ -170,8 +170,8 @@ export const TopEnd = {
         placement="top-end"
       >
         <div className="w-48 p-4">
-          <p className="text-sm text-white">Positioned above trigger</p>
-          <p className="text-xs text-gray-400">Right edges aligned</p>
+          <p className="text-fg text-sm">Positioned above trigger</p>
+          <p className="text-fg-muted text-xs">Right edges aligned</p>
         </div>
       </Dropdown>
     </div>
@@ -194,8 +194,8 @@ export const TopCenter = {
         placement="top-center"
       >
         <div className="w-48 p-4">
-          <p className="text-sm text-white">Positioned above trigger</p>
-          <p className="text-xs text-gray-400">Centered horizontally</p>
+          <p className="text-fg text-sm">Positioned above trigger</p>
+          <p className="text-fg-muted text-xs">Centered horizontally</p>
         </div>
       </Dropdown>
     </div>
@@ -216,7 +216,7 @@ export const Controlled = {
           <Button variant="secondary" onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? "Close" : "Open"} Menu
           </Button>
-          <span className="text-sm text-white">
+          <span className="text-fg text-sm">
             Menu is {isOpen ? "open" : "closed"}
           </span>
         </div>
@@ -233,14 +233,14 @@ export const Controlled = {
             <div className="space-y-2">
               <button
                 type="button"
-                className="block w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                className="rounded-control text-fg-muted hover:bg-surface-hover hover:text-fg focus-visible:outline-focus block w-full px-3 py-2 text-left text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
                 onClick={() => setIsOpen(false)}
               >
                 Close Menu
               </button>
               <button
                 type="button"
-                className="block w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                className="rounded-control text-fg-muted hover:bg-surface-hover hover:text-fg focus-visible:outline-focus block w-full px-3 py-2 text-left text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 Keep Menu Open
               </button>
@@ -264,7 +264,7 @@ export const WithUserAvatar = {
           <button
             type="button"
             onClick={onClick}
-            className={`focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-none ${
+            className={`focus-visible:outline-focus rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 ${
               className || ""
             }`}
           >
@@ -282,15 +282,15 @@ export const WithUserAvatar = {
           <div className="mb-4 flex items-center space-x-3">
             <UserAvatar name="John Doe" role={UserRole.PARTICIPANT} size="lg" />
             <div>
-              <p className="font-medium text-white">John Doe</p>
+              <p className="text-fg font-medium">John Doe</p>
             </div>
           </div>
 
-          <hr className="mb-4 border-gray-700" />
+          <hr className="border-line mb-4" />
 
           <button
             type="button"
-            className="w-full rounded-md px-3 py-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+            className="rounded-control text-fg-muted hover:bg-surface-hover hover:text-fg focus-visible:outline-focus w-full px-3 py-2 text-left text-sm focus-visible:outline-2 focus-visible:outline-offset-2"
           >
             Change username
           </button>

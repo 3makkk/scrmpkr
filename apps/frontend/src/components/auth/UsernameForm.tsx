@@ -39,7 +39,7 @@ export default function UsernameForm({
       <div>
         <label
           htmlFor="username"
-          className="mb-3 block text-sm font-medium text-gray-300"
+          className="text-fg mb-3 block text-sm font-medium"
         >
           Your name
         </label>
@@ -73,7 +73,7 @@ export default function UsernameForm({
           <Button
             type="button"
             onClick={onCancel}
-            variant="secondary"
+            variant="tertiary"
             className="flex-1"
             data-testid="username-cancel"
           >

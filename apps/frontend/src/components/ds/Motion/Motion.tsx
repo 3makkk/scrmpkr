@@ -22,19 +22,6 @@ export const animationClasses = {
   shimmer: "animate-shimmer",
 } as const;
 
-// Hover and interaction classes using Tailwind
-export const interactionClasses = {
-  cardHover: "transition-transform duration-200 hover:-translate-y-0.5",
-  cardActive: "active:scale-[0.99]",
-
-  buttonHover: "transition-transform duration-150 hover:scale-[1.01]",
-  buttonActive: "active:scale-[0.99]",
-
-  scaleOnHover: "transition-transform duration-200 hover:scale-105",
-  liftOnHover:
-    "transition-all duration-200 hover:-translate-y-1 hover:shadow-xl",
-} as const;
-
 // Stagger animations can be achieved with CSS custom properties and nth-child
 export const staggerDelay = (index: number, baseDelay = 30) => ({
   className: `animation-delay-${index * baseDelay}`,
@@ -49,5 +36,3 @@ export const motionVariants = {
   slideInFromRight: animationClasses.slideInFromRight,
   scaleIn: animationClasses.scaleIn,
 } as const;
-
-export const motionInteractions = interactionClasses;

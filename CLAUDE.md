@@ -8,6 +8,7 @@ Other docs:
 
 - `README.md` — human setup, env vars, Prometheus metrics, and the deploy runbook.
 - `docs/ACL_DOCUMENTATION.md` — the RBAC role/resource/action model in `packages/shared`.
+- `docs/DESIGN_PRINCIPLES.md` — the visual system: colour tokens, action hierarchy, states, type and layout rules for the frontend.
 - `apps/frontend/src/components/ds/README.md` — design-system component reference and the Tailwind-based animation approach.
 - `apps/e2e/README.md` — end-to-end test scenarios and flow.
 

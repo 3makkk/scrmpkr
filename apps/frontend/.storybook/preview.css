@@ -1,8 +1,8 @@
-/* Ensure the entire Storybook canvas and docs have slate-900 background */
+/* Storybook canvas and docs use the page surface (--color-surface-page) */
 
 .sb-show-main,
 .docs-story {
-  background-color: #0f172a; /* Tailwind's slate-900 */
+  background-color: var(--color-surface-page);
 }
 
 html,

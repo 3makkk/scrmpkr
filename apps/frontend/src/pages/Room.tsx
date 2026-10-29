@@ -7,6 +7,7 @@ import RoleSelectionForm from "../components/auth/RoleSelectionForm";
 import ConfettiOverlay from "../components/core/effects/ConfettiOverlay";
 import LoadingSpinner from "../components/core/layout/LoadingSpinner";
 import PageLayout from "../components/core/layout/PageLayout";
+import Button from "../components/ds/Button/Button";
 import PrimaryActionZone from "../components/poker/voting/PrimaryActionZone";
 import StateAwareSessionControls from "../components/room/controls/StateAwareSessionControls";
 import RoomContextBar from "../components/room/header/RoomContextBar";
@@ -61,15 +62,11 @@ export default function Room() {
     return (
       <PageLayout>
         <div className="flex min-h-[400px] flex-col items-center justify-center">
-          <h2 className="mb-4 text-xl font-semibold text-red-600">Error</h2>
-          <p className="text-gray-600">{error}</p>
-          <button
-            type="button"
-            className="mt-6 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-            onClick={() => navigate("/")}
-          >
+          <h2 className="text-danger mb-4 text-xl font-medium">Error</h2>
+          <p className="text-fg-muted">{error}</p>
+          <Button type="button" className="mt-6" onClick={() => navigate("/")}>
             Return Home
-          </button>
+          </Button>
         </div>
       </PageLayout>
     );
@@ -81,37 +78,36 @@ export default function Room() {
       <PageLayout>
         <div className="flex min-h-[400px] flex-col items-center justify-center">
           <LoadingSpinner />
-          <p className="mt-4 text-gray-600">Joining room...</p>
+          <p className="text-fg-muted mt-4">Joining room...</p>
         </div>
       </PageLayout>
     );
   }
 
   return (
-    <PageLayout className="flex min-h-screen flex-col">
+    <PageLayout className="flex flex-col lg:h-dvh">
       <ConfettiOverlay />
 
-      {/* Main content area - scrollable */}
-      <div className="flex min-h-0 flex-1 flex-col">
-        {/* Room Context Bar - Always visible at top */}
-        <RoomContextBar />
+      {/* Room Context Bar - part of the outer frame, sits on the background */}
+      <RoomContextBar />
 
-        {/* Main content area with sidebar */}
-        <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-          {/* Left sidebar - Contextual Team Status */}
-          <div className="border-r border-gray-700/30 bg-gray-900/20 lg:w-80 lg:shrink-0">
-            <ContextualTeamStatus />
-          </div>
+      {/* Main content area with sidebar */}
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        {/* Left sidebar - Contextual Team Status, part of the outer frame */}
+        <aside className="lg:w-80 lg:shrink-0 lg:overflow-y-auto">
+          <ContextualTeamStatus />
+        </aside>
 
-          {/* Right content - Primary Action Zone */}
-          <div className="flex-1 overflow-y-auto">
+        {/* Right content - Primary Action Zone as the raised main card */}
+        <main className="rounded-card border-line bg-surface-raised relative mx-3 mb-3 flex min-h-0 flex-1 flex-col border lg:ml-0">
+          <div className="min-h-0 flex-1 overflow-y-auto pb-20">
             <PrimaryActionZone />
           </div>
-        </div>
-      </div>
 
-      {/* State-Aware Session Controls - Sticky footer, always visible */}
-      <StateAwareSessionControls />
+          {/* State-Aware Session Controls - floating action button */}
+          <StateAwareSessionControls />
+        </main>
+      </div>
     </PageLayout>
   );
 }

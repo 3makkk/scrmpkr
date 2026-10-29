@@ -1,4 +1,5 @@
 import { canVote } from "@scrmpkr/shared";
+import clsx from "clsx";
 import { useAuth } from "../../../AuthProvider";
 import { useRoom } from "../../../hooks/useRoom";
 import { shouldShowSessionControls } from "../../../utils/ui-permissions";
@@ -30,87 +31,63 @@ export default function StateAwareSessionControls() {
     activeParticipants.length > 0 &&
     activeParticipants.every((p) => p.hasVoted);
 
-  // Only show controls when there's a clear action available and user has permissions
-  const getAvailableActions = (): React.ReactElement[] => {
-    const actions: React.ReactElement[] = [];
-
+  // Only one action applies at a time, so the controls are a single floating button
+  const getAvailableAction = (): React.ReactElement | null => {
     // Only owners can reveal or clear votes
-    if (!canControl) return actions;
+    if (!canControl) return null;
 
     // During voting phase - show reveal button if there are votes
     if (!isRoundRevealed && votedActiveParticipants > 0) {
-      const buttonText = allActiveVoted
-        ? "Reveal Votes (Everyone Voted!)"
-        : `Reveal Votes (${votedActiveParticipants}/${activeParticipants.length} voted)`;
-
-      actions.push(
+      return (
         <Button
-          key="reveal"
           type="button"
           onClick={revealVotes}
-          className="max-w-sm flex-1"
+          className={clsx(
+            "flex items-center gap-3 rounded-full! shadow-xl shadow-black/40",
+            allActiveVoted && "animate-glow-pulse",
+          )}
           data-testid="reveal-votes-button"
         >
-          {buttonText}
-        </Button>,
+          Reveal votes
+          <span
+            className="bg-surface-page/40 rounded-full px-2 py-0.5 text-xs tabular-nums"
+            data-testid="voting-progress"
+          >
+            {votedActiveParticipants}/{activeParticipants.length}
+            <span className="sr-only"> voted</span>
+          </span>
+        </Button>
       );
     }
 
     // After results are revealed - show clear votes to start new round
     if (isRoundRevealed && hasVotes) {
-      actions.push(
+      return (
         <Button
-          key="clear"
           type="button"
           onClick={clearVotes}
           variant="primary"
-          className="max-w-sm flex-1"
+          className="rounded-full! shadow-xl shadow-black/40"
           data-testid="clear-votes-button"
         >
           Start Next Round
-        </Button>,
+        </Button>
       );
     }
 
-    return actions;
+    return null;
   };
 
-  const availableActions = getAvailableActions();
+  const availableAction = getAvailableAction();
 
-  // Don't render if no actions are available
-  if (availableActions.length === 0) {
+  // Don't render if no action is available
+  if (!availableAction) {
     return null;
   }
 
   return (
-    <div className="sticky bottom-0 border-t border-gray-700/50 bg-gray-900/95 shadow-lg backdrop-blur-sm">
-      <div className="mx-auto max-w-4xl px-4 py-4">
-        <div className="flex justify-center space-x-4">{availableActions}</div>
-
-        {/* Show helpful context about what the action will do */}
-        <div className="mt-2 text-center">
-          {!canControl && (
-            <p className="text-xs text-gray-500">
-              Only participants and room owners can control voting sessions
-            </p>
-          )}
-          {canControl && !isRoundRevealed && votedActiveParticipants > 0 && (
-            <p className="text-xs text-gray-400" data-testid="voting-progress">
-              {allActiveVoted
-                ? "All participants have voted. Ready to see the results!"
-                : `${
-                    activeParticipants.length - votedActiveParticipants
-                  } participants still voting...`}
-            </p>
-          )}
-
-          {canControl && isRoundRevealed && hasVotes && (
-            <p className="text-xs text-gray-400">
-              Ready to start a new voting round with the same participants.
-            </p>
-          )}
-        </div>
-      </div>
+    <div className="animate-fade-in-scale fixed bottom-4 left-1/2 z-20 -translate-x-1/2 lg:absolute lg:bottom-6">
+      {availableAction}
     </div>
   );
 }
