@@ -1,10 +1,12 @@
 import { UserRole } from "@scrmpkr/shared";
+import clsx from "clsx";
 import { useState } from "react";
 import { useAuth } from "../../AuthProvider";
 import { useRoom } from "../../hooks/useRoom";
 import Card from "../ds/Card/Card";
 import Dropdown from "../ds/Dropdown/Dropdown";
 import Modal from "../ds/Modal/Modal";
+import { focusRing } from "../ds/states";
 import UserAvatar from "../ds/UserAvatar/UserAvatar";
 import RoleOptionCard from "./RoleOptionCard";
 import { ROLE_OPTIONS } from "./roleOptions";
@@ -55,9 +57,7 @@ export default function AccountIndicator() {
           <button
             type="button"
             onClick={onClick}
-            className={`focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-none ${
-              className || ""
-            }`}
+            className={clsx("rounded-full", focusRing, className)}
             data-testid="account-indicator"
           >
             <UserAvatar
