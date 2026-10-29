@@ -31,7 +31,6 @@ const PENDING: string[] = [
   "components/auth/roleOptions.ts",
   "components/ds/BarVoteChart/BarVoteChart.tsx",
   "components/ds/Motion/Motion.tsx",
-  "components/ds/PokerCard/PokerCard.tsx",
   "components/ds/UserAvatar/UserAvatar.tsx",
   "components/poker/results/VotingResults.tsx",
   "components/poker/voting/VotingDeck.tsx",
