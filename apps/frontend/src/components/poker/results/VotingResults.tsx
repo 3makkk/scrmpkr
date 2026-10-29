@@ -1,6 +1,5 @@
 import { useRoom } from "../../../hooks/useRoom";
 import BarVoteChart from "../../ds/BarVoteChart/BarVoteChart";
-import Card from "../shared/Card";
 
 export default function VotingResults() {
   const { roomState } = useRoom();
@@ -30,7 +29,7 @@ export default function VotingResults() {
   }
 
   return (
-    <Card data-testid="voting-results">
+    <div className="p-6" data-testid="voting-results">
       <h2 className="animate-fade-in-scale mb-8 text-center text-2xl font-medium text-white">
         Voting Results
       </h2>
@@ -106,6 +105,6 @@ export default function VotingResults() {
           </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

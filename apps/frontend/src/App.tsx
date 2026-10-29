@@ -19,7 +19,7 @@ export default function App() {
   return (
     <AuthProvider>
       <RoomProvider>
-        <div className="min-h-screen bg-linear-to-br from-gray-950 via-gray-900 to-gray-950">
+        <div className="bg-mesh min-h-screen">
           <BrowserRouter>
             <AnimatedRoutes />
           </BrowserRouter>

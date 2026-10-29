@@ -88,30 +88,29 @@ export default function Room() {
   }
 
   return (
-    <PageLayout className="flex min-h-screen flex-col">
+    <PageLayout className="flex flex-col lg:h-dvh">
       <ConfettiOverlay />
 
-      {/* Main content area - scrollable */}
-      <div className="flex min-h-0 flex-1 flex-col">
-        {/* Room Context Bar - Always visible at top */}
-        <RoomContextBar />
+      {/* Room Context Bar - part of the outer frame, sits on the background */}
+      <RoomContextBar />
 
-        {/* Main content area with sidebar */}
-        <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-          {/* Left sidebar - Contextual Team Status */}
-          <div className="border-r border-gray-700/30 bg-gray-900/20 lg:w-80 lg:shrink-0">
-            <ContextualTeamStatus />
-          </div>
+      {/* Main content area with sidebar */}
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        {/* Left sidebar - Contextual Team Status, part of the outer frame */}
+        <aside className="lg:w-80 lg:shrink-0 lg:overflow-y-auto">
+          <ContextualTeamStatus />
+        </aside>
 
-          {/* Right content - Primary Action Zone */}
-          <div className="flex-1 overflow-y-auto">
+        {/* Right content - Primary Action Zone as the raised main card */}
+        <main className="relative mx-3 mb-3 flex min-h-0 flex-1 flex-col rounded-2xl border border-gray-700/50 bg-gray-900/75 shadow-2xl shadow-black/40 lg:ml-0">
+          <div className="min-h-0 flex-1 overflow-y-auto pb-20">
             <PrimaryActionZone />
           </div>
-        </div>
-      </div>
 
-      {/* State-Aware Session Controls - Sticky footer, always visible */}
-      <StateAwareSessionControls />
+          {/* State-Aware Session Controls - floating action button */}
+          <StateAwareSessionControls />
+        </main>
+      </div>
     </PageLayout>
   );
 }

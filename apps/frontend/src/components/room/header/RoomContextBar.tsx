@@ -14,7 +14,7 @@ export default function RoomContextBar() {
   if (!roomState) return null;
 
   return (
-    <div className="border-b border-gray-700/50 bg-gray-800/50 px-4 py-3">
+    <div className="px-4 py-3">
       <div className="mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-6">
           <div className="flex items-center space-x-2">
