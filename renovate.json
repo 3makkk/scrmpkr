@@ -1,0 +1,61 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "timezone": "Europe/Berlin",
+  "dependencyDashboard": true,
+  "automerge": false,
+  "prConcurrentLimit": 5,
+  "packageRules": [
+    {
+      "description": "Patch updates daily",
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "schedule": [
+        "* 3-6 * * *"
+      ],
+      "addLabels": [
+        "dependencies",
+        "patch"
+      ]
+    },
+    {
+      "description": "Minor updates Mondays",
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "schedule": [
+        "* 3-6 * * 1"
+      ],
+      "addLabels": [
+        "dependencies",
+        "minor"
+      ]
+    },
+    {
+      "description": "Major updates first Monday each month",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "schedule": [
+        "* 3-6 1-7 * 1"
+      ],
+      "addLabels": [
+        "dependencies",
+        "major"
+      ]
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "schedule": [
+      "at any time"
+    ],
+    "addLabels": [
+      "dependencies",
+      "security"
+    ],
+    "automerge": false
+  }
+}
