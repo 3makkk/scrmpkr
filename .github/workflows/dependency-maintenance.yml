@@ -1,0 +1,113 @@
+name: Dependency maintenance
+on:
+  workflow_run:
+    workflows: ["Code Integrity Checks"]
+    types: [completed]
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+jobs:
+  process:
+    if: ${{ github.event.workflow_run.event == 'pull_request' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
+      issues: write
+    steps:
+      - name: Identify trusted Renovate PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$REPO/actions/runs/$RUN_ID/pulls" > /tmp/run-prs.json
+          node - <<'NODE' >> "$GITHUB_OUTPUT"
+          const fs = require('fs');
+          const prs = JSON.parse(fs.readFileSync('/tmp/run-prs.json','utf8'));
+          const pr = prs.find(p => p.head?.repo?.full_name === process.env.REPO && p.user?.login === 'renovate[bot]' && p.head?.sha === process.env.HEAD_SHA);
+          if (pr) {
+            console.log('number='+pr.number);
+            console.log('branch='+pr.head.ref);
+            console.log('sha='+pr.head.sha);
+          }
+          NODE
+      - name: Checkout trusted Renovate branch
+        if: ${{ steps.pr.outputs.number != '' }}
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.pr.outputs.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Determine repair eligibility
+        if: ${{ steps.pr.outputs.number != '' }}
+        id: gate
+        env:
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          BRANCH: ${{ steps.pr.outputs.branch }}
+        run: |
+          set -euo pipefail
+          count=$(git log --format=%s "origin/main..HEAD" | grep -c '^chore(deps): codex repair attempt$' || true)
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          if [ "$CONCLUSION" != "success" ] && [ "$count" -lt 2 ]; then
+            echo "repair=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Run Codex repair
+        if: ${{ steps.gate.outputs.repair == 'true' }}
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          permission-profile: ":workspace"
+          allow-bot-users: "renovate[bot]"
+          prompt: |
+            Fix the CI failure for this trusted Renovate dependency update.
+            Keep changes minimal and within this repository.
+            Never edit GitHub workflows, credentials, deployment settings or security controls.
+            Preserve pnpm patchedDependencies, especially thread-stream.
+            Do not merge, push, or commit. Make necessary file changes only.
+            Review the failing CI run and reproduce checks if possible.
+      - name: Commit and push repair if changed
+        if: ${{ steps.gate.outputs.repair == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ steps.pr.outputs.branch }}
+          EXPECTED_SHA: ${{ steps.pr.outputs.sha }}
+        run: |
+          set -euo pipefail
+          git diff --exit-code && exit 0
+          if git diff --name-only | grep -E '^(\.github/|renovate\.json$|\.npmrc$|\.githooks/|.*\.ya?ml$)'; then
+            echo "Protected configuration modified; refusing push"
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -u
+          git commit -m "chore(deps): codex repair attempt"
+          current=$(gh api "repos/$REPO/git/ref/heads/$BRANCH" --jq '.object.sha')
+          test "$current" = "$EXPECTED_SHA" || { echo "Branch moved; refusing push"; exit 1; }
+          git -c http.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" push origin "HEAD:refs/heads/$BRANCH"
+      - name: Notify when merge-ready
+        if: ${{ steps.pr.outputs.number != '' && github.event.workflow_run.conclusion == 'success' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ steps.pr.outputs.number }}
+          SHA: ${{ steps.pr.outputs.sha }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$REPO/pulls/$PR" > /tmp/pr.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('/tmp/pr.json','utf8'));
+          if(p.state!=='open'||p.draft||p.head.sha!==process.env.SHA||p.mergeable!==true||p.mergeable_state!=='clean') process.exit(1);
+          NODE
+          marker="<!-- dependency-ready:$SHA -->"
+          if gh api "repos/$REPO/issues/$PR/comments" --paginate --jq '.[].body' | grep -Fq "$marker"; then exit 0; fi
+          printf '@3makkk Dependency update is ready for manual review and merge. All required GitHub merge conditions currently appear satisfied.\n\n%s\n\n%s\n' "https://github.com/$REPO/pull/$PR" "$marker" > /tmp/comment.md
+          gh api "repos/$REPO/issues/$PR/comments" -f body=@/tmp/comment.md
