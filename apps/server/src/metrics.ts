@@ -9,6 +9,8 @@ import logger from "./logger.js";
 // Configure Prometheus exporter - it automatically creates an HTTP server
 const prometheusExporter = new PrometheusExporter(
   {
+    // The scraper connects over the Docker network; OTel 3 defaults to localhost.
+    host: "0.0.0.0",
     port: 9464,
   },
   () => {
